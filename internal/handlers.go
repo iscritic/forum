@@ -1,8 +1,11 @@
 package internal
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
-func Home(w http.ResponseWriter, r *http.Request) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
@@ -13,5 +16,7 @@ func Home(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	fmt.Fprint(w, "HOME PAGE")
 
 }

@@ -1,13 +1,21 @@
 package internal
 
-import "net/http"
+import (
+	"forum/pkg/logger"
+	"net/http"
+)
 
-func routes() *http.ServeMux {
+type application struct {
+	logger *logger.Logger
+}
 
+func Routes(l *logger.Logger) *http.ServeMux {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", Home)
+	app := &application{
+		logger: l,
+	}
 
+	mux.HandleFunc("/", app.home)
 	return mux
-
 }
