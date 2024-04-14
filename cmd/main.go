@@ -1,42 +1,36 @@
 package main
 
 import (
-	"fmt"
+	"forum/internal"
 	"forum/internal/config"
+	"forum/pkg/logger"
+	_ "github.com/mattn/go-sqlite3"
+	"log"
+	"net/http"
 )
 
 func main() {
 
-	//TODO init config
+	lg := logger.NewLogger()
 
 	cfg := config.MustLoad()
+	lg.InfoLog.Printf("config is set: %s\n", cfg)
 
-	fmt.Println(cfg)
-
-	//TODO init logger
-
-	//TODO init storage
-
-	//TODO init router
-
-	//TODO run server
-
-	//lg := logger.NewLogger()
-	//
-	//db, err := sql.Open("sqlite3", "./db/store.db")
+	//db, err := sqlite.New(cfg.StoragePath)
 	//if err != nil {
 	//	panic(err)
 	//}
-	//defer db.Close()
-	//
-	//srv := &http.Server{
-	//	Addr:    "0.0.0.0:7000",
-	//	Handler: internal.Routes(lg),
-	//}
-	//
-	//lg.InfoLog.Println("Listening serven on http://localhost:7000...")
-	//err = srv.ListenAndServe()
-	//if err != nil {
-	//	log.Fatalln(err)
-	//}
+
+	srv := &http.Server{
+		Addr:        cfg.HTTPServer.Address,
+		Handler:     internal.Routes(lg),
+		ReadTimeout: config.ParseTime(cfg.HTTPServer.ReadTimeout),
+		IdleTimeout: config.ParseTime(cfg.HTTPServer.IdleTimeout),
+	}
+
+	lg.InfoLog.Printf("Listening serven on http://%s...\n", cfg.HTTPServer.Address)
+	err := srv.ListenAndServe()
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
