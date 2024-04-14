@@ -2,26 +2,26 @@ package config
 
 import (
 	"encoding/json"
+	"forum/pkg/env"
 	"log"
 	"os"
 	"time"
-
-	"forum/pkg/env"
 )
 
-type HTTPServerConfig struct {
-	Address     string        `json:"address"`
-	Timeout     time.Duration `json:"timeout"`
-	IdleTimeout time.Duration `json:"idle_timeout"`
+type Config struct {
+	Env         string     `json:"env"`
+	StoragePath string     `json:"storage_path"`
+	HTTPServer  HTTPServer `json:"http_server"`
 }
 
-type Config struct {
-	Env         string           `json:"env"`
-	StoragePath string           `json:"storage_path"`
-	HTTPServer  HTTPServerConfig `json:"http_server"`
+type HTTPServer struct {
+	Address     string `json:"address"`
+	ReadTimeout string `json:"timeout"`
+	IdleTimeout string `json:"idle_timeout"`
 }
 
 func MustLoad() *Config {
+
 	if err := env.LoadEnv(".env"); err != nil {
 		log.Fatalf("failed to load environment variables: %v", err)
 	}
@@ -31,20 +31,24 @@ func MustLoad() *Config {
 		log.Fatalln("CONFIG_PATH is not set")
 	}
 
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		log.Fatalf("config file not exist: %s", configPath)
-	}
-
-	file, err := os.Open(configPath)
+	// Read the config file
+	data, err := os.ReadFile(configPath)
 	if err != nil {
-		log.Fatalf("failed to open config file: %v", err)
+		log.Fatalf("failed to read config file: %v", err)
 	}
-	defer file.Close()
 
 	var cfg Config
-	if err := json.NewDecoder(file).Decode(&cfg); err != nil {
+	if err := json.Unmarshal(data, &cfg); err != nil {
 		log.Fatalf("failed to parse config file: %v", err)
 	}
 
 	return &cfg
+}
+
+func ParseTime(s string) time.Duration {
+	parsedTime, err := time.ParseDuration(s)
+	if err != nil {
+		log.Fatalf("can't parse time: %v", err)
+	}
+	return parsedTime
 }

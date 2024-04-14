@@ -1,6 +1,6 @@
 {
   "env": "local",
-  "storage_path": "",
+  "storage_path": "./storage/store.storage",
   "http_server": {
     "address": "localhost:4269",
     "timeout": "4s",
