@@ -1,19 +1,22 @@
 package internal
 
 import (
+	"forum/internal/sqlite"
 	"forum/pkg/logger"
 	"net/http"
 )
 
 type application struct {
-	logger *logger.Logger
+	logger  *logger.Logger
+	storage *sqlite.Storage
 }
 
-func Routes(l *logger.Logger) *http.ServeMux {
+func Routes(l *logger.Logger, db *sqlite.Storage) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	app := &application{
-		logger: l,
+		logger:  l,
+		storage: db,
 	}
 
 	mux.HandleFunc("/", app.home)
