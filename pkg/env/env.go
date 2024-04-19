@@ -18,7 +18,10 @@ func LoadEnv(filename string) error {
 		parts := strings.SplitN(line, "=", 2)
 		if len(parts) == 2 {
 			key, value := parts[0], parts[1]
-			os.Setenv(key, value)
+			err := os.Setenv(key, value)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	if err := scanner.Err(); err != nil {

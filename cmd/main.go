@@ -5,9 +5,10 @@ import (
 	"forum/internal/config"
 	"forum/internal/sqlite"
 	"forum/pkg/logger"
-	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"net/http"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {

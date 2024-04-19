@@ -25,7 +25,19 @@ func New(path string) (*Storage, error) {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users (
                         id INTEGER PRIMARY KEY,
                         username TEXT UNIQUE,
+                        email TEXT UNIQUE,
                         password TEXT,
+                        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )`)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS posts (
+                        id INTEGER PRIMARY KEY,
+                        title TEXT,
+                        content TEXT,
+                        author_id INTEGER,
                         creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )`)
 	if err != nil {
