@@ -19,9 +19,9 @@ func Routes(l *logger.Logger, db *sqlite.Storage) *http.ServeMux {
 		storage: db,
 	}
 
-	mux.HandleFunc("/", app.home)
-	//mux.HandleFunc("/post/view", app.viewPost)
-	mux.HandleFunc("/post/create", app.createPost)
+	mux.HandleFunc("/", app.HomeHandler)
+	mux.HandleFunc("/post/view", app.ViewPostHandler)
+	mux.HandleFunc("/post/create", app.CreatePostHandler)
 	//mux.HandleFunc("/post/update", app.updatePost)
 	//
 	//mux.HandleFunc("/user")
