@@ -19,8 +19,13 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	posts, err := app.storage.GetAllPosts()
+	if err != nil {
+		return
+	}
+
 	// Использование шаблона для рендеринга HTML
-	renderTemplate(w, "./web/html/home.html", nil)
+	renderTemplate(w, "./web/html/home.html", posts)
 }
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +59,13 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 			app.logger.ErrorLog.Println(err)
 			return
 		}
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		id, err := app.storage.GetLastPostID()
+		if err != nil {
+			return
+		}
+
+		http.Redirect(w, r, "/post/view?id="+strconv.Itoa(id), http.StatusSeeOther)
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}

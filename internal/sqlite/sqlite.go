@@ -82,3 +82,52 @@ func (store *Storage) GetPostByID(id int) (*Post, error) {
 
 	return post, nil
 }
+
+func (store *Storage) GetAllPosts() ([]*Post, error) {
+	// Выполняем запрос к базе данных для выборки всех постов
+	rows, err := store.db.Query("SELECT id, title, content, author_id, creation_date FROM posts")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Создаем слайс для хранения всех постов
+	var posts []*Post
+
+	// Итерируем по результатам запроса
+	for rows.Next() {
+		// Создаем временную переменную для хранения данных поста
+		var post Post
+		// Сканируем результаты запроса в переменные структуры Post
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
+		if err != nil {
+			return nil, err
+		}
+		// Добавляем пост в слайс
+		posts = append(posts, &post)
+	}
+
+	// Проверяем наличие ошибок после итерации по результатам запроса
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Возвращаем слайс всех постов
+	return posts, nil
+}
+
+func (store *Storage) GetLastPostID() (int, error) {
+	var lastID int
+
+	query := "SELECT id FROM posts ORDER BY id DESC LIMIT 1"
+	err := store.db.QueryRow(query).Scan(&lastID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, nil // Если нет строк, возвращаем 0
+		}
+		log.Println("Error getting last post ID:", err)
+		return 0, err
+	}
+
+	return lastID, nil
+}
