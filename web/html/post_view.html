@@ -4,32 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Post</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1 {
-            margin-top: 0;
-        }
-        .post {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 20px;
-        }
-    </style>
+
 </head>
 <body>
 <div class="container">
-    <h1>{{ .Title }}</h1>
-    <p>{{ .Content }}</p>
-    <p>Author: {{ .AuthorID }}</p>
-    <p>Creation Date: {{ .CreationDate }}</p>
+
+    <h1>{{ .Post.Title }}</h1>
+    <p>{{ .Post.Content }}</p>
+    <p>Author: {{ .Post.AuthorID }}</p>
+    <p>Creation Date: {{ .Post.CreationDate }}</p>
+
+    <div class="comment-form">
+        <h2>Write a comment</h2>
+        <form action="/post/comment" method="post">
+            <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+            <textarea name="content" rows="4" placeholder="Write your comment here"></textarea><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <div class="comment-section">
+        {{ range .Comment }}
+            <p>{{.Content}}</p>
+            <p>{{.AuthorID}}</p>
+            <p>{{.CreationDate}}</p>
+        <hr>
+        {{ end }}
+    </div>
+
+
+
 </div>
 </body>
 </html>

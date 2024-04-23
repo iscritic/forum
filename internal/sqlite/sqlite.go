@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -15,8 +16,54 @@ type Post struct {
 	CreationDate time.Time
 }
 
+type Comment struct {
+	ID           int
+	PostID       int
+	Content      string
+	AuthorID     int
+	CreationDate time.Time
+}
+
+type PostData struct {
+	Post    Post
+	Comment []*Comment
+}
+
 type Storage struct {
 	db *sql.DB
+}
+
+var queries = []string{
+	`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        username TEXT UNIQUE,
+        email TEXT UNIQUE,
+        password TEXT,
+        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`,
+	`CREATE TABLE IF NOT EXISTS category (
+        id INTEGER PRIMARY KEY,
+        name TEXT UNIQUE
+    )`,
+	`CREATE TABLE IF NOT EXISTS posts (
+        id INTEGER PRIMARY KEY,
+        title TEXT,
+        content TEXT,
+        author_id INTEGER,
+        category TEXT,
+        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (author_id) REFERENCES users(id),
+        FOREIGN KEY (category) REFERENCES category(name)
+    )`,
+	`CREATE TABLE IF NOT EXISTS comments (
+		id INTEGER PRIMARY KEY,
+		post_id INTEGER,
+		content TEXT,
+		author_id INTEGER,
+		creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (post_id) REFERENCES posts(id),
+        FOREIGN KEY (author_id) REFERENCES users(id)
+	)`,
 }
 
 func New(path string) (*Storage, error) {
@@ -30,51 +77,40 @@ func New(path string) (*Storage, error) {
 		return nil, fmt.Errorf("can't connect to database: %w", err)
 	}
 
-	// Создаем таблицу пользователей.
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users (
-                        id INTEGER PRIMARY KEY,
-                        username TEXT UNIQUE,
-                        email TEXT UNIQUE,
-                        password TEXT,
-                        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )`)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS posts (
-                        id INTEGER PRIMARY KEY,
-                        title TEXT,
-                        content TEXT,
-                        author_id INTEGER,
-                        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )`)
-	if err != nil {
-		log.Fatal(err)
+	for _, querie := range queries {
+		_, err := db.Exec(querie)
+		if err != nil {
+			log.Fatalf("can't execute queries %q: %w", querie, err)
+		}
 	}
 
 	return &Storage{db: db}, nil
 
 }
 
-func (store *Storage) CreatePost(post Post) error {
-	_, err := store.db.Exec(`INSERT INTO posts (title, content, author_id) VALUES (?, ?, ?)`,
-		post.Title, post.Content, post.AuthorID)
+func (Storage *Storage) CreatePost(post Post) (int, error) {
+	res, err := Storage.db.Exec(`INSERT INTO posts (title, content) VALUES (?, ?)`,
+		post.Title, post.Content)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+
+	lastID, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+	return int(lastID), nil
 }
 
-func (store *Storage) GetPostByID(id int) (*Post, error) {
+func (Storage *Storage) GetPostByID(id int) (*Post, error) {
 	// Предполагается, что у вас есть поле DB типа *sql.DB в вашей структуре Application
-	query := "SELECT id, title, content, author_id, creation_date FROM posts WHERE id = ?"
-	row := store.db.QueryRow(query, id)
+	query := "SELECT id, title, content,  creation_date FROM posts WHERE id = ?"
+	row := Storage.db.QueryRow(query, id)
 
 	post := &Post{}
-	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil // Пост не найден
 		}
 		return nil, err // Произошла ошибка при выполнении запроса
@@ -83,9 +119,11 @@ func (store *Storage) GetPostByID(id int) (*Post, error) {
 	return post, nil
 }
 
-func (store *Storage) GetAllPosts() ([]*Post, error) {
-	// Выполняем запрос к базе данных для выборки всех постов
-	rows, err := store.db.Query("SELECT id, title, content, author_id, creation_date FROM posts")
+func (Storage *Storage) GetAllPosts() ([]*Post, error) {
+
+	//TODO authors ids
+
+	rows, err := Storage.db.Query("SELECT  id, title, content, creation_date FROM posts ORDER BY id DESC ")
 	if err != nil {
 		return nil, err
 	}
@@ -96,10 +134,10 @@ func (store *Storage) GetAllPosts() ([]*Post, error) {
 
 	// Итерируем по результатам запроса
 	for rows.Next() {
-		// Создаем временную переменную для хранения данных поста
+		// Создаем новую переменную для хранения данных поста на каждой итерации
 		var post Post
 		// Сканируем результаты запроса в переменные структуры Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
@@ -116,18 +154,37 @@ func (store *Storage) GetAllPosts() ([]*Post, error) {
 	return posts, nil
 }
 
-func (store *Storage) GetLastPostID() (int, error) {
-	var lastID int
+func (Storage *Storage) CreateComment(comment Comment) error {
 
-	query := "SELECT id FROM posts ORDER BY id DESC LIMIT 1"
-	err := store.db.QueryRow(query).Scan(&lastID)
+	_, err := Storage.db.Exec(`INSERT INTO comments (post_id, content) VALUES (?, ? )`,
+		comment.PostID, comment.Content)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return 0, nil // Если нет строк, возвращаем 0
-		}
-		log.Println("Error getting last post ID:", err)
-		return 0, err
+		return err
 	}
 
-	return lastID, nil
+	return nil
+}
+
+func (s *Storage) GetComments(postID int) ([]*Comment, error) {
+	rows, err := s.db.Query("SELECT id, content, creation_date FROM comments WHERE post_id = ? ORDER BY id DESC", postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []*Comment
+
+	for rows.Next() {
+		var comment Comment
+		if err := rows.Scan(&comment.ID, &comment.Content, &comment.CreationDate); err != nil {
+			return nil, err
+		}
+		comments = append(comments, &comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return comments, nil
 }

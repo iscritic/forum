@@ -54,18 +54,13 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		post.AuthorID = 69
 		post.ID = 1
 
-		err := app.storage.CreatePost(post)
+		lastID, err := app.storage.CreatePost(post)
 		if err != nil {
 			app.logger.ErrorLog.Println(err)
 			return
 		}
 
-		id, err := app.storage.GetLastPostID()
-		if err != nil {
-			return
-		}
-
-		http.Redirect(w, r, "/post/view?id="+strconv.Itoa(id), http.StatusSeeOther)
+		http.Redirect(w, r, "/post/view?id="+strconv.Itoa(lastID), http.StatusSeeOther)
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
@@ -103,5 +98,51 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	renderTemplate(w, "./web/html/post_view.html", post)
+	comments, err := app.storage.GetComments(id)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		return
+	}
+
+	postData := sqlite.PostData{
+		Post:    *post,
+		Comment: comments,
+	}
+	renderTemplate(w, "./web/html/post_view.html", postData)
+}
+
+func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Failed to parse form", http.StatusInternalServerError)
+		return
+	}
+
+	var comment sqlite.Comment
+
+	// Получаем ID поста из формы
+	postIDStr := r.Form.Get("post_id")
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	comment.PostID = postID
+	comment.Content = r.Form.Get("content")
+
+	//TODO author comment id
+
+	err = app.storage.CreateComment(comment)
+	if err != nil {
+		return
+	}
+
+	http.Redirect(w, r, "/post/view?id="+postIDStr, http.StatusSeeOther)
+
 }

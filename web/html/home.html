@@ -4,19 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
+    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
 <h1>Home Page</h1>
 <a href="/post/create"><button>Create Post</button></a>
 
-{{ range . }}
-<div>
-    <h2>{{ .Title }}</h2>
-    <p>{{ .Content }}</p>
-    <p>Author: {{ .AuthorID }}</p>
-    <p>Creation Date: {{ .CreationDate }}</p>
-</div>
-<hr>
-{{ end }}
+    {{ range . }}
+        <a href="/post/view?id={{ .ID }}" class = "Post" >
+            <hr>
+                <div>
+                    <h2>{{ .Title }}</h2>
+                    <p>{{ .Content }}</p>
+                    <p>Author: {{ .AuthorID }}</p>
+                    <p>Creation Date: {{ .CreationDate }}</p>
+                </div>
+            <hr>
+        </a>
+    {{ end }}
 </body>
 </html>
