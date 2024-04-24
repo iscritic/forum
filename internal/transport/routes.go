@@ -23,9 +23,12 @@ func Routes(l *logger.Logger, db *sqlite.Storage) *http.ServeMux {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	mux.HandleFunc("/", app.HomeHandler)
+
 	mux.HandleFunc("/post/view", app.ViewPostHandler)
 	mux.HandleFunc("/post/create", app.CreatePostHandler)
 	mux.HandleFunc("/post/comment", app.CreateComment)
+
+	mux.HandleFunc("/register", app.RegisterHandler)
 	//mux.HandleFunc("/post/update", app.updatePost)
 	//
 	//mux.HandleFunc("/user")

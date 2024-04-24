@@ -13,6 +13,7 @@ type Post struct {
 	Title        string
 	Content      string
 	AuthorID     int
+	Category     string
 	CreationDate time.Time
 }
 
@@ -29,6 +30,19 @@ type PostData struct {
 	Comment []*Comment
 }
 
+type User struct {
+	ID           int
+	Username     string
+	Email        string
+	Password     string
+	Role         string
+	CreationDate time.Time
+}
+
+type Category struct {
+	ID   int
+	Name string
+}
 type Storage struct {
 	db *sql.DB
 }
@@ -39,6 +53,7 @@ var queries = []string{
         username TEXT UNIQUE,
         email TEXT UNIQUE,
         password TEXT,
+        role TEXT,
         creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )`,
 	`CREATE TABLE IF NOT EXISTS category (
@@ -63,6 +78,10 @@ var queries = []string{
 		creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (post_id) REFERENCES posts(id),
         FOREIGN KEY (author_id) REFERENCES users(id)
+	)`,
+	`CREATE TABLE IF NOT EXISTS category (
+		id INTEGER PRIMARY KEY,
+		name TEXT UNIQUE
 	)`,
 }
 
@@ -187,4 +206,13 @@ func (s *Storage) GetAllComments(postID int) ([]*Comment, error) {
 	}
 
 	return comments, nil
+}
+
+func (storage *Storage) CreateUser(user User) error {
+	_, err := storage.db.Exec(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`, user.Username, user.Email, user.Password)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

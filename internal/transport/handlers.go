@@ -132,3 +132,36 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/post/view?id="+postIDStr, http.StatusSeeOther)
 
 }
+
+func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodGet:
+		template.RenderTemplate(w, "./web/html/register.html", nil)
+		return
+	case http.MethodPost:
+		err := r.ParseForm()
+		if err != nil {
+			return
+		}
+
+		// Получаем данные из формы регистрации
+		username := r.Form.Get("username")
+		email := r.Form.Get("email")
+		password := r.Form.Get("password")
+
+		// Создаем нового пользователя
+		newUser := sqlite.User{
+			Username: username,
+			Email:    email,
+			Password: password,
+			Role:     "user", // Устанавливаем роль по умолчанию
+		}
+
+		service.Register(app.storage, newUser)
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		app.logger.InfoLog.Printf("New user detected: %v", newUser)
+	}
+
+}
