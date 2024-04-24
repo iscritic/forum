@@ -29,6 +29,7 @@ func Routes(l *logger.Logger, db *sqlite.Storage) *http.ServeMux {
 	mux.HandleFunc("/post/comment", app.CreateComment)
 
 	mux.HandleFunc("/register", app.RegisterHandler)
+	mux.HandleFunc("/login", app.LoginHandler)
 	//mux.HandleFunc("/post/update", app.updatePost)
 	//
 	//mux.HandleFunc("/user")

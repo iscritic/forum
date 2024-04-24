@@ -3,6 +3,7 @@ package transport
 import (
 	"forum/internal/helpers/template"
 	"forum/internal/service"
+	"forum/internal/service/session"
 	"forum/internal/sqlite"
 	"net/http"
 	"strconv"
@@ -164,4 +165,58 @@ func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) 
 		app.logger.InfoLog.Printf("New user detected: %v", newUser)
 	}
 
+}
+
+func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		template.RenderTemplate(w, "./web/html/login.html", nil)
+		return
+	case http.MethodPost:
+		err := r.ParseForm()
+		if err != nil {
+			// Обработка ошибки
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		// Получаем данные из формы авторизации
+		username := r.Form.Get("username")
+		password := r.Form.Get("password")
+
+		// Проверяем существование пользователя с заданными данными
+		user, err := app.storage.GetUserByUsername(username)
+		if err != nil {
+			// Обработка ошибки
+			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			return
+		}
+
+		app.logger.ErrorLog.Println("we are here")
+
+		// Проверяем соответствие пароля
+		if user.Password != password {
+			// Обработка ошибки
+			http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+			return
+		}
+
+		app.logger.ErrorLog.Println("we are here")
+
+		// Создаем сессию и устанавливаем cookie
+		sessionToken, err := session.CreateSession(app.storage, user)
+		if err != nil {
+			app.logger.InfoLog.Println(err)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:    "session_token",
+			Value:   sessionToken,
+			Expires: time.Now().Add(20 * time.Minute),
+			Path:    "/",
+		})
+
+		// Перенаправляем пользователя на домашнюю страницу
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
 }

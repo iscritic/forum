@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/gofrs/uuid"
 	"log"
 	"time"
 )
@@ -42,6 +43,14 @@ type User struct {
 type Category struct {
 	ID   int
 	Name string
+}
+
+type Session struct {
+	ID           int
+	SessionToken uuid.UUID
+	UserID       int
+	CreatedAt    time.Time
+	ExpiredAt    time.Time
 }
 type Storage struct {
 	db *sql.DB
@@ -83,6 +92,15 @@ var queries = []string{
 		id INTEGER PRIMARY KEY,
 		name TEXT UNIQUE
 	)`,
+
+	`CREATE TABLE IF NOT EXISTS sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_token TEXT UNIQUE NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+)`,
 }
 
 func New(path string) (*Storage, error) {
@@ -214,5 +232,48 @@ func (storage *Storage) CreateUser(user User) error {
 		return err
 	}
 
+	return nil
+}
+
+func (storage *Storage) GetUserByUsername(username string) (*User, error) {
+	row := storage.db.QueryRow(`SELECT id, username, email, password FROM users WHERE username = ?`, username)
+
+	var user User // Создаем переменную user
+
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password) // Передаем адреса полей структуры для сканирования
+	if err != nil {
+		return nil, err
+	}
+
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (storage *Storage) GetUserByID(id int) (*User, error) {
+	row := storage.db.QueryRow(`SELECT id, username, email, password FROM users WHERE id = ?`, id)
+
+	var user User // Создаем переменную user
+
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password) // Передаем адреса полей структуры для сканирования
+	if err != nil {
+		return nil, err
+	}
+
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (storage *Storage) CreateSession(sess Session) error {
+	_, err := storage.db.Exec(`INSERT INTO sessions (session_token, user_id, expires_at) VALUES (?, ?, ?)`,
+		sess.SessionToken, sess.UserID, sess.ExpiredAt)
+	if err != nil {
+		return err
+	}
 	return nil
 }
