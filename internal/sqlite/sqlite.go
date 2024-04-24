@@ -165,7 +165,7 @@ func (Storage *Storage) CreateComment(comment Comment) error {
 	return nil
 }
 
-func (s *Storage) GetComments(postID int) ([]*Comment, error) {
+func (s *Storage) GetAllComments(postID int) ([]*Comment, error) {
 	rows, err := s.db.Query("SELECT id, content, creation_date FROM comments WHERE post_id = ? ORDER BY id DESC", postID)
 	if err != nil {
 		return nil, err

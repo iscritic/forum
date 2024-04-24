@@ -1,9 +1,9 @@
 package main
 
 import (
-	"forum/internal"
 	"forum/internal/config"
 	"forum/internal/sqlite"
+	"forum/internal/transport"
 	"forum/pkg/logger"
 	"log"
 	"net/http"
@@ -25,7 +25,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:        cfg.HTTPServer.Address,
-		Handler:     internal.Routes(lg, db),
+		Handler:     transport.Routes(lg, db),
 		ReadTimeout: config.ParseTime(cfg.HTTPServer.ReadTimeout),
 		IdleTimeout: config.ParseTime(cfg.HTTPServer.IdleTimeout),
 	}

@@ -1,10 +1,11 @@
-package internal
+package transport
 
 import (
+	"forum/internal/helpers/template"
+	"forum/internal/service"
 	"forum/internal/sqlite"
 	"net/http"
 	"strconv"
-	"text/template"
 	"time"
 )
 
@@ -19,13 +20,14 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := app.storage.GetAllPosts()
+	posts, err := service.FetchPosts(app.storage)
 	if err != nil {
+		app.logger.ErrorLog.Println(err)
 		return
 	}
 
 	// Использование шаблона для рендеринга HTML
-	renderTemplate(w, "./web/html/home.html", posts)
+	template.RenderTemplate(w, "./web/html/home.html", posts)
 }
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,14 +35,20 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 
 	case http.MethodGet:
 		// Использование шаблона для рендеринга формы создания поста
-		renderTemplate(w, "./web/html/post_create.html", nil)
+		template.RenderTemplate(w, "./web/html/post_create.html", nil)
+		return
 
 	case http.MethodPost:
 
+		err := r.ParseForm()
+		if err != nil {
+			return
+		}
+
 		var post sqlite.Post
 
-		title := r.FormValue("title")
-		content := r.FormValue("content")
+		title := r.Form.Get("title")
+		content := r.Form.Get("content")
 
 		// Обработка ошибок при получении данных из формы
 		if title == "" || content == "" {
@@ -63,18 +71,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		http.Redirect(w, r, "/post/view?id="+strconv.Itoa(lastID), http.StatusSeeOther)
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-	}
-}
-
-func renderTemplate(w http.ResponseWriter, tmpl string, data interface{}) {
-	t, err := template.ParseFiles(tmpl)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
-	}
-	err = t.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
 
@@ -92,23 +89,12 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	post, err := app.storage.GetPostByID(id)
+	postData, err := service.GetPostData(app.storage, id)
 	if err != nil {
 		app.logger.ErrorLog.Println(err)
-		return
 	}
 
-	comments, err := app.storage.GetComments(id)
-	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		return
-	}
-
-	postData := sqlite.PostData{
-		Post:    *post,
-		Comment: comments,
-	}
-	renderTemplate(w, "./web/html/post_view.html", postData)
+	template.RenderTemplate(w, "./web/html/post_view.html", postData)
 }
 
 func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
