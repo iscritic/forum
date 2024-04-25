@@ -4,7 +4,7 @@ import "forum/internal/sqlite"
 
 func FetchPosts(db *sqlite.Storage) ([]*sqlite.Post, error) {
 
-	//TODO бизнес логика, пагинация страниц
+	//TODO: бизнес логика, пагинация страниц
 
 	posts, err := db.GetAllPosts()
 	if err != nil {

@@ -11,7 +11,7 @@ type application struct {
 	storage *sqlite.Storage
 }
 
-func Routes(l *logger.Logger, db *sqlite.Storage) *http.ServeMux {
+func Routes(l *logger.Logger, db *sqlite.Storage) http.Handler {
 	mux := http.NewServeMux()
 
 	app := &application{
@@ -34,5 +34,12 @@ func Routes(l *logger.Logger, db *sqlite.Storage) *http.ServeMux {
 	//
 	//mux.HandleFunc("/user")
 	//mux.HandleFunc("/user/create", app.createUser)
-	return mux
+	return app.SessionMiddleware(mux)
+}
+
+func (app *application) SessionMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// middleware logic
+		next.ServeHTTP(w, r)
+	})
 }
