@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Post</title>
-</head>
-<body>
+{{template "base" .}}
+
+{{define "title"}}Create Post{{end}}
+
+{{define "body"}}
 <h1>Create Post</h1>
 <form action="/post/create" method="POST">
     <div>
@@ -20,5 +17,4 @@
         <button type="submit">Submit</button>
     </div>
 </form>
-</body>
-</html>
+{{end}}
