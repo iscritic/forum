@@ -1,5 +1,29 @@
+body{
+    color: white;
+    background-image: linear-gradient(to right top, #e6e0e2, #e3d1dc, #dbc4db, #ccb9de, #b5b0e2, #aab2e5, #9eb4e8, #91b6e9, #9cc0e9, #aacaea, #b9d4ea, #caddea);
+    background-repeat: round;
+}
 
+.container{
+    margin-right: 30%;
+    margin-left: 30%;
+}
 a.Post{
     text-decoration: none;
     color: inherit;
+}
+
+nav{
+
+}
+
+.post{
+    background-color: rgba(0, 0, 0, 0.40);
+    border: solid 1px;
+    border-radius: 30px;
+    
+}
+.posts {
+    display: flexbox;
+
 }

@@ -7,20 +7,32 @@
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-<h1>Home Page</h1>
-<a href="/post/create"><button>Create Post</button></a>
-
+    <div class="container">
+<nav>
+    <a href="/post/create" class="href">create</a>
+    <a href="/register" class="href">register</a>
+    <a href="/login" class="href">login</a>
+    
+</nav>
+<div class="posts">
     {{ range . }}
         <a href="/post/view?id={{ .ID }}" class = "Post" >
-            <hr>
-                <div>
-                    <h2>{{ .Title }}</h2>
-                    <p>{{ .Content }}</p>
+                <div class="post">
                     <p>Author: {{ .AuthorID }}</p>
+                    <h2>{{ .Title }}</h2>
                     <p>Creation Date: {{ .CreationDate }}</p>
+                    <p>{{ .Content }}</p>
+                    
+                    
                 </div>
-            <hr>
         </a>
     {{ end }}
+</div>
+</div>
+
+
 </body>
 </html>
+
+
+
