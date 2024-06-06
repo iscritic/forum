@@ -8,7 +8,7 @@
 
 </head>
 <body>
-<div class="container">
+<div class="wrapper">
 
     <h1>{{ .Post.Title }}</h1>
     <p>{{ .Post.Content }}</p>
@@ -19,7 +19,7 @@
         <h2>Write a comment</h2>
         <form action="/post/comment" method="post">
             <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-            <textarea name="content" rows="4" placeholder="Write your comment here"></textarea><br>
+            <textarea name="content" rows="4" placeholder=""Write your comment here></textarea><br>
             <button type="submit">Submit</button>
         </form>
     </div>

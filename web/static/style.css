@@ -1,10 +1,12 @@
 body{
     color: white;
     background-image: linear-gradient(to right top, #e6e0e2, #e3d1dc, #dbc4db, #ccb9de, #b5b0e2, #aab2e5, #9eb4e8, #91b6e9, #9cc0e9, #aacaea, #b9d4ea, #caddea);
-    background-repeat: round;
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
 }
 
-.container{
+.wrapper{
     margin-right: 30%;
     margin-left: 30%;
 }
@@ -13,7 +15,20 @@ a.Post{
     color: inherit;
 }
 
+header{
+    padding: 10px;
+    display: flex; 
+    justify-content: flex-end;
+    align-items: center;
+}
+
 nav{
+    float: left;
+}
+
+main {
+    display: flex;
+    flex: 1;
 
 }
 
@@ -21,9 +36,46 @@ nav{
     background-color: rgba(0, 0, 0, 0.40);
     border: solid 1px;
     border-radius: 30px;
-    
+    margin-bottom: 30px;
+    padding: 20px;
+    width: 100%;
+    /* max-width: 1000px; */
+    box-sizing: border-box;
 }
-.posts {
-    display: flexbox;
 
+.minimalistic-form{
+    background-color: rgba(0, 0, 0, 0.40);
+    border: solid 1px;
+    border-radius: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    width: 100%;
+    max-width: 1000px;
+    box-sizing: border-box;
+}
+
+.create-post-form {
+    background-color: rgba(0, 0, 0, 0.40);
+    border: solid 1px;
+    border-radius: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    width: 100%;
+    max-width: 1000px;
+    box-sizing: border-box;
+}
+
+.posts {
+    /* float: right;
+    padding-right: 510px; */
+}
+
+.hidden {
+    display: none;
+}
+
+footer{ 
+
+    text-align: center;
+    padding: 10px 0;
 }
