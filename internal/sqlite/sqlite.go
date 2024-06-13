@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"log"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 type Post struct {
@@ -52,6 +53,7 @@ type Session struct {
 	CreatedAt    time.Time
 	ExpiredAt    time.Time
 }
+
 type Storage struct {
 	db *sql.DB
 }
@@ -79,6 +81,16 @@ var queries = []string{
         FOREIGN KEY (author_id) REFERENCES users(id),
         FOREIGN KEY (category) REFERENCES category(name)
     )`,
+
+	// New table for likes and dislikes (should we use here boolean or ENUM stuff?)
+	`CREATE POST IF NOT EXISTS posts_interactions (
+		id INTEGER PRIMARY KEY,
+		post_id INT REFERENCES posts(id),
+		user_id INT REFERNCES users(id),
+		interaction_type BOOLEAN 
+		creation_date TIMESTAMP DEFAULT CURRENT_TIMESPAMP, 
+	)`,
+
 	`CREATE TABLE IF NOT EXISTS comments (
 		id INTEGER PRIMARY KEY,
 		post_id INTEGER,
@@ -104,7 +116,6 @@ var queries = []string{
 }
 
 func New(path string) (*Storage, error) {
-
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, fmt.Errorf("can't open database: %w", err)
@@ -122,7 +133,6 @@ func New(path string) (*Storage, error) {
 	}
 
 	return &Storage{db: db}, nil
-
 }
 
 func (Storage *Storage) CreatePost(post Post) (int, error) {
@@ -140,7 +150,8 @@ func (Storage *Storage) CreatePost(post Post) (int, error) {
 }
 
 func (Storage *Storage) GetPostByID(id int) (*Post, error) {
-	// Предполагается, что у вас есть поле DB типа *sql.DB в вашей структуре Application
+	// ToDo likes and dislikes
+
 	query := "SELECT id, title, content,  creation_date FROM posts WHERE id = ?"
 	row := Storage.db.QueryRow(query, id)
 
@@ -157,8 +168,8 @@ func (Storage *Storage) GetPostByID(id int) (*Post, error) {
 }
 
 func (Storage *Storage) GetAllPosts() ([]*Post, error) {
-
-	//TODO authors ids
+	// TODO authors ids
+	// ToDo likes and dislikes
 
 	rows, err := Storage.db.Query("SELECT  id, title, content, creation_date FROM posts ORDER BY id DESC ")
 	if err != nil {
@@ -166,33 +177,24 @@ func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 	}
 	defer rows.Close()
 
-	// Создаем слайс для хранения всех постов
 	var posts []*Post
-
-	// Итерируем по результатам запроса
 	for rows.Next() {
-		// Создаем новую переменную для хранения данных поста на каждой итерации
 		var post Post
-		// Сканируем результаты запроса в переменные структуры Post
 		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
-		// Добавляем пост в слайс
 		posts = append(posts, &post)
 	}
 
-	// Проверяем наличие ошибок после итерации по результатам запроса
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
-	// Возвращаем слайс всех постов
 	return posts, nil
 }
 
 func (Storage *Storage) CreateComment(comment Comment) error {
-
 	_, err := Storage.db.Exec(`INSERT INTO comments (post_id, content) VALUES (?, ? )`,
 		comment.PostID, comment.Content)
 	if err != nil {

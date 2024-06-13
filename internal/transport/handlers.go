@@ -223,3 +223,5 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	// Перенаправляем пользователя на домашнюю страницу
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+
