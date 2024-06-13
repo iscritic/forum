@@ -19,6 +19,12 @@ type Post struct {
 	CreationDate time.Time
 }
 
+type PostWithLikes struct {
+	Post
+	Likes    int `json:"likes"`
+	Dislikes int `json:"dislikes"`
+}
+
 type Comment struct {
 	ID           int
 	PostID       int
@@ -60,36 +66,28 @@ type Storage struct {
 
 var queries = []string{
 	`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
-        username TEXT UNIQUE,
-        email TEXT UNIQUE,
-        password TEXT,
-        role TEXT,
-        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-	`CREATE TABLE IF NOT EXISTS category (
-        id INTEGER PRIMARY KEY,
-        name TEXT UNIQUE
-    )`,
-	`CREATE TABLE IF NOT EXISTS posts (
-        id INTEGER PRIMARY KEY,
-        title TEXT,
-        content TEXT,
-        author_id INTEGER,
-        category TEXT,
-        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (author_id) REFERENCES users(id),
-        FOREIGN KEY (category) REFERENCES category(name)
-    )`,
-
-	// New table for likes and dislikes (should we use here boolean or ENUM stuff?)
-	`CREATE POST IF NOT EXISTS posts_interactions (
 		id INTEGER PRIMARY KEY,
-		post_id INT REFERENCES posts(id),
-		user_id INT REFERNCES users(id),
-		interaction_type BOOLEAN 
-		creation_date TIMESTAMP DEFAULT CURRENT_TIMESPAMP, 
-	)`,
+		username TEXT UNIQUE,
+		email TEXT UNIQUE,
+		password TEXT,
+		role TEXT,
+		creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);`,
+	`CREATE TABLE IF NOT EXISTS category (
+		id INTEGER PRIMARY KEY,
+		name TEXT UNIQUE
+	);`,
+
+	`CREATE TABLE IF NOT EXISTS posts (
+		id INTEGER PRIMARY KEY,
+		title TEXT,
+		content TEXT,
+		author_id INTEGER,
+		category_id INTEGER,
+		creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (author_id) REFERENCES users(id),
+		FOREIGN KEY (category_id) REFERENCES category(id)
+	);`,
 
 	`CREATE TABLE IF NOT EXISTS comments (
 		id INTEGER PRIMARY KEY,
@@ -97,22 +95,32 @@ var queries = []string{
 		content TEXT,
 		author_id INTEGER,
 		creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (post_id) REFERENCES posts(id),
-        FOREIGN KEY (author_id) REFERENCES users(id)
-	)`,
-	`CREATE TABLE IF NOT EXISTS category (
+		FOREIGN KEY (post_id) REFERENCES posts(id),
+		FOREIGN KEY (author_id) REFERENCES users(id)
+	);
+	`,
+
+	// New table for likes and dislikes (should we use here boolean or ENUM stuff?)
+	`
+	CREATE TABLE IF NOT EXISTS posts_interactions (
 		id INTEGER PRIMARY KEY,
-		name TEXT UNIQUE
-	)`,
+		post_id INTEGER,
+		user_id INTEGER,
+		interaction_type TEXT CHECK(interaction_type IN ('like', 'dislike')),
+		creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (post_id) REFERENCES posts(id),
+		FOREIGN KEY (user_id) REFERENCES users(id)
+	);
+	`,
 
 	`CREATE TABLE IF NOT EXISTS sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    session_token TEXT UNIQUE NOT NULL,
-    user_id INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-)`,
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		session_token TEXT UNIQUE NOT NULL,
+		user_id INTEGER NOT NULL,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		expires_at TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id)
+	)`,
 }
 
 func New(path string) (*Storage, error) {
@@ -278,4 +286,54 @@ func (storage *Storage) CreateSession(sess Session) error {
 		return err
 	}
 	return nil
+}
+
+func (Storage *Storage) GetUserPosts(userID int) ([]*PostWithLikes, error) {
+	query := "SELECT p.id, p.title, p.content, p.creation_date, COUNT(pi.id) AS likes, COUNT(di.id) AS dislikes FROM posts p LEFT JOIN posts_interactions pi ON p.id = pi.post_id AND pi.interaction_type = 'like' LEFT JOIN posts_interactions di ON p.id = di.post_id AND pi.interaction_type = 'dislike'  WHERE p.author_id = ? GROUP BY p.id"
+	rows, err := Storage.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []*PostWithLikes
+	for rows.Next() {
+		post := &PostWithLikes{}
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate, &post.Likes, &post.Dislikes)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
+func (Storage *Storage) GetUserLikedPosts(userID int) ([]*PostWithLikes, error) {
+	query := "SELECT p.id, p.title, p.content, p.creation_date, COUNT(pi.id) AS likes, COUNT(di.id) AS dislikes FROM posts p LEFT JOIN posts_interactions pi ON p.id = pi.post_id AND pi.interaction_type = 'like' LEFT JOIN posts_interactions di ON p.id = di.post_id AND di.interaction_type = 'dislike'  WHERE pi.user_id = ? GROUP BY p.id"
+	rows, err := Storage.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []*PostWithLikes
+	for rows.Next() {
+		post := &PostWithLikes{}
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate, &post.Likes, &post.Dislikes)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }

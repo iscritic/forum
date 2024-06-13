@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,6 +36,7 @@
                         <h2>{{ .Title }}</h2>
                         <p class="date">Creation Date: {{ .CreationDate }}</p>
                         <p>{{ .Content }}</p>
+                        <p>{{ .Likes }}</p>
                     </div>
                 </a>
                 {{ end }}
@@ -55,26 +55,3 @@
     </script>
 </body>
 </html>
-=======
-{{template "base" .}}
-
-{{define "title"}}Home{{end}}
-
-{{define "body"}}
-<h1>Home Page</h1>
-<a href="/post/create"><button>Create Post</button></a>
-
-    {{ range . }}
-        <a href="/post/view?id={{ .ID }}" class = "Post" >
-            <hr>
-                <div>
-                    <h2>{{ .Title }}</h2>
-                    <p>{{ .Content }}</p>
-                    <p>Author: {{ .AuthorID }}</p>
-                    <p>Creation Date: {{ .CreationDate }}</p>
-                </div>
-            <hr>
-        </a>
-    {{ end }}
-{{end}}
->>>>>>> origin/anelkhan
