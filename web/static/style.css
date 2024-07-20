@@ -15,7 +15,6 @@ a.Post{
     color: inherit;
 }
 
-<<<<<<< HEAD
 header{
     padding: 10px;
     display: flex; 
@@ -67,10 +66,9 @@ main {
 }
 
 .posts {
-    /* float: right;
-    padding-right: 510px; */
-}
-
+    width: fit-content;
+    margin: 0 auto;  
+  }
 .hidden {
     display: none;
 }
@@ -80,5 +78,3 @@ footer{
     text-align: center;
     padding: 10px 0;
 }
-=======
->>>>>>> origin/anelkhan
