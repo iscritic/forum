@@ -1,22 +1,25 @@
 package transport
 
 import (
+	"forum/internal/helpers/template"
 	"forum/internal/sqlite"
 	"forum/pkg/logger"
 	"net/http"
 )
 
 type application struct {
-	logger  *logger.Logger
-	storage *sqlite.Storage
+	logger        *logger.Logger
+	storage       *sqlite.Storage
+	templateCache *template.TemplateCache
 }
 
-func Routes(l *logger.Logger, db *sqlite.Storage) http.Handler {
+func Routes(l *logger.Logger, db *sqlite.Storage, tc *template.TemplateCache) http.Handler {
 	mux := http.NewServeMux()
 
 	app := &application{
-		logger:  l,
-		storage: db,
+		logger:        l,
+		storage:       db,
+		templateCache: tc,
 	}
 
 	fileServer := http.FileServer(http.Dir("./web/static"))

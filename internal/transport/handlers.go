@@ -28,7 +28,7 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Использование шаблона для рендеринга HTML
-	template.RenderTemplate(w, "./web/html/home.html", posts)
+	template.RenderTemplate(w, app.templateCache, "./web/html/home.html", posts)
 }
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +36,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 
 	case http.MethodGet:
 		// Использование шаблона для рендеринга формы создания поста
-		template.RenderTemplate(w, "./web/html/post_create.html", nil)
+		template.RenderTemplate(w, app.templateCache, "./web/html/post_create.html", nil)
 		return
 
 	case http.MethodPost:
@@ -95,11 +95,10 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		app.logger.ErrorLog.Println(err)
 	}
 
-	template.RenderTemplate(w, "./web/html/post_view.html", postData)
+	template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
 }
 
 func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
-
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -123,7 +122,7 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	comment.PostID = postID
 	comment.Content = r.Form.Get("content")
 
-	//TODO author comment id
+	// TODO author comment id
 
 	err = app.storage.CreateComment(comment)
 	if err != nil {
@@ -131,14 +130,12 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/post/view?id="+postIDStr, http.StatusSeeOther)
-
 }
 
 func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-
 	switch r.Method {
 	case http.MethodGet:
-		template.RenderTemplate(w, "./web/html/register.html", nil)
+		template.RenderTemplate(w, app.templateCache, "./web/html/register.html", nil)
 		return
 	case http.MethodPost:
 		err := r.ParseForm()
@@ -164,13 +161,12 @@ func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		app.logger.InfoLog.Printf("New user detected: %v", newUser)
 	}
-
 }
 
 func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodGet:
-		template.RenderTemplate(w, "./web/html/login.html", nil)
+		template.RenderTemplate(w, app.templateCache, "./web/html/login.html", nil)
 		return
 	case r.Method != http.MethodPost:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
