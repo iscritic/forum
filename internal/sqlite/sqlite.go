@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"log"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 type Post struct {
@@ -52,6 +53,7 @@ type Session struct {
 	CreatedAt    time.Time
 	ExpiredAt    time.Time
 }
+
 type Storage struct {
 	db *sql.DB
 }
@@ -104,7 +106,6 @@ var queries = []string{
 }
 
 func New(path string) (*Storage, error) {
-
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return nil, fmt.Errorf("can't open database: %w", err)
@@ -122,7 +123,6 @@ func New(path string) (*Storage, error) {
 	}
 
 	return &Storage{db: db}, nil
-
 }
 
 func (Storage *Storage) CreatePost(post Post) (int, error) {
@@ -157,8 +157,7 @@ func (Storage *Storage) GetPostByID(id int) (*Post, error) {
 }
 
 func (Storage *Storage) GetAllPosts() ([]*Post, error) {
-
-	//TODO authors ids
+	// TODO authors ids
 
 	rows, err := Storage.db.Query("SELECT  id, title, content, creation_date FROM posts ORDER BY id DESC ")
 	if err != nil {
@@ -192,7 +191,6 @@ func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 }
 
 func (Storage *Storage) CreateComment(comment Comment) error {
-
 	_, err := Storage.db.Exec(`INSERT INTO comments (post_id, content) VALUES (?, ? )`,
 		comment.PostID, comment.Content)
 	if err != nil {
@@ -276,4 +274,26 @@ func (storage *Storage) CreateSession(sess Session) error {
 		return err
 	}
 	return nil
+}
+
+func (storage *Storage) GetSessionByToken(token string) (*Session, error) {
+	var session Session
+	err := storage.db.QueryRow(`
+        SELECT id, session_token, user_id, created_at, expires_at 
+        FROM sessions 
+        WHERE session_token = ?`, token).Scan(
+		&session.ID, &session.SessionToken, &session.UserID, &session.CreatedAt, &session.ExpiredAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No session found
+		}
+		return nil, err
+	}
+	return &session, nil
+}
+
+func (storage *Storage) DeleteSession(token string) error {
+	_, err := storage.db.Exec(`DELETE FROM sessions WHERE session_token = ?`, token)
+	return err
 }

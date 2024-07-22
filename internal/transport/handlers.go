@@ -99,7 +99,6 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
-
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -123,7 +122,7 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	comment.PostID = postID
 	comment.Content = r.Form.Get("content")
 
-	//TODO author comment id
+	// TODO author comment id
 
 	err = app.storage.CreateComment(comment)
 	if err != nil {
@@ -131,11 +130,9 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/post/view?id="+postIDStr, http.StatusSeeOther)
-
 }
 
 func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-
 	switch r.Method {
 	case http.MethodGet:
 		template.RenderTemplate(w, "./web/html/register.html", nil)
@@ -164,7 +161,6 @@ func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		app.logger.InfoLog.Printf("New user detected: %v", newUser)
 	}
-
 }
 
 func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
