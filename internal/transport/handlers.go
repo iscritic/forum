@@ -7,6 +7,7 @@ import (
 	"forum/internal/sqlite"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -83,7 +84,7 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	idStr := r.URL.Query().Get("id")
+	idStr := strings.TrimPrefix(r.URL.Path, "/post/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)

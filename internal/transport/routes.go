@@ -27,7 +27,7 @@ func Routes(l *logger.Logger, db *sqlite.Storage, tc *template.TemplateCache) ht
 
 	mux.HandleFunc("/", app.HomeHandler)
 
-	mux.HandleFunc("/post/view", app.ViewPostHandler)
+	mux.HandleFunc("/post/", app.ViewPostHandler)
 	mux.HandleFunc("/post/create", app.CreatePostHandler)
 	mux.HandleFunc("/post/comment", app.CreateComment)
 
