@@ -94,6 +94,7 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 	postData, err := service.GetPostData(app.storage, id)
 	if err != nil {
 		app.logger.ErrorLog.Println(err)
+		return
 	}
 
 	template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
