@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"fmt"
 	"forum/internal/helpers/template"
 	"forum/internal/repository"
 	"forum/internal/service"
@@ -21,6 +22,11 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
+	//WE GET ID OF USER
+	userID := r.Context().Value("userID")
+
+	fmt.Println("Your ID is ", userID)
 
 	posts, err := service.FetchPosts(app.storage)
 	if err != nil {
