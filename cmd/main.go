@@ -2,6 +2,7 @@ package main
 
 import (
 	"forum/internal/config"
+	"forum/internal/helpers/template"
 	"forum/internal/sqlite"
 	"forum/internal/transport"
 	"forum/pkg/logger"
@@ -12,7 +13,6 @@ import (
 )
 
 func main() {
-
 	lg := logger.NewLogger()
 
 	cfg := config.MustLoad()
@@ -22,10 +22,14 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	templateCache := template.NewTemplateCache()
+	if err := template.LoadTemplates(templateCache, "./web/html"); err != nil {
+		log.Fatalf("failed to load templates: %v", err)
+	}
 
 	srv := &http.Server{
 		Addr:        cfg.HTTPServer.Address,
-		Handler:     transport.Routes(lg, db),
+		Handler:     transport.Routes(lg, db, templateCache),
 		ReadTimeout: config.ParseTime(cfg.HTTPServer.ReadTimeout),
 		IdleTimeout: config.ParseTime(cfg.HTTPServer.IdleTimeout),
 	}

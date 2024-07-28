@@ -2,6 +2,7 @@ package transport
 
 import (
 	"context"
+	"forum/internal/helpers/template"
 	"forum/internal/sqlite"
 	"forum/pkg/logger"
 	"net/http"
@@ -9,16 +10,18 @@ import (
 )
 
 type application struct {
-	logger  *logger.Logger
-	storage *sqlite.Storage
+	logger        *logger.Logger
+	storage       *sqlite.Storage
+	templateCache *template.TemplateCache
 }
 
-func Routes(l *logger.Logger, db *sqlite.Storage) http.Handler {
+func Routes(l *logger.Logger, db *sqlite.Storage, tc *template.TemplateCache) http.Handler {
 	mux := http.NewServeMux()
 
 	app := &application{
-		logger:  l,
-		storage: db,
+		logger:        l,
+		storage:       db,
+		templateCache: tc,
 	}
 
 	fileServer := http.FileServer(http.Dir("./web/static"))
@@ -26,7 +29,7 @@ func Routes(l *logger.Logger, db *sqlite.Storage) http.Handler {
 
 	mux.HandleFunc("/", app.HomeHandler)
 
-	mux.HandleFunc("/post/view", app.ViewPostHandler)
+	mux.HandleFunc("/post/", app.ViewPostHandler)
 	mux.HandleFunc("/post/create", app.CreatePostHandler)
 	mux.HandleFunc("/post/comment", app.CreateComment)
 

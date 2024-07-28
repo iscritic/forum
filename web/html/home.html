@@ -30,7 +30,7 @@
                 </div>
 
                 {{ range . }}
-                <a href="/post/view?id={{ .ID }}" class="Post">
+                <a href="/post/{{ .ID }}" class="Post">
                     <div class="post">
                         <h4 class="author">Author: {{ .AuthorID }}</h4>
                         <h2>{{ .Title }}</h2>

@@ -7,6 +7,7 @@ import (
 	"forum/internal/sqlite"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -28,7 +29,7 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Использование шаблона для рендеринга HTML
-	template.RenderTemplate(w, "./web/html/home.html", posts)
+	template.RenderTemplate(w, app.templateCache, "./web/html/home.html", posts)
 }
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +37,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 
 	case http.MethodGet:
 		// Использование шаблона для рендеринга формы создания поста
-		template.RenderTemplate(w, "./web/html/post_create.html", nil)
+		template.RenderTemplate(w, app.templateCache, "./web/html/post_create.html", nil)
 		return
 
 	case http.MethodPost:
@@ -83,7 +84,7 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	idStr := r.URL.Query().Get("id")
+	idStr := strings.TrimPrefix(r.URL.Path, "/post/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid post ID", http.StatusBadRequest)
@@ -93,9 +94,10 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 	postData, err := service.GetPostData(app.storage, id)
 	if err != nil {
 		app.logger.ErrorLog.Println(err)
+		return
 	}
 
-	template.RenderTemplate(w, "./web/html/post_view.html", postData)
+	template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
 }
 
 func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
@@ -129,13 +131,13 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/post/view?id="+postIDStr, http.StatusSeeOther)
+	http.Redirect(w, r, "/post/"+postIDStr, http.StatusSeeOther)
 }
 
 func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		template.RenderTemplate(w, "./web/html/register.html", nil)
+		template.RenderTemplate(w, app.templateCache, "./web/html/register.html", nil)
 		return
 	case http.MethodPost:
 		err := r.ParseForm()
@@ -166,7 +168,7 @@ func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) 
 func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodGet:
-		template.RenderTemplate(w, "./web/html/login.html", nil)
+		template.RenderTemplate(w, app.templateCache, "./web/html/login.html", nil)
 		return
 	case r.Method != http.MethodPost:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
