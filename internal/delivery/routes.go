@@ -1,9 +1,9 @@
-package transport
+package delivery
 
 import (
 	"context"
 	"forum/internal/helpers/template"
-	"forum/internal/sqlite"
+	"forum/internal/repository"
 	"forum/pkg/logger"
 	"net/http"
 	"time"
@@ -11,11 +11,11 @@ import (
 
 type application struct {
 	logger        *logger.Logger
-	storage       *sqlite.Storage
+	storage       *repository.Storage
 	templateCache *template.TemplateCache
 }
 
-func Routes(l *logger.Logger, db *sqlite.Storage, tc *template.TemplateCache) http.Handler {
+func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache) http.Handler {
 	mux := http.NewServeMux()
 
 	app := &application{

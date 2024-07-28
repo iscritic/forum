@@ -1,10 +1,10 @@
-package transport
+package delivery
 
 import (
 	"forum/internal/helpers/template"
+	"forum/internal/repository"
 	"forum/internal/service"
 	"forum/internal/service/session"
-	"forum/internal/sqlite"
 	"net/http"
 	"strconv"
 	"strings"
@@ -47,7 +47,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		var post sqlite.Post
+		var post repository.Post
 
 		title := r.Form.Get("title")
 		content := r.Form.Get("content")
@@ -70,7 +70,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 			return
 		}
 
-		http.Redirect(w, r, "/post/view?id="+strconv.Itoa(lastID), http.StatusSeeOther)
+		http.Redirect(w, r, "/post/"+strconv.Itoa(lastID), http.StatusSeeOther)
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -111,7 +111,7 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var comment sqlite.Comment
+	var comment repository.Comment
 
 	// Получаем ID поста из формы
 	postIDStr := r.Form.Get("post_id")
@@ -151,7 +151,7 @@ func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) 
 		password := r.Form.Get("password")
 
 		// Создаем нового пользователя
-		newUser := sqlite.User{
+		newUser := repository.User{
 			Username: username,
 			Email:    email,
 			Password: password,

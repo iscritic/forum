@@ -1,8 +1,8 @@
 package service
 
-import "forum/internal/sqlite"
+import "forum/internal/repository"
 
-func FetchPosts(db *sqlite.Storage) ([]*sqlite.Post, error) {
+func FetchPosts(db *repository.Storage) ([]*repository.Post, error) {
 
 	//TODO: бизнес логика, пагинация страниц
 
@@ -14,11 +14,11 @@ func FetchPosts(db *sqlite.Storage) ([]*sqlite.Post, error) {
 	return posts, nil
 }
 
-func GetPostData(db *sqlite.Storage, id int) (sqlite.PostData, error) {
+func GetPostData(db *repository.Storage, id int) (repository.PostData, error) {
 
 	//TODO бизнес логика комментариев, лайки
 
-	var postData sqlite.PostData
+	var postData repository.PostData
 
 	post, err := db.GetPostByID(id)
 	if err != nil {
@@ -30,7 +30,7 @@ func GetPostData(db *sqlite.Storage, id int) (sqlite.PostData, error) {
 		return postData, err
 	}
 
-	postData = sqlite.PostData{
+	postData = repository.PostData{
 		Post:    *post,
 		Comment: comments,
 	}
@@ -38,7 +38,7 @@ func GetPostData(db *sqlite.Storage, id int) (sqlite.PostData, error) {
 	return postData, nil
 }
 
-func Register(db *sqlite.Storage, user sqlite.User) error {
+func Register(db *repository.Storage, user repository.User) error {
 
 	//TODO бизнес логика комментариев, лайки
 

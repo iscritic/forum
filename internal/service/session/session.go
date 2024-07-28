@@ -2,13 +2,13 @@ package session
 
 import (
 	"fmt"
-	"forum/internal/sqlite"
+	"forum/internal/repository"
 	"github.com/gofrs/uuid"
 	"log"
 	"time"
 )
 
-func CreateSession(db *sqlite.Storage, user *sqlite.User) (string, error) {
+func CreateSession(db *repository.Storage, user *repository.User) (string, error) {
 
 	u4, err := uuid.NewV4()
 	if err != nil {
@@ -16,7 +16,7 @@ func CreateSession(db *sqlite.Storage, user *sqlite.User) (string, error) {
 	}
 	log.Printf("generated Version 4 UUID %v", u4)
 
-	var sess sqlite.Session
+	var sess repository.Session
 
 	sess.UserID = user.ID
 	sess.SessionToken = u4
