@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
+	"io/ioutil"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -70,53 +70,6 @@ type Storage struct {
 	db *sql.DB
 }
 
-var queries = []string{
-	`CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY,
-        username TEXT UNIQUE,
-        email TEXT UNIQUE,
-        password TEXT,
-        role TEXT,
-        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
-	`CREATE TABLE IF NOT EXISTS category (
-        id INTEGER PRIMARY KEY,
-        name TEXT UNIQUE
-    )`,
-	`CREATE TABLE IF NOT EXISTS posts (
-        id INTEGER PRIMARY KEY,
-        title TEXT,
-        content TEXT,
-        author_id INTEGER,
-        category TEXT,
-        creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (author_id) REFERENCES users(id),
-        FOREIGN KEY (category) REFERENCES category(name)
-    )`,
-	`CREATE TABLE IF NOT EXISTS comments (
-		id INTEGER PRIMARY KEY,
-		post_id INTEGER,
-		content TEXT,
-		author_id INTEGER,
-		creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (post_id) REFERENCES posts(id),
-        FOREIGN KEY (author_id) REFERENCES users(id)
-	)`,
-	`CREATE TABLE IF NOT EXISTS category (
-		id INTEGER PRIMARY KEY,
-		name TEXT UNIQUE
-	)`,
-
-	`CREATE TABLE IF NOT EXISTS sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    session_token TEXT UNIQUE NOT NULL,
-    user_id INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-)`,
-}
-
 func New(path string) (*Storage, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
@@ -127,11 +80,14 @@ func New(path string) (*Storage, error) {
 		return nil, fmt.Errorf("can't connect to database: %w", err)
 	}
 
-	for _, querie := range queries {
-		_, err := db.Exec(querie)
-		if err != nil {
-			log.Fatalf("can't execute queries %q: %w", querie, err)
-		}
+	querry, err := ioutil.ReadFile("./storage/schema.sql")
+	if err != nil {
+		return nil, fmt.Errorf("can't read file: %v", err)
+	}
+
+	_, err = db.Exec(string(querry))
+	if err != nil {
+		return nil, fmt.Errorf("can't execute this querry: %v", err)
 	}
 
 	return &Storage{db: db}, nil

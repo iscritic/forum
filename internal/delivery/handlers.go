@@ -23,7 +23,7 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//WE GET ID OF USER
+	// WE GET ID OF USER
 	userID := r.Context().Value("userID")
 
 	fmt.Println("Your ID is ", userID)
@@ -226,4 +226,8 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Перенаправляем пользователя на домашнюю страницу
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) LikeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "You liked/disliked this page")
 }

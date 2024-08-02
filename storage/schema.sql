@@ -1,3 +1,4 @@
+-- schema.sql
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     username TEXT UNIQUE,
@@ -33,7 +34,10 @@ CREATE TABLE IF NOT EXISTS comments (
     likes INTEGER DEFAULT 0,
     dislikes INTEGER DEFAULT 0,
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (post_id) REFERENCES posts(id) -- schema.sql
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_token TEXT UNIQUE NOT NULL,

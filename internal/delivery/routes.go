@@ -30,6 +30,7 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.HandleFunc("/post/", app.ViewPostHandler)
 	mux.HandleFunc("/post/create", app.CreatePostHandler)
 	mux.HandleFunc("/post/comment", app.CreateComment)
+	mux.HandleFunc("/post/like", app.LikeHandler)
 
 	mux.HandleFunc("/register", app.RegisterHandler)
 	mux.HandleFunc("/login", app.LoginHandler)

@@ -15,6 +15,25 @@
     <p>Author: {{ .Post.AuthorID }}</p>
     <p>Creation Date: {{ .Post.CreationDate }}</p>
 
+    <div class="PostLikeForm">
+        <span>
+            <form method="POST" action="/post/like">
+                <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                <input type="hidden" name="status" value="1">
+                <button type="submit">👍 {{.Post.Likes}}</button>
+            </form>
+        </span>
+        <span>
+            <form method="POST" action="/post/like">
+                <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                <input type="hidden" name="status" value="-1">
+                <button type="submit">👎 {{.Post.Dislikes}}</button>
+            </form>
+        </span>
+    </div>
+    
+    
+
     <div class="comment-form">
         <h2>Write a comment</h2>
         <form action="/post/comment" method="post">
@@ -29,9 +48,31 @@
             <p>{{.Content}}</p>
             <p>{{.AuthorID}}</p>
             <p>{{.CreationDate}}</p>
-        <hr>
+
+            <div class="PostLikeForm">
+                <span>
+                    <form method="POST" action="/post/like">
+                        <input type="hidden" name="comment_id" value="{{.ID}}">
+                        <input type="hidden" name="status" value="1">
+                        <button type="submit">👍 {{.Likes}}</button>
+                    </form>
+                </span>
+                <span>
+                    <form method="POST" action="/post/like">
+                        <input type="hidden" name="comment_id" value="{{.ID}}">
+                        <input type="hidden" name="status" value="-1">
+                        <button type="submit">👎 {{.Dislikes}}</button>
+                    </form>
+                </span>
+            </div>
+            
+            <hr>
         {{ end }}
     </div>
+    
+    </div>
+
+
 
 
 
