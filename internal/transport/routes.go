@@ -28,13 +28,17 @@ func Routes(l *logger.Logger, db *sqlite.Storage, tc *template.TemplateCache) ht
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	mux.HandleFunc("/", app.HomeHandler)
-
 	mux.HandleFunc("/post/", app.ViewPostHandler)
 	mux.HandleFunc("/post/create", app.CreatePostHandler)
 	mux.HandleFunc("/post/comment", app.CreateComment)
 
 	mux.HandleFunc("/register", app.RegisterHandler)
 	mux.HandleFunc("/login", app.LoginHandler)
+
+	mux.HandleFunc("/post/like", app.LikePostHandler)
+	mux.HandleFunc("/post/dislike", app.DislikePostHandler)
+	mux.HandleFunc("/comment/like", app.LikeCommentHandler)
+	mux.HandleFunc("/comment/dislike", app.DislikeCommentHandler)
 
 	return app.SessionMiddleware(mux)
 }

@@ -78,7 +78,6 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
-	// Проверяем, что метод запроса GET
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -97,6 +96,25 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	likes, dislikes, err := app.storage.GetLikesAndDislikesForPost(id)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		return
+	}
+
+	postData.Post.Likes = likes
+	postData.Post.Dislikes = dislikes
+
+	for i := range postData.Comment {
+		commentLikes, commentDislikes, err := app.storage.GetLikesAndDislikesForComment(postData.Comment[i].ID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			return
+		}
+		postData.Comment[i].Likes = commentLikes
+		postData.Comment[i].Dislikes = commentDislikes
+	}
+
 	template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
 }
 
@@ -111,9 +129,6 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var comment sqlite.Comment
-
-	// Получаем ID поста из формы
 	postIDStr := r.Form.Get("post_id")
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
@@ -121,13 +136,17 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comment.PostID = postID
-	comment.Content = r.Form.Get("content")
-
-	// TODO author comment id
+	comment := sqlite.Comment{
+		PostID:  postID,
+		Content: r.Form.Get("content"),
+		// Set the AuthorID based on session or context
+		// AuthorID: ...
+	}
 
 	err = app.storage.CreateComment(comment)
 	if err != nil {
+		app.logger.ErrorLog.Println("Failed to create comment:", err)
+		http.Error(w, "Failed to create comment", http.StatusInternalServerError)
 		return
 	}
 
@@ -220,4 +239,163 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Перенаправляем пользователя на домашнюю страницу
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// //// likes and dislikes
+func (app *application) LikePostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	postIDStr := r.FormValue("post_id")
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	userID := r.Context().Value("userID").(int)
+
+	hasLiked, err := app.storage.HasLikedPost(userID, postID)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if hasLiked {
+		err = app.storage.RemoveLike(userID, postID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		hasDisliked, err := app.storage.HasDislikedPost(userID, postID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if hasDisliked {
+			err = app.storage.RemoveDislike(userID, postID)
+			if err != nil {
+				app.logger.ErrorLog.Println(err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		}
+		err = app.storage.LikePost(userID, postID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	http.Redirect(w, r, "/post/"+postIDStr, http.StatusSeeOther)
+}
+
+func (app *application) DislikePostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	postIDStr := r.FormValue("post_id")
+	postID, err := strconv.Atoi(postIDStr)
+	if err != nil {
+		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		return
+	}
+
+	userID := r.Context().Value("userID").(int)
+
+	hasDisliked, err := app.storage.HasDislikedPost(userID, postID)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if hasDisliked {
+		err = app.storage.RemoveDislike(userID, postID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		hasLiked, err := app.storage.HasLikedPost(userID, postID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if hasLiked {
+			err = app.storage.RemoveLike(userID, postID)
+			if err != nil {
+				app.logger.ErrorLog.Println(err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		}
+		err = app.storage.DislikePost(userID, postID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	http.Redirect(w, r, "/post/"+postIDStr, http.StatusSeeOther)
+}
+
+func (app *application) LikeCommentHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	commentIDStr := r.FormValue("comment_id")
+	commentID, err := strconv.Atoi(commentIDStr)
+	if err != nil {
+		http.Error(w, "Invalid comment ID", http.StatusBadRequest)
+		return
+	}
+
+	userID := r.Context().Value("userID").(int)
+	err = app.storage.LikeComment(userID, commentID)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
+}
+
+func (app *application) DislikeCommentHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	commentIDStr := r.FormValue("comment_id")
+	commentID, err := strconv.Atoi(commentIDStr)
+	if err != nil {
+		http.Error(w, "Invalid comment ID", http.StatusBadRequest)
+		return
+	}
+
+	userID := r.Context().Value("userID").(int)
+	err = app.storage.DislikeComment(userID, commentID)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 }

@@ -5,19 +5,21 @@ import (
 	"text/template"
 )
 
-func RenderTemplate(w http.ResponseWriter, tc *TemplateCache, tmpl string, data interface{}) {
+// RenderTemplate renders a template using the TemplateCache.
+func RenderTemplate(w http.ResponseWriter, tc *TemplateCache, tmpl string, data interface{}) error {
 	t, ok := tc.Get(tmpl)
 	if !ok {
 		var err error
 		t, err = template.ParseFiles(tmpl)
 		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-			return
+			return err // Return error to the caller
 		}
 		tc.Set(tmpl, t)
 	}
+
 	err := t.Execute(w, data)
 	if err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return err // Return error to the caller
 	}
+	return nil
 }

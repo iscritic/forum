@@ -17,6 +17,8 @@ type Post struct {
 	AuthorID     int
 	Category     string
 	CreationDate time.Time
+	Likes        int
+	Dislikes     int
 }
 
 type Comment struct {
@@ -25,11 +27,15 @@ type Comment struct {
 	Content      string
 	AuthorID     int
 	CreationDate time.Time
+	Likes        int
+	Dislikes     int
 }
 
 type PostData struct {
-	Post    Post
-	Comment []*Comment
+	Post     Post
+	Comment  []*Comment
+	Likes    int
+	Dislikes int
 }
 
 type User struct {
@@ -103,6 +109,26 @@ var queries = []string{
     expires_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
 )`,
+	`CREATE TABLE IF NOT EXISTS likes (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL,
+	post_id INTEGER,
+	comment_id INTEGER,
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (post_id) REFERENCES posts(id),
+	FOREIGN KEY (comment_id) REFERENCES comments(id),
+	UNIQUE(user_id, post_id, comment_id)
+)`,
+	`CREATE TABLE IF NOT EXISTS dislikes (
+	id INTEGER PRIMARY KEY AUTOINCREMENT,
+	user_id INTEGER NOT NULL,
+	post_id INTEGER,
+	comment_id INTEGER,
+	FOREIGN KEY (user_id) REFERENCES users(id),
+	FOREIGN KEY (post_id) REFERENCES posts(id),
+	FOREIGN KEY (comment_id) REFERENCES comments(id),
+	UNIQUE(user_id, post_id, comment_id)
+)`,
 }
 
 func New(path string) (*Storage, error) {
@@ -139,18 +165,23 @@ func (Storage *Storage) CreatePost(post Post) (int, error) {
 	return int(lastID), nil
 }
 
-func (Storage *Storage) GetPostByID(id int) (*Post, error) {
-	// Предполагается, что у вас есть поле DB типа *sql.DB в вашей структуре Application
-	query := "SELECT id, title, content,  creation_date FROM posts WHERE id = ?"
-	row := Storage.db.QueryRow(query, id)
+func (storage *Storage) GetPostByID(id int) (*Post, error) {
+	query := `
+        SELECT 
+            p.id, p.title, p.content, p.creation_date,
+            (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS likes,
+            (SELECT COUNT(*) FROM dislikes WHERE post_id = p.id) AS dislikes
+        FROM posts p
+        WHERE p.id = ?`
+	row := storage.db.QueryRow(query, id)
 
 	post := &Post{}
-	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate)
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate, &post.Likes, &post.Dislikes)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil // Пост не найден
+			return nil, nil // Post not found
 		}
-		return nil, err // Произошла ошибка при выполнении запроса
+		return nil, err // Error occurred
 	}
 
 	return post, nil
@@ -201,17 +232,23 @@ func (Storage *Storage) CreateComment(comment Comment) error {
 }
 
 func (s *Storage) GetAllComments(postID int) ([]*Comment, error) {
-	rows, err := s.db.Query("SELECT id, content, creation_date FROM comments WHERE post_id = ? ORDER BY id DESC", postID)
+	rows, err := s.db.Query(`
+        SELECT 
+            c.id, c.content, c.creation_date,
+            (SELECT COUNT(*) FROM likes WHERE comment_id = c.id) AS likes,
+            (SELECT COUNT(*) FROM dislikes WHERE comment_id = c.id) AS dislikes
+        FROM comments c
+        WHERE c.post_id = ? 
+        ORDER BY c.id DESC`, postID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
 	var comments []*Comment
-
 	for rows.Next() {
 		var comment Comment
-		if err := rows.Scan(&comment.ID, &comment.Content, &comment.CreationDate); err != nil {
+		if err := rows.Scan(&comment.ID, &comment.Content, &comment.CreationDate, &comment.Likes, &comment.Dislikes); err != nil {
 			return nil, err
 		}
 		comments = append(comments, &comment)
@@ -296,4 +333,98 @@ func (storage *Storage) GetSessionByToken(token string) (*Session, error) {
 func (storage *Storage) DeleteSession(token string) error {
 	_, err := storage.db.Exec(`DELETE FROM sessions WHERE session_token = ?`, token)
 	return err
+}
+
+func (storage *Storage) LikePost(userID, postID int) error {
+	_, err := storage.db.Exec(`
+        INSERT INTO likes (user_id, post_id)
+        VALUES (?, ?)
+        ON CONFLICT(user_id, post_id, comment_id) DO NOTHING`, userID, postID, nil)
+	return err
+}
+
+func (storage *Storage) LikeComment(userID, commentID int) error {
+	_, err := storage.db.Exec(`
+        INSERT INTO likes (user_id, comment_id)
+        VALUES (?, ?)
+        ON CONFLICT(user_id, post_id, comment_id) DO NOTHING`, userID, commentID, nil)
+	return err
+}
+
+func (storage *Storage) DislikePost(userID, postID int) error {
+	_, err := storage.db.Exec(`
+        INSERT INTO dislikes (user_id, post_id)
+        VALUES (?, ?)
+        ON CONFLICT(user_id, post_id, comment_id) DO NOTHING`, userID, postID, nil)
+	return err
+}
+
+func (storage *Storage) DislikeComment(userID, commentID int) error {
+	_, err := storage.db.Exec(`
+        INSERT INTO dislikes (user_id, comment_id)
+        VALUES (?, ?)
+        ON CONFLICT(user_id, post_id, comment_id) DO NOTHING`, userID, commentID, nil)
+	return err
+}
+
+func (storage *Storage) HasLikedPost(userID, postID int) (bool, error) {
+	var count int
+	err := storage.db.QueryRow(`
+        SELECT COUNT(*) FROM likes WHERE user_id = ? AND post_id = ?`, userID, postID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (storage *Storage) HasDislikedPost(userID, postID int) (bool, error) {
+	var count int
+	err := storage.db.QueryRow(`
+        SELECT COUNT(*) FROM dislikes WHERE user_id = ? AND post_id = ?`, userID, postID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (storage *Storage) RemoveLike(userID, postID int) error {
+	_, err := storage.db.Exec(`DELETE FROM likes WHERE user_id = ? AND post_id = ?`, userID, postID)
+	return err
+}
+
+func (storage *Storage) RemoveDislike(userID, postID int) error {
+	_, err := storage.db.Exec(`DELETE FROM dislikes WHERE user_id = ? AND post_id = ?`, userID, postID)
+	return err
+}
+
+func (storage *Storage) UnlikeComment(userID, commentID int) error {
+	_, err := storage.db.Exec(`
+        DELETE FROM likes 
+        WHERE user_id = ? AND comment_id = ?`, userID, commentID)
+	return err
+}
+
+func (storage *Storage) UndislikeComment(userID, commentID int) error {
+	_, err := storage.db.Exec(`
+        DELETE FROM dislikes 
+        WHERE user_id = ? AND comment_id = ?`, userID, commentID)
+	return err
+}
+
+func (storage *Storage) GetLikesAndDislikesForPost(postID int) (likes, dislikes int, err error) {
+	err = storage.db.QueryRow(`
+        SELECT 
+            (SELECT COUNT(*) FROM likes WHERE post_id = ?) AS likes, 
+            (SELECT COUNT(*) FROM dislikes WHERE post_id = ?) AS dislikes`,
+		postID, postID).Scan(&likes, &dislikes)
+	return
+}
+
+func (storage *Storage) GetLikesAndDislikesForComment(commentID int) (likes, dislikes int, err error) {
+	err = storage.db.QueryRow(`
+        SELECT 
+            (SELECT COUNT(*) FROM likes WHERE comment_id = ?) AS likes, 
+            (SELECT COUNT(*) FROM dislikes WHERE comment_id = ?) AS dislikes`,
+		commentID, commentID).Scan(&likes, &dislikes)
+	return
 }

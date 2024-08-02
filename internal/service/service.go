@@ -15,9 +15,6 @@ func FetchPosts(db *sqlite.Storage) ([]*sqlite.Post, error) {
 }
 
 func GetPostData(db *sqlite.Storage, id int) (sqlite.PostData, error) {
-
-	//TODO бизнес логика комментариев, лайки
-
 	var postData sqlite.PostData
 
 	post, err := db.GetPostByID(id)
@@ -30,9 +27,24 @@ func GetPostData(db *sqlite.Storage, id int) (sqlite.PostData, error) {
 		return postData, err
 	}
 
+	likes, dislikes, err := db.GetLikesAndDislikesForPost(id)
+	if err != nil {
+		return postData, err
+	}
+
+	// Fetch like and dislike counts for each comment
+	for i := range comments {
+		comments[i].Likes, comments[i].Dislikes, err = db.GetLikesAndDislikesForComment(comments[i].ID)
+		if err != nil {
+			return postData, err
+		}
+	}
+
 	postData = sqlite.PostData{
-		Post:    *post,
+		Post:     *post,
 		Comment: comments,
+		Likes:    likes,
+		Dislikes: dislikes,
 	}
 
 	return postData, nil
