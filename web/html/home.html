@@ -36,6 +36,23 @@
                         <h2>{{ .Title }}</h2>
                         <p class="date">Creation Date: {{ .CreationDate }}</p>
                         <p>{{ .Content }}</p>
+
+                        <div class="PostLikeForm">
+                            <span>
+                                <form method="POST" action="/post/like">
+                                    <input type="hidden" name="post_id" value="{{.ID}}">
+                                    <input type="hidden" name="status" value="1">
+                                    <button type="submit">👍 {{.Likes}}</button>
+                                </form>
+                            </span>
+                            <span>
+                                <form method="POST" action="/post/like">
+                                    <input type="hidden" name="post_id" value="{{.ID}}">
+                                    <input type="hidden" name="status" value="-1">
+                                    <button type="submit">👎 {{.Dislikes}}</button>
+                                </form>
+                            </span>
+                        </div>
                     </div>
                 </a>
                 {{ end }}

@@ -23,10 +23,10 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// WE GET ID OF USER
-	userID := r.Context().Value("userID")
+	// // WE GET ID OF USER
+	// userID := r.Context().Value("userID")
 
-	fmt.Println("Your ID is ", userID)
+	// fmt.Println("Your ID is ", userID)
 
 	posts, err := service.FetchPosts(app.storage)
 	if err != nil {
@@ -39,6 +39,7 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++==")
 	switch r.Method {
 
 	case http.MethodGet:
@@ -67,8 +68,11 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		post.Title = title
 		post.Content = content
 		post.CreationDate = time.Now()
-		post.AuthorID = 69
-		post.ID = 1
+
+		//  r.Context().Value("userID")
+		post.AuthorID = r.Context().Value("userID").(int)
+
+		fmt.Println(post.AuthorID)
 
 		lastID, err := app.storage.CreatePost(post)
 		if err != nil {
@@ -82,6 +86,8 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 }
+
+
 
 func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, что метод запроса GET
@@ -232,4 +238,18 @@ func (app *application) LikeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) SortedByCategory(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Category page")
+}
+
+func (app *application) CreatedPostsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "My created posts page...")
+}
+
+func (app *application) LikedPostsHanlers(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "I liked those posts...")
+}
+
+func getSesion(r *http.Request) string {
+	cookie, _ := r.Cookie("session_token")
+
+	return cookie.Value
 }
