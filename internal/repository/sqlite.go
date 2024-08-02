@@ -16,6 +16,8 @@ type Post struct {
 	Content      string
 	AuthorID     int
 	Category     string
+	Likes        int
+	Dislikes     int
 	CreationDate time.Time
 }
 
@@ -24,6 +26,8 @@ type Comment struct {
 	PostID       int
 	Content      string
 	AuthorID     int
+	Likes        int
+	Dislikes     int
 	CreationDate time.Time
 }
 
@@ -52,6 +56,14 @@ type Session struct {
 	UserID       int
 	CreatedAt    time.Time
 	ExpiredAt    time.Time
+}
+
+type Like struct {
+	ID        int
+	PostID    int
+	CommentID int
+	UserID    int
+	Grade     int
 }
 
 type Storage struct {
