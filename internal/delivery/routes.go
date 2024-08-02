@@ -4,6 +4,7 @@ import (
 	"forum/internal/helpers/template"
 	"forum/internal/repository"
 	"forum/pkg/logger"
+	"forum/pkg/mw"
 	"net/http"
 )
 
@@ -26,14 +27,21 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	mux.HandleFunc("/", app.HomeHandler)
-
 	mux.HandleFunc("/post/", app.ViewPostHandler)
-	mux.HandleFunc("/post/create", app.CreatePostHandler)
-	mux.HandleFunc("/post/comment", app.CreateComment)
-	mux.HandleFunc("/post/like", app.LikeHandler)
+	mux.HandleFunc("/category/", app.SortedByCategory)
 
 	mux.HandleFunc("/register", app.RegisterHandler)
 	mux.HandleFunc("/login", app.LoginHandler)
 
-	return app.SessionMiddleware(mux)
+	// require authentification
+	protected := mw.New(app.requiredAuthentication)
+
+	mux.Handle("/post/create", protected.ThenFunc(app.CreatePostHandler))
+	mux.Handle("/post/comment", protected.ThenFunc(app.CreateComment))
+	mux.Handle("/post/like", protected.ThenFunc(app.LikeHandler))
+
+	// standard midllewares for all routes
+	standard := mw.New(app.logRequest, app.recoverPanic, secureHeaders)
+
+	return standard.Then(mux)
 }

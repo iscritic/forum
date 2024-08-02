@@ -200,8 +200,6 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.logger.ErrorLog.Println("we are here")
-
 	// Проверяем соответствие пароля
 	if user.Password != password {
 		// Обработка ошибки
@@ -230,4 +228,8 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) LikeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "You liked/disliked this page")
+}
+
+func (app *application) SortedByCategory(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Category page")
 }
