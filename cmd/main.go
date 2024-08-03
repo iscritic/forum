@@ -13,6 +13,9 @@ import (
 )
 
 func main() {
+
+	//TEST
+
 	lg := logger.NewLogger()
 
 	cfg := config.MustLoad()
