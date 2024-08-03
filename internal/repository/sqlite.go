@@ -15,7 +15,7 @@ type Post struct {
 	Title        string
 	Content      string
 	AuthorID     int
-	Category     string
+	CategoryID   int
 	Likes        int
 	Dislikes     int
 	CreationDate time.Time
@@ -94,8 +94,8 @@ func New(path string) (*Storage, error) {
 }
 
 func (Storage *Storage) CreatePost(post Post) (int, error) {
-	res, err := Storage.db.Exec(`INSERT INTO posts (title, content) VALUES (?, ?)`,
-		post.Title, post.Content)
+	res, err := Storage.db.Exec(`INSERT INTO posts (title, content, author_id, category_id) VALUES (?, ?, ?, ?)`,
+		post.Title, post.Content, post.AuthorID, post.CategoryID)
 	if err != nil {
 		return 0, err
 	}
@@ -109,11 +109,11 @@ func (Storage *Storage) CreatePost(post Post) (int, error) {
 
 func (Storage *Storage) GetPostByID(id int) (*Post, error) {
 	// Предполагается, что у вас есть поле DB типа *sql.DB в вашей структуре Application
-	query := "SELECT id, title, content,  creation_date FROM posts WHERE id = ?"
+	query := "SELECT id, title, content, author_id, category_id, creation_date FROM posts WHERE id = ?"
 	row := Storage.db.QueryRow(query, id)
 
 	post := &Post{}
-	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate)
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryID, &post.CreationDate)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil // Пост не найден
@@ -127,7 +127,7 @@ func (Storage *Storage) GetPostByID(id int) (*Post, error) {
 func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 	// TODO authors ids
 
-	rows, err := Storage.db.Query("SELECT  id, title, content, creation_date FROM posts ORDER BY id DESC ")
+	rows, err := Storage.db.Query("SELECT  id, title, content, author_id, category_id, creation_date FROM posts ORDER BY id DESC ")
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 		// Создаем новую переменную для хранения данных поста на каждой итерации
 		var post Post
 		// Сканируем результаты запроса в переменные структуры Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryID, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}

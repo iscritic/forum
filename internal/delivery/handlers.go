@@ -71,6 +71,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 
 		//  r.Context().Value("userID")
 		post.AuthorID = r.Context().Value("userID").(int)
+		post.CategoryID = 9
 
 		fmt.Println(post.AuthorID)
 
@@ -86,8 +87,6 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 }
-
-
 
 func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, что метод запроса GET
@@ -108,6 +107,8 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		app.logger.ErrorLog.Println(err)
 		return
 	}
+
+	fmt.Println("postData", postData)
 
 	template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
 }
@@ -237,7 +238,7 @@ func (app *application) LikeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) SortedByCategory(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Category page")
+	fmt.Fprintf(w, "CategoryID page")
 }
 
 func (app *application) CreatedPostsHandler(w http.ResponseWriter, r *http.Request) {
