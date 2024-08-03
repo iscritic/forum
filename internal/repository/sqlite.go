@@ -15,7 +15,7 @@ type Post struct {
 	Title        string
 	Content      string
 	AuthorID     int
-	Category     string
+	CategoryID   int
 	Likes        int
 	Dislikes     int
 	CreationDate time.Time
@@ -94,8 +94,8 @@ func New(path string) (*Storage, error) {
 }
 
 func (Storage *Storage) CreatePost(post Post) (int, error) {
-	res, err := Storage.db.Exec(`INSERT INTO posts (title, content) VALUES (?, ?)`,
-		post.Title, post.Content)
+	res, err := Storage.db.Exec(`INSERT INTO posts (title, content, author_id, category_id) VALUES (?, ?, ?, ?)`,
+		post.Title, post.Content, post.AuthorID, post.CategoryID)
 	if err != nil {
 		return 0, err
 	}

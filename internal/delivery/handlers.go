@@ -68,8 +68,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		post.Title = title
 		post.Content = content
 		post.CreationDate = time.Now()
-
-		//  r.Context().Value("userID")
+		post.CategoryID = 1 //  r.Context().Value("userID")
 		post.AuthorID = r.Context().Value("userID").(int)
 
 		fmt.Println(post.AuthorID)
@@ -86,8 +85,6 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 }
-
-
 
 func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 	// Проверяем, что метод запроса GET
