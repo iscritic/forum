@@ -33,7 +33,7 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.HandleFunc("/register", app.RegisterHandler)
 	mux.HandleFunc("/login", app.LoginHandler)
 
-	// require authentification
+	// require authentication
 	protected := mw.New(app.requiredAuthentication)
 
 	mux.Handle("/post/create", protected.ThenFunc(app.CreatePostHandler))

@@ -2,16 +2,21 @@ package service
 
 import "forum/internal/repository"
 
-func FetchPosts(db *repository.Storage) ([]*repository.Post, error) {
+func FetchPosts(db *repository.Storage) ([]repository.PostRelatedData, error) {
 
 	//TODO: бизнес логика, пагинация страниц
 
-	posts, err := db.GetAllPosts()
+	data, err := db.GetPostsRelatedData()
 	if err != nil {
-		return posts, err
+		return nil, err
 	}
 
-	return posts, nil
+	//posts, err := db.GetAllPosts()
+	//if err != nil {
+	//	return posts, err
+	//}
+
+	return data, nil
 }
 
 func GetPostData(db *repository.Storage, id int) (repository.PostData, error) {

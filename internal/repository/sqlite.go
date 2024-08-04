@@ -66,6 +66,13 @@ type Like struct {
 	Grade     int
 }
 
+type PostRelatedData struct {
+	Post     Post
+	Comment  []Comment
+	User     User
+	Category Category
+}
+
 type Storage struct {
 	db *sql.DB
 }
@@ -264,4 +271,149 @@ func (storage *Storage) GetSessionByToken(token string) (*Session, error) {
 func (storage *Storage) DeleteSession(token string) error {
 	_, err := storage.db.Exec(`DELETE FROM sessions WHERE session_token = ?`, token)
 	return err
+}
+
+func (storage *Storage) GetCountOfLikes(postID int) (int, error) {
+	var count int
+
+	return count, nil
+}
+
+func (storage *Storage) GetCountOfDislikes(postID int) (int, error) {
+	var count int
+
+	return count, nil
+}
+
+func (storage *Storage) GetCategoryById(categoryID int) (string, error) {
+	var category string
+
+	return category, nil
+}
+
+func (s *Storage) GetPostRelatedData(postID int) (*PostRelatedData, error) {
+	// Получение поста по ID
+	post, err := s.GetPostByID(postID)
+	if err != nil {
+		return nil, err
+	}
+	if post == nil {
+		return nil, errors.New("post not found")
+	}
+
+	// Получение связанных комментариев
+	comments, err := s.GetCommentsByPostID(postID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Получение информации об авторе поста
+	author, err := s.GetUserByID(post.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Получение информации о категории
+	categoryName, err := s.GetCategoryById(post.CategoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Заполнение и возврат структуры PostRelatedData
+	postRelatedData := &PostRelatedData{
+		Post:     *post,
+		Comment:  comments,
+		User:     *author,
+		Category: Category{ID: post.CategoryID, Name: categoryName},
+	}
+
+	return postRelatedData, nil
+}
+
+func (s *Storage) GetCommentsByPostID(postID int) ([]Comment, error) {
+	rows, err := s.db.Query(`
+        SELECT id, post_id, content, author_id, likes, dislikes, creation_date 
+        FROM comments 
+        WHERE post_id = ? 
+        ORDER BY creation_date DESC`, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []*Comment
+
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(
+			&comment.ID,
+			&comment.PostID,
+			&comment.Content,
+			&comment.AuthorID,
+			&comment.Likes,
+			&comment.Dislikes,
+			&comment.CreationDate,
+		)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, &comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Преобразование [] *Comment в []Comment
+	result := make([]Comment, len(comments))
+	for i, c := range comments {
+		result[i] = *c
+	}
+
+	return result, nil
+}
+
+func (s *Storage) GetPostsRelatedData() ([]PostRelatedData, error) {
+	// Получение всех постов
+	posts, err := s.GetAllPosts()
+	if err != nil {
+		return nil, err
+	}
+
+	// Слайс для хранения всех связанных данных
+	var postsRelatedData []PostRelatedData
+
+	// Итерация по каждому посту для получения связанных данных
+	for _, post := range posts {
+		// Получение связанных комментариев
+		comments, err := s.GetCommentsByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации об авторе поста
+		author, err := s.GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации о категории
+		categoryName, err := s.GetCategoryById(post.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Заполнение структуры PostRelatedData для текущего поста
+		postRelatedData := PostRelatedData{
+			Post:     *post,
+			Comment:  comments,
+			User:     *author,
+			Category: Category{ID: post.CategoryID, Name: categoryName},
+		}
+
+		// Добавление в слайс
+		postsRelatedData = append(postsRelatedData, postRelatedData)
+	}
+
+	return postsRelatedData, nil
 }
