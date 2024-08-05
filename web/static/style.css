@@ -78,3 +78,25 @@ footer{
     text-align: center;
     padding: 10px 0;
 }
+
+.comment_card{
+    background-color: rgba(0, 0, 0, 0.40);
+    border: solid 1px;
+    border-radius: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    width: 100%;
+    /* max-width: 1000px; */
+    box-sizing: border-box;
+}
+
+.comment-form{
+    background-color: rgba(0, 0, 0, 0.40);
+    border: solid 1px;
+    border-radius: 30px;
+    margin-bottom: 30px;
+    padding: 20px;
+    width: 100%;
+    /* max-width: 1000px; */
+    box-sizing: border-box;
+}

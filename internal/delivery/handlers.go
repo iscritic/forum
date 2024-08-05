@@ -39,7 +39,6 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++==")
 	switch r.Method {
 
 	case http.MethodGet:
@@ -107,8 +106,6 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		app.logger.ErrorLog.Println(err)
 		return
 	}
-
-	fmt.Println("postData", postData)
 
 	template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
 }
