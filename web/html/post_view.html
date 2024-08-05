@@ -4,77 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/style.css">
-    <title>Post</title>
-
+    <title>{{ .Post.Title }}</title>
 </head>
 <body>
 <div class="wrapper">
-
     <h1>{{ .Post.Title }}</h1>
     <p>{{ .Post.Content }}</p>
-    <p>Author: {{ .Post.AuthorID }}</p>
+    <p>Author: {{ .User.Username }}</p>
     <p>Creation Date: {{ .Post.CreationDate }}</p>
 
     <div class="PostLikeForm">
+            <span>
+                <form method="POST" action="/post/like">
+                    <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+                    <input type="hidden" name="status" value="1">
+                    <button type="submit">👍 {{ .Post.Likes }}</button>
+                </form>
+            </span>
         <span>
-            <form method="POST" action="/post/like">
-                <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                <input type="hidden" name="status" value="1">
-                <button type="submit">👍 {{.Post.Likes}}</button>
-            </form>
-        </span>
-        <span>
-            <form method="POST" action="/post/like">
-                <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                <input type="hidden" name="status" value="-1">
-                <button type="submit">👎 {{.Post.Dislikes}}</button>
-            </form>
-        </span>
+                <form method="POST" action="/post/like">
+                    <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+                    <input type="hidden" name="status" value="-1">
+                    <button type="submit">👎 {{ .Post.Dislikes }}</button>
+                </form>
+            </span>
     </div>
-    
-    
 
     <div class="comment-form">
         <h2>Write a comment</h2>
         <form action="/post/comment" method="post">
             <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-            <textarea name="content" rows="4" placeholder=""Write your comment here></textarea><br>
+            <textarea name="content" rows="4" placeholder="Write your comment here" required></textarea><br>
             <button type="submit">Submit</button>
         </form>
     </div>
 
-    <div class="comment-section">
-        {{ range .Comment }}
-            <p>{{.Content}}</p>
-            <p>{{.AuthorID}}</p>
-            <p>{{.CreationDate}}</p>
+    {{ range .CommentR }}
+        {{ .User.Username }}
+    <br>
+        {{ .Comment.Content}}
+    <br>
+        {{ .Comment.CreationDate.Format "January 2, 2006" }}
+    <br>
+    <br>
 
-            <div class="CommentLikeForm">
-                <span>
-                    <form method="POST" action="/post/like">
-                        <input type="hidden" name="comment_id" value="{{.ID}}">
-                        <input type="hidden" name="status" value="1">
-                        <button type="submit">👍 {{.Likes}}</button>
-                    </form>
-                </span>
-                <span>
-                    <form method="POST" action="/post/like">
-                        <input type="hidden" name="comment_id" value="{{.ID}}">
-                        <input type="hidden" name="status" value="-1">
-                        <button type="submit">👎 {{.Dislikes}}</button>
-                    </form>
-                </span>
-            </div>
-            
-            <hr>
+    {{ end }}
+
+
+    <div class="comment-section">
+        <h2>Comments</h2>
+        {{ if .Comments }}
+        <ul>
+            {{ range .Comments }}
+            <li class="comment">
+                <div class="comment-header">
+                    <strong class="comment-author">{{ .User.Username }}</strong>
+                    <span class="comment-date">{{ .Comment.CreationDate.Format "January 2, 2006" }}</span>
+                </div>
+                <p class="comment-content">{{ .Comment.Content }}</p>
+                <div class="comment-likes">
+                    <span class="comment-likes-up">👍 {{ .Comment.Likes }}</span>
+                    <span class="comment-likes-down">👎 {{ .Comment.Dislikes }}</span>
+                </div>
+            </li>
+            {{ end }}
+        </ul>
+        {{ else }}
+        <p>No comments yet.</p>
         {{ end }}
     </div>
-    
-    </div>
-
-
-
-
 
 </div>
 </body>

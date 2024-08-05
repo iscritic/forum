@@ -137,6 +137,8 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	comment.PostID = postID
 	comment.Content = r.Form.Get("content")
 
+	comment.AuthorID = r.Context().Value("userID").(int)
+
 	// TODO author comment id
 
 	err = app.storage.CreateComment(comment)

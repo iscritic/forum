@@ -19,28 +19,14 @@ func FetchPosts(db *repository.Storage) ([]repository.PostRelatedData, error) {
 	return data, nil
 }
 
-func GetPostData(db *repository.Storage, id int) (repository.PostData, error) {
+func GetPostData(db *repository.Storage, id int) (repository.PostRelatedData, error) {
 
-	//TODO бизнес логика комментариев, лайки
-
-	var postData repository.PostData
-
-	post, err := db.GetPostByID(id)
+	post, err := db.GetPostRelatedDataByID(id)
 	if err != nil {
-		return postData, err
+		return repository.PostRelatedData{}, err
 	}
 
-	comments, err := db.GetAllComments(id)
-	if err != nil {
-		return postData, err
-	}
-
-	postData = repository.PostData{
-		Post:    *post,
-		Comment: comments,
-	}
-
-	return postData, nil
+	return *post, nil
 }
 
 func Register(db *repository.Storage, user repository.User) error {

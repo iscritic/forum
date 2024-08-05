@@ -31,11 +31,6 @@ type Comment struct {
 	CreationDate time.Time
 }
 
-type PostData struct {
-	Post    Post
-	Comment []*Comment
-}
-
 type User struct {
 	ID           int
 	Username     string
@@ -68,9 +63,19 @@ type Like struct {
 
 type PostRelatedData struct {
 	Post     Post
-	Comment  []Comment
+	CommentR []CommentRelatedData
 	User     User
 	Category Category
+}
+
+type CommentRelatedData struct {
+	Comment Comment
+	User    User
+}
+
+type PostData struct {
+	Post     PostRelatedData
+	Comments []*CommentRelatedData
 }
 
 type Storage struct {
@@ -131,6 +136,45 @@ func (Storage *Storage) GetPostByID(id int) (*Post, error) {
 	return post, nil
 }
 
+func (s *Storage) GetPostRelatedData(postID int) (*PostRelatedData, error) {
+	// Получение поста по ID
+	post, err := s.GetPostByID(postID)
+	if err != nil {
+		return nil, err
+	}
+	if post == nil {
+		return nil, errors.New("post not found")
+	}
+
+	// Получение связанных комментариев
+	comments, err := s.GetCommentsRelatedData(postID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Получение информации об авторе поста
+	author, err := s.GetUserByID(post.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Получение информации о категории
+	categoryName, err := s.GetCategoryById(post.CategoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Заполнение и возврат структуры PostRelatedData
+	postRelatedData := &PostRelatedData{
+		Post:     *post,
+		CommentR: comments,
+		User:     *author,
+		Category: Category{ID: post.CategoryID, Name: categoryName},
+	}
+
+	return postRelatedData, nil
+}
+
 func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 	// TODO authors ids
 
@@ -166,8 +210,8 @@ func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 }
 
 func (Storage *Storage) CreateComment(comment Comment) error {
-	_, err := Storage.db.Exec(`INSERT INTO comments (post_id, content) VALUES (?, ? )`,
-		comment.PostID, comment.Content)
+	_, err := Storage.db.Exec(`INSERT INTO comments (post_id, content, author_id) VALUES (?, ?, ? )`,
+		comment.PostID, comment.Content, comment.AuthorID)
 	if err != nil {
 		return err
 	}
@@ -197,6 +241,74 @@ func (s *Storage) GetAllComments(postID int) ([]*Comment, error) {
 	}
 
 	return comments, nil
+}
+
+func (s *Storage) GetCommentsRelatedData(postID int) ([]CommentRelatedData, error) {
+	// Получаем все комментарии
+	rows, err := s.db.Query(`
+        SELECT id, post_id, content, author_id, likes, dislikes, creation_date 
+        FROM comments 
+        WHERE post_id = ? 
+        ORDER BY creation_date DESC`, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		if err := rows.Scan(
+			&comment.ID,
+			&comment.PostID,
+			&comment.Content,
+			&comment.AuthorID,
+			&comment.Likes,
+			&comment.Dislikes,
+			&comment.CreationDate,
+		); err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Получаем уникальные ID авторов
+	authorIDs := make(map[int]struct{})
+	for _, comment := range comments {
+		authorIDs[comment.AuthorID] = struct{}{}
+	}
+
+	// Получаем информацию о пользователях
+	var authors []User
+	for authorID := range authorIDs {
+		author, err := s.GetUserByID(authorID)
+		if err != nil {
+			return nil, err
+		}
+		authors = append(authors, *author)
+	}
+
+	// Создаем отображение ID авторов для быстрого доступа
+	authorMap := make(map[int]User)
+	for _, author := range authors {
+		authorMap[author.ID] = author
+	}
+
+	// Создаем результат
+	var commentsRelatedData []CommentRelatedData
+	for _, comment := range comments {
+		user := authorMap[comment.AuthorID]
+		commentsRelatedData = append(commentsRelatedData, CommentRelatedData{
+			Comment: comment,
+			User:    user,
+		})
+	}
+
+	return commentsRelatedData, nil
 }
 
 func (storage *Storage) CreateUser(user User) error {
@@ -291,38 +403,38 @@ func (storage *Storage) GetCategoryById(categoryID int) (string, error) {
 	return category, nil
 }
 
-func (s *Storage) GetPostRelatedData(postID int) (*PostRelatedData, error) {
-	// Получение поста по ID
+func (s *Storage) GetPostRelatedDataByID(postID int) (*PostRelatedData, error) {
+	// 1. Fetch the post by ID
 	post, err := s.GetPostByID(postID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch post: %w", err) // Wrap the error
 	}
 	if post == nil {
 		return nil, errors.New("post not found")
 	}
 
-	// Получение связанных комментариев
-	comments, err := s.GetCommentsByPostID(postID)
+	// 2. Fetch related comments
+	comments, err := s.GetCommentsRelatedData(postID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch comments: %w", err) // Wrap the error
 	}
 
-	// Получение информации об авторе поста
+	// 3. Fetch author information
 	author, err := s.GetUserByID(post.AuthorID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch author: %w", err) // Wrap the error
 	}
 
-	// Получение информации о категории
+	// 4. Fetch category information
 	categoryName, err := s.GetCategoryById(post.CategoryID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to fetch category: %w", err) // Wrap the error
 	}
 
-	// Заполнение и возврат структуры PostRelatedData
+	// 5. Construct and return the PostRelatedData struct
 	postRelatedData := &PostRelatedData{
 		Post:     *post,
-		Comment:  comments,
+		CommentR: comments,
 		User:     *author,
 		Category: Category{ID: post.CategoryID, Name: categoryName},
 	}
@@ -386,7 +498,7 @@ func (s *Storage) GetPostsRelatedData() ([]PostRelatedData, error) {
 	// Итерация по каждому посту для получения связанных данных
 	for _, post := range posts {
 		// Получение связанных комментариев
-		comments, err := s.GetCommentsByPostID(post.ID)
+		comments, err := s.GetCommentsRelatedData(post.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -406,7 +518,7 @@ func (s *Storage) GetPostsRelatedData() ([]PostRelatedData, error) {
 		// Заполнение структуры PostRelatedData для текущего поста
 		postRelatedData := PostRelatedData{
 			Post:     *post,
-			Comment:  comments,
+			CommentR: comments,
 			User:     *author,
 			Category: Category{ID: post.CategoryID, Name: categoryName},
 		}
