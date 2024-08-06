@@ -529,3 +529,9 @@ func (s *Storage) GetPostsRelatedData() ([]PostRelatedData, error) {
 
 	return postsRelatedData, nil
 }
+
+func (s *Storage) DeleteAllSessionsForUser(userID int) error {
+	query := `DELETE FROM sessions WHERE user_id = $1`
+	_, err := s.db.Exec(query, userID)
+	return err
+}

@@ -58,7 +58,6 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		title := r.Form.Get("title")
 		content := r.Form.Get("content")
 
-		// Обработка ошибок при получении данных из формы
 		if title == "" || content == "" {
 			http.Error(w, "Tittle and content are required", http.StatusBadRequest)
 			return
@@ -88,7 +87,6 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
-	// Проверяем, что метод запроса GET
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
