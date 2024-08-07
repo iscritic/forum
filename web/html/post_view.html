@@ -16,14 +16,12 @@
         <span>
             <form method="POST" action="/post/like">
                 <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                <input type="hidden" name="status" value="1">
                 <button type="submit">❤️ {{.Post.Likes}}</button>
             </form>
         </span>
         <span>
             <form method="POST" action="/post/dislike">
                 <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                <input type="hidden" name="status" value="-1"> 
                 <button type="submit">💔 {{.Post.Dislikes}}</button>
             </form>
         </span>
@@ -40,20 +38,20 @@
     </div>
 
     <div class="comment-section">
-        {{ range .Comments }}
+        {{ range .Comment }}
             <p>{{ .Content }}</p>
             <p>Author: {{ .AuthorID }}</p>
             <p>Creation Date: {{ .CreationDate }}</p>
-            <!-- <form method="POST" action="/comment/like">
-                <input type="hidden" name="comment_id" value="{{ .ID }}">
-                <input type="hidden" name="status" value="1">
-                <button type="submit">❤️ {{ .Likes }}</button>
-            </form>
-            <form method="POST" action="/comment/dislike">
-                <input type="hidden" name="comment_id" value="{{ .ID }}">
-                <input type="hidden" name="status" value="-1">
-                <button type="submit">💔  {{ .Dislikes }}</button>
-            </form> -->
+            <div class="CommentLikeForm">
+                <form method="POST" action="/comment/like">
+                    <input type="hidden" name="comment_id" value="{{ .ID }}">
+                    <button type="submit">❤️ {{ .Likes }}</button>
+                </form>
+                <form method="POST" action="/comment/dislike">
+                    <input type="hidden" name="comment_id" value="{{ .ID }}">
+                    <button type="submit">💔 {{ .Dislikes }}</button>
+                </form>
+            </div>
             <hr>
         {{ end }}
     </div>

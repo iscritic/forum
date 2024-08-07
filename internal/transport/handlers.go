@@ -366,11 +366,42 @@ func (app *application) LikeCommentHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	userID := r.Context().Value("userID").(int)
-	err = app.storage.LikeComment(userID, commentID)
+
+	hasLiked, err := app.storage.HasLikedComment(userID, commentID)
 	if err != nil {
 		app.logger.ErrorLog.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
+	}
+
+	if hasLiked {
+		err = app.storage.UnlikeComment(userID, commentID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		hasDisliked, err := app.storage.HasDislikedComment(userID, commentID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if hasDisliked {
+			err = app.storage.UndislikeComment(userID, commentID)
+			if err != nil {
+				app.logger.ErrorLog.Println(err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		}
+		err = app.storage.LikeComment(userID, commentID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
@@ -390,11 +421,42 @@ func (app *application) DislikeCommentHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	userID := r.Context().Value("userID").(int)
-	err = app.storage.DislikeComment(userID, commentID)
+
+	hasDisliked, err := app.storage.HasDislikedComment(userID, commentID)
 	if err != nil {
 		app.logger.ErrorLog.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
+	}
+
+	if hasDisliked {
+		err = app.storage.UndislikeComment(userID, commentID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		hasLiked, err := app.storage.HasLikedComment(userID, commentID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if hasLiked {
+			err = app.storage.UnlikeComment(userID, commentID)
+			if err != nil {
+				app.logger.ErrorLog.Println(err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+		}
+		err = app.storage.DislikeComment(userID, commentID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)

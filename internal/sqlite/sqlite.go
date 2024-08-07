@@ -411,6 +411,26 @@ func (storage *Storage) UndislikeComment(userID, commentID int) error {
 	return err
 }
 
+func (storage *Storage) HasLikedComment(userID, commentID int) (bool, error) {
+	var count int
+	err := storage.db.QueryRow(`
+        SELECT COUNT(*) FROM likes WHERE user_id = ? AND comment_id = ?`, userID, commentID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func (storage *Storage) HasDislikedComment(userID, commentID int) (bool, error) {
+	var count int
+	err := storage.db.QueryRow(`
+        SELECT COUNT(*) FROM dislikes WHERE user_id = ? AND comment_id = ?`, userID, commentID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (storage *Storage) GetLikesAndDislikesForPost(postID int) (likes, dislikes int, err error) {
 	err = storage.db.QueryRow(`
         SELECT 
