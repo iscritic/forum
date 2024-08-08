@@ -57,3 +57,10 @@ CREATE TABLE IF NOT EXISTS likes (
     FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+INSERT INTO category (tag, name) VALUES
+    ('movies', 'movies'),
+    ('news', 'news'),
+    ('milye_zhivotnye', 'milye zhivotnye'),
+    ('games', 'games'),
+    ('offtop', 'offtop'),
+    ('gachi', 'gachi');

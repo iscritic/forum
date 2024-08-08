@@ -1,11 +1,12 @@
 package delivery
 
 import (
+	"net/http"
+
 	"forum/internal/helpers/template"
 	"forum/internal/repository"
 	"forum/pkg/logger"
 	"forum/pkg/mw"
-	"net/http"
 )
 
 type application struct {
@@ -28,7 +29,7 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 
 	mux.HandleFunc("/", app.HomeHandler)
 	mux.HandleFunc("/post/", app.ViewPostHandler)
-	mux.HandleFunc("/category/", app.SortedByCategory)
+	// mux.HandleFunc("/category/", app.SortedByCategory)
 
 	mux.HandleFunc("/register", app.RegisterHandler)
 	mux.HandleFunc("/login", app.LoginHandler)

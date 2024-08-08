@@ -42,6 +42,7 @@ type User struct {
 
 type Category struct {
 	ID   int
+	Tag  string
 	Name string
 }
 
@@ -529,6 +530,9 @@ func (s *Storage) GetPostsRelatedData() ([]PostRelatedData, error) {
 
 	return postsRelatedData, nil
 }
+
+// func (s *Storage) GetPostsSortedByCategory(id int) ([]PostRelatedData, error) {
+// }
 
 func (s *Storage) DeleteAllSessionsForUser(userID int) error {
 	query := `DELETE FROM sessions WHERE user_id = $1`
