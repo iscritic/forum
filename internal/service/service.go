@@ -28,6 +28,7 @@ func GetAllLikedPostsById(db *repository.Storage, id int) ([]entity.PostRelatedD
 	if err != nil {
 		return nil, err
 	}
+	// todo fix, internal
 
 	return data, nil
 }

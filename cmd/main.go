@@ -1,19 +1,19 @@
 package main
 
 import (
+	"log"
+	"net/http"
+
 	"forum/internal/config"
 	"forum/internal/delivery"
 	"forum/internal/helpers/template"
 	"forum/internal/repository"
 	"forum/pkg/logger"
-	"log"
-	"net/http"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-
 	lg := logger.NewLogger()
 
 	cfg := config.MustLoad()
