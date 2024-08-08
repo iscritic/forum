@@ -2,7 +2,6 @@ package delivery
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -246,7 +245,6 @@ func (app *application) SortedByCategory(w http.ResponseWriter, r *http.Request)
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid category id", http.StatusBadRequest)
-		log.Println("ddd", id)
 		return
 	}
 	PostsByCategory, err := service.GetPostsSortedByCategory(app.storage, id)

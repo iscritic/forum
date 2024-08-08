@@ -45,6 +45,7 @@ func GetPostsSortedByCategory(db *repository.Storage, id int) ([]repository.Post
 	if err != nil {
 		return nil, err
 	}
+	// todo fix, internal
 
 	return posts, nil
 }

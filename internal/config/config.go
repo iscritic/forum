@@ -2,10 +2,11 @@ package config
 
 import (
 	"encoding/json"
-	"forum/pkg/env"
 	"log"
 	"os"
 	"time"
+
+	"forum/pkg/env"
 )
 
 type Config struct {
@@ -21,7 +22,6 @@ type HTTPServer struct {
 }
 
 func MustLoad() *Config {
-
 	if err := env.LoadEnv(".env"); err != nil {
 		log.Fatalf("failed to load environment variables: %v", err)
 	}
