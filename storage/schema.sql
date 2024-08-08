@@ -12,6 +12,25 @@ CREATE TABLE IF NOT EXISTS category (
     id INTEGER PRIMARY KEY,
     name TEXT UNIQUE
 );
+INSERT INTO category (tag, name)
+SELECT 'movies', 'Movies'
+WHERE NOT EXISTS (SELECT 1 FROM category WHERE tag = 'movies');
+
+INSERT INTO category (tag, name)
+SELECT 'news', 'News'
+WHERE NOT EXISTS (SELECT 1 FROM category WHERE tag = 'news');
+
+INSERT INTO category (tag, name)
+SELECT 'pets', 'Pets'
+WHERE NOT EXISTS (SELECT 1 FROM category WHERE tag = 'pets');
+
+INSERT INTO category (tag, name)
+SELECT 'games', 'Games'
+WHERE NOT EXISTS (SELECT 1 FROM category WHERE tag = 'games');
+
+INSERT INTO category (tag, name)
+SELECT 'offtop', 'Off-Topic'
+WHERE NOT EXISTS (SELECT 1 FROM category WHERE tag = 'offtop');
 
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY,
