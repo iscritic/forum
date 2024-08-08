@@ -63,9 +63,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="../static/style.css">
-</head>
+    <title>Category Posts</title> 
+    <link rel="stylesheet" href="../static/style.css"> </head>
 <body>
     <div class="wrapper">
         <header>
@@ -76,13 +75,12 @@
         </header>
         <main>
             <div class="posts">
-
-
-                {{ range . }}
+                {{ range . }} 
                 <a href="/post/{{ .Post.ID }}" class="Post">
                     <div class="post">
                         <h4 class="author">Author: {{ .User.Username }}</h4>
                         <h2>{{ .Post.Title }}</h2>
+                        <p class="category">Category: {{ .Category.Name }}</p> 
                         <p class="date">Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
                         <p>{{ .Post.Content }}</p>
 
