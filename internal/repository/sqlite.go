@@ -531,8 +531,43 @@ func (s *Storage) GetPostsRelatedData() ([]PostRelatedData, error) {
 	return postsRelatedData, nil
 }
 
-// func (s *Storage) GetPostsSortedByCategory(id int) ([]PostRelatedData, error) {
-// }
+func (s *Storage) GetPostsSortedByCategory(catID int) ([]PostRelatedData, error) {
+	rows, err := s.db.Query(`
+        SELECT p.id, p.title, p.content, p.author_id, p.category_id, p.creation_date
+        FROM posts p
+        WHERE p.category_id = ? 
+        ORDER BY p.creation_date DESC`, catID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		err := rows.Scan(&post.ID, &post.Title, &post.Content,
+			&post.AuthorID,
+			&post.CategoryID, &post.CreationDate)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	var postsRelatedData []PostRelatedData
+	for _, post := range posts {
+		postRelatedData := PostRelatedData{
+			Post: post,
+			// comments etc
+		}
+		postsRelatedData = append(postsRelatedData, postRelatedData)
+	}
+
+	return postsRelatedData, nil
+}
 
 func (s *Storage) DeleteAllSessionsForUser(userID int) error {
 	query := `DELETE FROM sessions WHERE user_id = $1`

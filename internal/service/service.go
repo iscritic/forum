@@ -1,10 +1,11 @@
 package service
 
-import "forum/internal/repository"
+import (
+	"forum/internal/repository"
+)
 
 func FetchPosts(db *repository.Storage) ([]repository.PostRelatedData, error) {
-
-	//TODO: бизнес логика, пагинация страниц
+	// TODO: бизнес логика, пагинация страниц
 
 	data, err := db.GetPostsRelatedData()
 	if err != nil {
@@ -20,7 +21,6 @@ func FetchPosts(db *repository.Storage) ([]repository.PostRelatedData, error) {
 }
 
 func GetPostData(db *repository.Storage, id int) (repository.PostRelatedData, error) {
-
 	post, err := db.GetPostRelatedDataByID(id)
 	if err != nil {
 		return repository.PostRelatedData{}, err
@@ -30,8 +30,7 @@ func GetPostData(db *repository.Storage, id int) (repository.PostRelatedData, er
 }
 
 func Register(db *repository.Storage, user repository.User) error {
-
-	//TODO бизнес логика комментариев, лайки
+	// TODO бизнес логика комментариев, лайки
 
 	err := db.CreateUser(user)
 	if err != nil {
@@ -39,4 +38,13 @@ func Register(db *repository.Storage, user repository.User) error {
 	}
 
 	return nil
+}
+
+func GetPostsSortedByCategory(db *repository.Storage, id int) ([]repository.PostRelatedData, error) {
+	posts, err := db.GetPostsSortedByCategory(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }

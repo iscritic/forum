@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -235,26 +236,27 @@ func (app *application) LikeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "You liked/disliked this page")
 }
 
-// func (app *application) SortedByCategory(w http.ResponseWriter, r *http.Request) {
-// 	if r.Method != http.MethodGet {
-// 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-// 		return
-// 	}
+func (app *application) SortedByCategory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 
-// 	idStr := strings.TrimPrefix(r.URL.Path, "/category")
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		http.Error(w, "Invalid category id", http.StatusBadRequest)
-// 		return
-// 	}
-// 	PostsByCategory, err := service.GetPostsSortedByCategory(app.storage, id)
-// 	if err != nil {
-// 		app.logger.ErrorLog.Println(err)
-// 		return
-// 	}
-// 	template.RenderTemplate(w. app.templateCache, "/web/html")
-// 	fmt.Fprintf(w, "CategoryID page")
-// }
+	idStr := strings.TrimPrefix(r.URL.Path, "/category/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid category id", http.StatusBadRequest)
+		log.Println("ddd", id)
+		return
+	}
+	PostsByCategory, err := service.GetPostsSortedByCategory(app.storage, id)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		return
+	}
+	template.RenderTemplate(w, app.templateCache, "/web/html/posts_category.html", PostsByCategory)
+	fmt.Fprintf(w, "CategoryID page")
+}
 
 func (app *application) CreatedPostsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "My created posts page...")
