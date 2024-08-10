@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -57,5 +57,66 @@
         }
     </script>
 </body>
-</html>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <nav>
+                <a href="/login" class="href">Log in</a>
+                <a href="/register" class="href"><button class="sign-button">Sign Up</button></a>
+            </nav>
+        </header>
+        <main>
+            <div class="posts">
 
+
+                {{ range . }}
+                <a href="/post/{{ .Post.ID }}" class="Post">
+                    <div class="post">
+                        <h4 class="author">Author: {{ .User.Username }}</h4>
+                        <h2>{{ .Post.Title }}</h2>
+                        <p class="date">Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
+                        <p>{{ .Post.Content }}</p>
+
+                        <div class="PostLikeForm">
+                            <span>
+                                <form method="POST" action="/post/like">
+                                    <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                                    <input type="hidden" name="status" value="1">
+                                    <button type="submit">👍 {{.Post.Likes}}</button>
+                                </form>
+                            </span>
+                            <span>
+                                <form method="POST" action="/post/like">
+                                    <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                                    <input type="hidden" name="status" value="-1">
+                                    <button type="submit">👎 {{.Post.Dislikes}}</button>
+                                </form>
+                            </span>
+                        </div>
+                    </div>
+                </a>
+                {{ end }}
+            </div>
+        </main>
+        <footer>
+            <p>&copy; 2024 Forum</p>
+        </footer>
+    </div>
+    <script>
+        function showForm() {
+            document.querySelector('.prompt').style.display = 'none';
+            document.getElementById('create-post-form').classList.remove('hidden');
+
+        }
+    </script>
+</body>
+</html>
