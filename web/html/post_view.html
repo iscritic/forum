@@ -4,78 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/style.css">
-    <title>Post</title>
-
+    <title>{{ .Post.Title }}</title>
 </head>
 <body>
 <div class="wrapper">
+    <div class="post">
+        <h1>{{ .Post.Title }}</h1>
+        <p>{{ .Post.Content }}</p>
+        <p>Author: {{ .User.Username }}</p>
+        <p>Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
 
-    <h1>{{ .Post.Title }}</h1>
-    <p>{{ .Post.Content }}</p>
-    <p>Author: {{ .Post.AuthorID }}</p>
-    <p>Creation Date: {{ .Post.CreationDate }}</p>
-
-    <div class="PostLikeForm">
-        <span>
-            <form method="POST" action="/post/like">
-                <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                <input type="hidden" name="status" value="1">
-                <button type="submit">👍 {{.Post.Likes}}</button>
-            </form>
-        </span>
-        <span>
-            <form method="POST" action="/post/like">
-                <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                <input type="hidden" name="status" value="-1">
-                <button type="submit">👎 {{.Post.Dislikes}}</button>
-            </form>
-        </span>
+        <div class="PostLikeForm">
+            <span>
+                <form method="POST" action="/post/like">
+                    <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+                    <input type="hidden" name="status" value="1">
+                    <button type="submit">👍 {{ .Post.Likes }}</button>
+                </form>
+            </span>
+            <span>
+                <form method="POST" action="/post/like">
+                    <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+                    <input type="hidden" name="status" value="-1">
+                    <button type="submit">👎 {{ .Post.Dislikes }}</button>
+                </form>
+            </span>
+        </div>
     </div>
-    
-    
 
-    <div class="comment-form">
+
+        <div class="comment-form">
         <h2>Write a comment</h2>
         <form action="/post/comment" method="post">
             <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-            <textarea name="content" rows="4" placeholder=""Write your comment here></textarea><br>
+            <textarea name="content" rows="4" placeholder="Write your comment here" required></textarea><br>
             <button type="submit">Submit</button>
         </form>
     </div>
 
-    <div class="comment-section">
-        {{ range .Comment }}
-            <p>{{.Content}}</p>
-            <p>{{.AuthorID}}</p>
-            <p>{{.CreationDate}}</p>
+    <div class="comments">
+        {{ range .CommentR }}
+        <div class="comment_card">
+            <p><strong>{{ .User.Username }}</strong></p>
+            <p>{{ .Comment.Content }}</p>
+            <p>{{ .Comment.CreationDate.Format "Jan 2, 2006" }}</p>
 
-            <div class="CommentLikeForm">
+            <div class="PostLikeForm">
+                    <span>
+                        <form method="POST" action="/comment/like">
+                            <input type="hidden" name="comment_id" value="{{.Comment.ID}}">
+                            <input type="hidden" name="status" value="1">
+                            <button type="submit">👍 {{.Comment.Likes}}</button>
+                        </form>
+                    </span>
                 <span>
-                    <form method="POST" action="/post/like">
-                        <input type="hidden" name="comment_id" value="{{.ID}}">
-                        <input type="hidden" name="status" value="1">
-                        <button type="submit">👍 {{.Likes}}</button>
-                    </form>
-                </span>
-                <span>
-                    <form method="POST" action="/post/like">
-                        <input type="hidden" name="comment_id" value="{{.ID}}">
-                        <input type="hidden" name="status" value="-1">
-                        <button type="submit">👎 {{.Dislikes}}</button>
-                    </form>
-                </span>
+                        <form method="POST" action="/comment/like">
+                            <input type="hidden" name="comment_id" value="{{.Comment.ID}}">
+                            <input type="hidden" name="status" value="-1">
+                            <button type="submit">👎 {{.Comment.Dislikes}}</button>
+                        </form>
+                    </span>
             </div>
-            
-            <hr>
+        </div>
         {{ end }}
     </div>
-    
-    </div>
-
-
-
-
-
 </div>
 </body>
 </html>

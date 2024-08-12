@@ -33,12 +33,13 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.HandleFunc("/register", app.RegisterHandler)
 	mux.HandleFunc("/login", app.LoginHandler)
 
-	// require authentification
+	// require authentication
 	protected := mw.New(app.requiredAuthentication)
 
 	mux.Handle("/post/create", protected.ThenFunc(app.CreatePostHandler))
 	mux.Handle("/post/comment", protected.ThenFunc(app.CreateComment))
 	mux.Handle("/post/like", protected.ThenFunc(app.LikeHandler))
+
 	mux.Handle("/createdposts", protected.ThenFunc(app.CreatePostHandler))
 	mux.Handle("/likedposts", protected.ThenFunc(app.LikedPostsHanlers))
 

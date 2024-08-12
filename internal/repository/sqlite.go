@@ -31,11 +31,6 @@ type Comment struct {
 	CreationDate time.Time
 }
 
-type PostData struct {
-	Post    Post
-	Comment []*Comment
-}
-
 type User struct {
 	ID           int
 	Username     string
@@ -64,6 +59,23 @@ type Like struct {
 	CommentID int
 	UserID    int
 	Grade     int
+}
+
+type PostRelatedData struct {
+	Post     Post
+	CommentR []CommentRelatedData
+	User     User
+	Category Category
+}
+
+type CommentRelatedData struct {
+	Comment Comment
+	User    User
+}
+
+type PostData struct {
+	Post     PostRelatedData
+	Comments []*CommentRelatedData
 }
 
 type Storage struct {
@@ -109,11 +121,11 @@ func (Storage *Storage) CreatePost(post Post) (int, error) {
 
 func (Storage *Storage) GetPostByID(id int) (*Post, error) {
 	// Предполагается, что у вас есть поле DB типа *sql.DB в вашей структуре Application
-	query := "SELECT id, title, content,  creation_date FROM posts WHERE id = ?"
+	query := "SELECT id, title, content, author_id, category_id, creation_date FROM posts WHERE id = ?"
 	row := Storage.db.QueryRow(query, id)
 
 	post := &Post{}
-	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate)
+	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryID, &post.CreationDate)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil // Пост не найден
@@ -124,10 +136,49 @@ func (Storage *Storage) GetPostByID(id int) (*Post, error) {
 	return post, nil
 }
 
+func (s *Storage) GetPostRelatedData(postID int) (*PostRelatedData, error) {
+	// Получение поста по ID
+	post, err := s.GetPostByID(postID)
+	if err != nil {
+		return nil, err
+	}
+	if post == nil {
+		return nil, errors.New("post not found")
+	}
+
+	// Получение связанных комментариев
+	comments, err := s.GetCommentsRelatedData(postID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Получение информации об авторе поста
+	author, err := s.GetUserByID(post.AuthorID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Получение информации о категории
+	categoryName, err := s.GetCategoryById(post.CategoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Заполнение и возврат структуры PostRelatedData
+	postRelatedData := &PostRelatedData{
+		Post:     *post,
+		CommentR: comments,
+		User:     *author,
+		Category: Category{ID: post.CategoryID, Name: categoryName},
+	}
+
+	return postRelatedData, nil
+}
+
 func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 	// TODO authors ids
 
-	rows, err := Storage.db.Query("SELECT  id, title, content, creation_date FROM posts ORDER BY id DESC ")
+	rows, err := Storage.db.Query("SELECT  id, title, content, author_id, category_id, creation_date FROM posts ORDER BY id DESC ")
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +192,7 @@ func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 		// Создаем новую переменную для хранения данных поста на каждой итерации
 		var post Post
 		// Сканируем результаты запроса в переменные структуры Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.CreationDate)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryID, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
@@ -159,8 +210,8 @@ func (Storage *Storage) GetAllPosts() ([]*Post, error) {
 }
 
 func (Storage *Storage) CreateComment(comment Comment) error {
-	_, err := Storage.db.Exec(`INSERT INTO comments (post_id, content) VALUES (?, ? )`,
-		comment.PostID, comment.Content)
+	_, err := Storage.db.Exec(`INSERT INTO comments (post_id, content, author_id) VALUES (?, ?, ? )`,
+		comment.PostID, comment.Content, comment.AuthorID)
 	if err != nil {
 		return err
 	}
@@ -190,6 +241,74 @@ func (s *Storage) GetAllComments(postID int) ([]*Comment, error) {
 	}
 
 	return comments, nil
+}
+
+func (s *Storage) GetCommentsRelatedData(postID int) ([]CommentRelatedData, error) {
+	// Получаем все комментарии
+	rows, err := s.db.Query(`
+        SELECT id, post_id, content, author_id, likes, dislikes, creation_date 
+        FROM comments 
+        WHERE post_id = ? 
+        ORDER BY creation_date DESC`, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []Comment
+	for rows.Next() {
+		var comment Comment
+		if err := rows.Scan(
+			&comment.ID,
+			&comment.PostID,
+			&comment.Content,
+			&comment.AuthorID,
+			&comment.Likes,
+			&comment.Dislikes,
+			&comment.CreationDate,
+		); err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Получаем уникальные ID авторов
+	authorIDs := make(map[int]struct{})
+	for _, comment := range comments {
+		authorIDs[comment.AuthorID] = struct{}{}
+	}
+
+	// Получаем информацию о пользователях
+	var authors []User
+	for authorID := range authorIDs {
+		author, err := s.GetUserByID(authorID)
+		if err != nil {
+			return nil, err
+		}
+		authors = append(authors, *author)
+	}
+
+	// Создаем отображение ID авторов для быстрого доступа
+	authorMap := make(map[int]User)
+	for _, author := range authors {
+		authorMap[author.ID] = author
+	}
+
+	// Создаем результат
+	var commentsRelatedData []CommentRelatedData
+	for _, comment := range comments {
+		user := authorMap[comment.AuthorID]
+		commentsRelatedData = append(commentsRelatedData, CommentRelatedData{
+			Comment: comment,
+			User:    user,
+		})
+	}
+
+	return commentsRelatedData, nil
 }
 
 func (storage *Storage) CreateUser(user User) error {
@@ -263,5 +382,156 @@ func (storage *Storage) GetSessionByToken(token string) (*Session, error) {
 
 func (storage *Storage) DeleteSession(token string) error {
 	_, err := storage.db.Exec(`DELETE FROM sessions WHERE session_token = ?`, token)
+	return err
+}
+
+func (storage *Storage) GetCountOfLikes(postID int) (int, error) {
+	var count int
+
+	return count, nil
+}
+
+func (storage *Storage) GetCountOfDislikes(postID int) (int, error) {
+	var count int
+
+	return count, nil
+}
+
+func (storage *Storage) GetCategoryById(categoryID int) (string, error) {
+	var category string
+
+	return category, nil
+}
+
+func (s *Storage) GetPostRelatedDataByID(postID int) (*PostRelatedData, error) {
+	// 1. Fetch the post by ID
+	post, err := s.GetPostByID(postID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch post: %w", err) // Wrap the error
+	}
+	if post == nil {
+		return nil, errors.New("post not found")
+	}
+
+	// 2. Fetch related comments
+	comments, err := s.GetCommentsRelatedData(postID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch comments: %w", err) // Wrap the error
+	}
+
+	// 3. Fetch author information
+	author, err := s.GetUserByID(post.AuthorID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch author: %w", err) // Wrap the error
+	}
+
+	// 4. Fetch category information
+	categoryName, err := s.GetCategoryById(post.CategoryID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch category: %w", err) // Wrap the error
+	}
+
+	// 5. Construct and return the PostRelatedData struct
+	postRelatedData := &PostRelatedData{
+		Post:     *post,
+		CommentR: comments,
+		User:     *author,
+		Category: Category{ID: post.CategoryID, Name: categoryName},
+	}
+
+	return postRelatedData, nil
+}
+
+func (s *Storage) GetCommentsByPostID(postID int) ([]Comment, error) {
+	rows, err := s.db.Query(`
+        SELECT id, post_id, content, author_id, likes, dislikes, creation_date 
+        FROM comments 
+        WHERE post_id = ? 
+        ORDER BY creation_date DESC`, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var comments []*Comment
+
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(
+			&comment.ID,
+			&comment.PostID,
+			&comment.Content,
+			&comment.AuthorID,
+			&comment.Likes,
+			&comment.Dislikes,
+			&comment.CreationDate,
+		)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, &comment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Преобразование [] *Comment в []Comment
+	result := make([]Comment, len(comments))
+	for i, c := range comments {
+		result[i] = *c
+	}
+
+	return result, nil
+}
+
+func (s *Storage) GetPostsRelatedData() ([]PostRelatedData, error) {
+	// Получение всех постов
+	posts, err := s.GetAllPosts()
+	if err != nil {
+		return nil, err
+	}
+
+	// Слайс для хранения всех связанных данных
+	var postsRelatedData []PostRelatedData
+
+	// Итерация по каждому посту для получения связанных данных
+	for _, post := range posts {
+		// Получение связанных комментариев
+		comments, err := s.GetCommentsRelatedData(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации об авторе поста
+		author, err := s.GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации о категории
+		categoryName, err := s.GetCategoryById(post.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Заполнение структуры PostRelatedData для текущего поста
+		postRelatedData := PostRelatedData{
+			Post:     *post,
+			CommentR: comments,
+			User:     *author,
+			Category: Category{ID: post.CategoryID, Name: categoryName},
+		}
+
+		// Добавление в слайс
+		postsRelatedData = append(postsRelatedData, postRelatedData)
+	}
+
+	return postsRelatedData, nil
+}
+
+func (s *Storage) DeleteAllSessionsForUser(userID int) error {
+	query := `DELETE FROM sessions WHERE user_id = $1`
+	_, err := s.db.Exec(query, userID)
 	return err
 }

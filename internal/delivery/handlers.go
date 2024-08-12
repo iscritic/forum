@@ -39,7 +39,6 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++==")
 	switch r.Method {
 
 	case http.MethodGet:
@@ -59,7 +58,6 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		title := r.Form.Get("title")
 		content := r.Form.Get("content")
 
-		// Обработка ошибок при получении данных из формы
 		if title == "" || content == "" {
 			http.Error(w, "Tittle and content are required", http.StatusBadRequest)
 			return
@@ -70,6 +68,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		post.CreationDate = time.Now()
 		post.CategoryID = 1 //  r.Context().Value("userID")
 		post.AuthorID = r.Context().Value("userID").(int)
+		post.CategoryID = 9
 
 		fmt.Println(post.AuthorID)
 
@@ -87,7 +86,6 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
-	// Проверяем, что метод запроса GET
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -132,6 +130,8 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 
 	comment.PostID = postID
 	comment.Content = r.Form.Get("content")
+
+	comment.AuthorID = r.Context().Value("userID").(int)
 
 	// TODO author comment id
 
@@ -234,7 +234,7 @@ func (app *application) LikeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) SortedByCategory(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Category page")
+	fmt.Fprintf(w, "CategoryID page")
 }
 
 func (app *application) CreatedPostsHandler(w http.ResponseWriter, r *http.Request) {

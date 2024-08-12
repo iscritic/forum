@@ -16,40 +16,29 @@
         </header>
         <main>
             <div class="posts">
-                <div class="minimalistic-form">
-                    <p class="prompt" onclick="showForm()">What's new?</p>
-                    <form id="create-post-form" class="hidden" action="/post/create" method="POST">
-                        <label for="title">Title:</label>
-                        <input type="text" id="title" name="title" required>
-                        <label for="content">Content:</label>
-                        <textarea id="content" name="content" rows="4" cols="50" required></textarea>
-                        <!-- <label for="category">Category:</label>
-                        <input type="text" id="category" name="category" required> -->
-                        <button type="submit">Submit</button>
-                    </form>
-                </div>
+
 
                 {{ range . }}
-                <a href="/post/{{ .ID }}" class="Post">
+                <a href="/post/{{ .Post.ID }}" class="Post">
                     <div class="post">
-                        <h4 class="author">Author: {{ .AuthorID }}</h4>
-                        <h2>{{ .Title }}</h2>
-                        <p class="date">Creation Date: {{ .CreationDate }}</p>
-                        <p>{{ .Content }}</p>
+                        <h4 class="author">Author: {{ .User.Username }}</h4>
+                        <h2>{{ .Post.Title }}</h2>
+                        <p class="date">Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
+                        <p>{{ .Post.Content }}</p>
 
                         <div class="PostLikeForm">
                             <span>
                                 <form method="POST" action="/post/like">
-                                    <input type="hidden" name="post_id" value="{{.ID}}">
+                                    <input type="hidden" name="post_id" value="{{.Post.ID}}">
                                     <input type="hidden" name="status" value="1">
-                                    <button type="submit">👍 {{.Likes}}</button>
+                                    <button type="submit">👍 {{.Post.Likes}}</button>
                                 </form>
                             </span>
                             <span>
                                 <form method="POST" action="/post/like">
-                                    <input type="hidden" name="post_id" value="{{.ID}}">
+                                    <input type="hidden" name="post_id" value="{{.Post.ID}}">
                                     <input type="hidden" name="status" value="-1">
-                                    <button type="submit">👎 {{.Dislikes}}</button>
+                                    <button type="submit">👎 {{.Post.Dislikes}}</button>
                                 </form>
                             </span>
                         </div>
