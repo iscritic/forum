@@ -1,63 +1,26 @@
 package service
 
-import "forum/internal/sqlite"
+import (
+	"forum/internal/entity"
+	"forum/internal/repository"
+)
 
-func FetchPosts(db *sqlite.Storage) ([]*sqlite.Post, error) {
+func GetAllPostRelatedData(db *repository.Storage) ([]entity.PostRelatedData, error) {
 
-	//TODO: бизнес логика, пагинация страниц
-
-	posts, err := db.GetAllPosts()
+	data, err := db.GetAllPostsRelatedData()
 	if err != nil {
-		return posts, err
+		return nil, err
 	}
 
-	return posts, nil
+	return data, nil
 }
 
-func GetPostData(db *sqlite.Storage, id int) (sqlite.PostData, error) {
-	var postData sqlite.PostData
+func GetPostData(db *repository.Storage, id int) (entity.PostRelatedData, error) {
 
-	post, err := db.GetPostByID(id)
+	post, err := db.GetPostRelatedDataByPostID(id)
 	if err != nil {
-		return postData, err
+		return entity.PostRelatedData{}, err
 	}
 
-	comments, err := db.GetAllComments(id)
-	if err != nil {
-		return postData, err
-	}
-
-	likes, dislikes, err := db.GetLikesAndDislikesForPost(id)
-	if err != nil {
-		return postData, err
-	}
-
-	// Fetch like and dislike counts for each comment
-	for i := range comments {
-		comments[i].Likes, comments[i].Dislikes, err = db.GetLikesAndDislikesForComment(comments[i].ID)
-		if err != nil {
-			return postData, err
-		}
-	}
-
-	postData = sqlite.PostData{
-		Post:     *post,
-		Comment: comments,
-		Likes:    likes,
-		Dislikes: dislikes,
-	}
-
-	return postData, nil
-}
-
-func Register(db *sqlite.Storage, user sqlite.User) error {
-
-	//TODO бизнес логика комментариев, лайки
-
-	err := db.CreateUser(user)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return *post, nil
 }

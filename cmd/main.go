@@ -2,9 +2,9 @@ package main
 
 import (
 	"forum/internal/config"
+	"forum/internal/delivery"
 	"forum/internal/helpers/template"
-	"forum/internal/sqlite"
-	"forum/internal/transport"
+	"forum/internal/repository"
 	"forum/pkg/logger"
 	"log"
 	"net/http"
@@ -13,12 +13,13 @@ import (
 )
 
 func main() {
+
 	lg := logger.NewLogger()
 
 	cfg := config.MustLoad()
 	lg.InfoLog.Printf("config is set: %s\n", cfg)
 
-	db, err := sqlite.New(cfg.StoragePath)
+	db, err := repository.New(cfg.StoragePath)
 	if err != nil {
 		panic(err)
 	}
@@ -29,7 +30,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:        cfg.HTTPServer.Address,
-		Handler:     transport.Routes(lg, db, templateCache),
+		Handler:     delivery.Routes(lg, db, templateCache),
 		ReadTimeout: config.ParseTime(cfg.HTTPServer.ReadTimeout),
 		IdleTimeout: config.ParseTime(cfg.HTTPServer.IdleTimeout),
 	}
