@@ -38,10 +38,14 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 
 	mux.Handle("/post/create", protected.ThenFunc(app.CreatePostHandler))
 	mux.Handle("/post/comment", protected.ThenFunc(app.CreateComment))
-	mux.Handle("/post/like", protected.ThenFunc(app.LikeHandler))
 
 	mux.Handle("/createdposts", protected.ThenFunc(app.CreatePostHandler))
 	mux.Handle("/likedposts", protected.ThenFunc(app.LikedPostsHanlers))
+
+	mux.Handle("/post/like", protected.ThenFunc(app.LikePostHandler))
+	mux.Handle("/post/dislike", protected.ThenFunc(app.DislikePostHandler))
+	mux.Handle("/comment/like", protected.ThenFunc(app.LikeCommentHandler))
+	mux.Handle("/comment/dislike", protected.ThenFunc(app.DislikeCommentHandler))
 
 	// standard midllewares for all routes
 	standard := mw.New(app.logRequest, app.recoverPanic, secureHeaders)

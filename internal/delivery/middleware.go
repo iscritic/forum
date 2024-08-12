@@ -8,7 +8,7 @@ import (
 
 func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.logger.InfoLog.Printf("SessionMiddleware called for: %s", r.URL.Path)
+		//app.logger.InfoLog.Printf("SessionMiddleware called for: %s", r.URL.Path)
 
 		// 2. Get session cookie
 		cookie, err := r.Cookie("session_token")
@@ -20,7 +20,7 @@ func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 			return
 		}
 
-		app.logger.InfoLog.Printf("Your session token: %v", cookie.Value)
+		//app.logger.InfoLog.Printf("Your session token: %v", cookie.Value)
 
 		// 3. Validate the session
 		session, err := app.storage.GetSessionByToken(cookie.Value)

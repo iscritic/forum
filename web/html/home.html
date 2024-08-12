@@ -27,20 +27,18 @@
                         <p>{{ .Post.Content }}</p>
 
                         <div class="PostLikeForm">
+                        <span>
+                            <form method="POST" action="/post/like">
+                                <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                                <button type="submit">❤️ {{.Post.Likes}}</button>
+                            </form>
+                        </span>
                             <span>
-                                <form method="POST" action="/post/like">
-                                    <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                    <input type="hidden" name="status" value="1">
-                                    <button type="submit">👍 {{.Post.Likes}}</button>
-                                </form>
-                            </span>
-                            <span>
-                                <form method="POST" action="/post/like">
-                                    <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                    <input type="hidden" name="status" value="-1">
-                                    <button type="submit">👎 {{.Post.Dislikes}}</button>
-                                </form>
-                            </span>
+                            <form method="POST" action="/post/dislike">
+                                <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                                <button type="submit">💔 {{.Post.Dislikes}}</button>
+                            </form>
+                        </span>
                         </div>
                     </div>
                 </a>
