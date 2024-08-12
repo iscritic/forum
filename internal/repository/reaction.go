@@ -3,32 +3,28 @@ package repository
 func (storage *Storage) LikePost(userID, postID int) error {
 	_, err := storage.db.Exec(`
         INSERT INTO likes (user_id, post_id)
-        VALUES (?, ?)
-        ON CONFLICT(user_id, post_id, comment_id) DO NOTHING`, userID, postID, nil)
+        VALUES (?, ?)`, userID, postID, nil)
 	return err
 }
 
 func (storage *Storage) LikeComment(userID, commentID int) error {
 	_, err := storage.db.Exec(`
         INSERT INTO likes (user_id, comment_id)
-        VALUES (?, ?)
-        ON CONFLICT(user_id, post_id, comment_id) DO NOTHING`, userID, commentID, nil)
+        VALUES (?, ?)`, userID, commentID, nil)
 	return err
 }
 
 func (storage *Storage) DislikePost(userID, postID int) error {
 	_, err := storage.db.Exec(`
         INSERT INTO dislikes (user_id, post_id)
-        VALUES (?, ?)
-        ON CONFLICT(user_id, post_id, comment_id) DO NOTHING`, userID, postID, nil)
+        VALUES (?, ?)`, userID, postID, nil)
 	return err
 }
 
 func (storage *Storage) DislikeComment(userID, commentID int) error {
 	_, err := storage.db.Exec(`
         INSERT INTO dislikes (user_id, comment_id)
-        VALUES (?, ?)
-        ON CONFLICT(user_id, post_id, comment_id) DO NOTHING`, userID, commentID, nil)
+        VALUES (?, ?)`, userID, commentID, nil)
 	return err
 }
 

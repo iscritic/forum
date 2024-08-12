@@ -36,6 +36,11 @@ func (s *Storage) GetAllPostsRelatedData() ([]entity.PostRelatedData, error) {
 			return nil, err
 		}
 
+		post.Likes, post.Dislikes, err = s.GetLikesAndDislikesForPost(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
 		// Заполнение структуры PostRelatedData для текущего поста
 		postRelatedData := entity.PostRelatedData{
 			Post:     *post,
@@ -59,6 +64,11 @@ func (s *Storage) GetPostRelatedDataByPostID(postID int) (*entity.PostRelatedDat
 	}
 	if post == nil {
 		return nil, errors.New("post not found")
+	}
+
+	post.Likes, post.Dislikes, err = s.GetLikesAndDislikesForPost(post.ID)
+	if err != nil {
+		return nil, err
 	}
 
 	// 2. Fetch related comments
@@ -114,6 +124,11 @@ func (s *Storage) GetAllCommentsRelatedDataByPostID(postID int) ([]entity.Commen
 			&comment.Dislikes,
 			&comment.CreationDate,
 		); err != nil {
+			return nil, err
+		}
+
+		comment.Likes, comment.Dislikes, err = s.GetLikesAndDislikesForComment(comment.ID)
+		if err != nil {
 			return nil, err
 		}
 		comments = append(comments, comment)
