@@ -2,13 +2,14 @@ package session
 
 import (
 	"fmt"
+	"forum/internal/entity"
 	"forum/internal/repository"
 	"github.com/gofrs/uuid"
 	"log"
 	"time"
 )
 
-func CreateSession(db *repository.Storage, user *repository.User) (string, error) {
+func CreateSession(db *repository.Storage, user *entity.User) (string, error) {
 	// Delete all existing sessions for the user
 	err := db.DeleteAllSessionsForUser(user.ID)
 	if err != nil {
@@ -23,7 +24,7 @@ func CreateSession(db *repository.Storage, user *repository.User) (string, error
 	log.Printf("generated Version 4 UUID %v", u4)
 
 	// Create a new session struct
-	var sess repository.Session
+	var sess entity.Session
 	sess.UserID = user.ID
 	sess.SessionToken = u4
 
