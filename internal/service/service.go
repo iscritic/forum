@@ -24,3 +24,13 @@ func GetPostRelatedData(db *repository.Storage, id int) (entity.PostRelatedData,
 
 	return *post, nil
 }
+
+func GetAllPostRelatedDataByCategory(db *repository.Storage, categoryID int) ([]entity.PostRelatedData, error) {
+
+	data, err := db.GetAllPostRelatedDataByCategory(categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}

@@ -172,3 +172,57 @@ func (s *Storage) GetAllCommentsRelatedDataByPostID(postID int) ([]entity.Commen
 
 	return commentsRelatedData, nil
 }
+
+func (s *Storage) GetAllPostRelatedDataByCategory(categoryID int) ([]entity.PostRelatedData, error) {
+	// Получение всех постов
+	posts, err := s.GetAllPostByCategory(categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Found some posts:", posts)
+
+	// Слайс для хранения всех связанных данных
+	var postsRelatedData []entity.PostRelatedData
+
+	// Итерация по каждому посту для получения связанных данных
+	for _, post := range posts {
+		// Получение связанных комментариев
+		comments, err := s.GetAllCommentsRelatedDataByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации об авторе поста
+		author, err := s.GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации о категории
+		categoryName, err := s.GetCategoryById(post.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+
+		post.Likes, post.Dislikes, err = s.GetLikesAndDislikesForPost(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Заполнение структуры PostRelatedData для текущего поста
+		postRelatedData := entity.PostRelatedData{
+			Post:     *post,
+			CommentR: comments,
+			User:     *author,
+			Category: entity.Category{ID: post.CategoryID, Name: categoryName},
+		}
+
+		// Добавление в слайс
+		postsRelatedData = append(postsRelatedData, postRelatedData)
+	}
+
+	fmt.Println("+++++++++++++++", postsRelatedData)
+
+	return postsRelatedData, nil
+}

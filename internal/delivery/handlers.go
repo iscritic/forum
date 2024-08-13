@@ -136,3 +136,28 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/post/"+postIDStr, http.StatusSeeOther)
 }
+
+func (app *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	idStr := strings.TrimPrefix(r.URL.Path, "/category/")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println("Looking by id: ", id)
+
+	posts, err := service.GetAllPostRelatedDataByCategory(app.storage, id)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		return
+	}
+
+	template.RenderTemplate(w, app.templateCache, "./web/html/home.html", posts)
+
+}

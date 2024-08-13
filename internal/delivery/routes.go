@@ -28,7 +28,7 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 
 	mux.HandleFunc("/", app.HomeHandler)
 	mux.HandleFunc("/post/", app.ViewPostHandler)
-	mux.HandleFunc("/category/", app.SortedByCategory)
+	mux.HandleFunc("/category/", app.SortedByCategoryHandler)
 
 	mux.HandleFunc("/register", app.RegisterHandler)
 	mux.HandleFunc("/login", app.LoginHandler)
