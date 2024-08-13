@@ -15,7 +15,7 @@ func GetAllPostRelatedData(db *repository.Storage) ([]entity.PostRelatedData, er
 	return data, nil
 }
 
-func GetPostData(db *repository.Storage, id int) (entity.PostRelatedData, error) {
+func GetPostRelatedData(db *repository.Storage, id int) (entity.PostRelatedData, error) {
 
 	post, err := db.GetPostRelatedDataByPostID(id)
 	if err != nil {

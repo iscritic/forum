@@ -63,3 +63,7 @@ func (Storage *Storage) GetPostByID(id int) (*entity.Post, error) {
 
 	return post, nil
 }
+
+//TODO: Edit Post
+
+//TODO: Delete Post

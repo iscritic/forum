@@ -92,7 +92,7 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	postData, err := service.GetPostData(app.storage, id)
+	postData, err := service.GetPostRelatedData(app.storage, id)
 	if err != nil {
 		app.logger.ErrorLog.Println(err)
 		return
