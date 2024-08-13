@@ -6,7 +6,6 @@ import (
 )
 
 func GetAllPostRelatedData(db *repository.Storage) ([]entity.PostRelatedData, error) {
-
 	data, err := db.GetAllPostsRelatedData()
 	if err != nil {
 		return nil, err
@@ -16,7 +15,6 @@ func GetAllPostRelatedData(db *repository.Storage) ([]entity.PostRelatedData, er
 }
 
 func GetPostRelatedData(db *repository.Storage, id int) (entity.PostRelatedData, error) {
-
 	post, err := db.GetPostRelatedDataByPostID(id)
 	if err != nil {
 		return entity.PostRelatedData{}, err
@@ -25,9 +23,8 @@ func GetPostRelatedData(db *repository.Storage, id int) (entity.PostRelatedData,
 	return *post, nil
 }
 
-func GetAllPostRelatedDataByCategory(db *repository.Storage, categoryID int) ([]entity.PostRelatedData, error) {
-
-	data, err := db.GetAllPostRelatedDataByCategory(categoryID)
+func GetAllLikedPostsById(db *repository.Storage, id int) ([]entity.PostRelatedData, error) {
+	data, err := db.GetMyLikedPosts(id)
 	if err != nil {
 		return nil, err
 	}

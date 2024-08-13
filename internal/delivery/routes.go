@@ -1,11 +1,12 @@
 package delivery
 
 import (
+	"net/http"
+
 	"forum/internal/helpers/template"
 	"forum/internal/repository"
 	"forum/pkg/logger"
 	"forum/pkg/mw"
-	"net/http"
 )
 
 type application struct {
@@ -39,8 +40,10 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.Handle("/post/create", protected.ThenFunc(app.CreatePostHandler))
 	mux.Handle("/post/comment", protected.ThenFunc(app.CreateComment))
 
-	mux.Handle("/createdposts", protected.ThenFunc(app.CreatePostHandler))
-	mux.Handle("/likedposts", protected.ThenFunc(app.LikedPostsHanlers))
+	mux.Handle("/createdposts", protected.ThenFunc(app.MyPostsHandler))
+	mux.Handle("/likedposts", protected.ThenFunc(app.MyLikedPostsHandler))
+
+	// mux.Handle("/likedposts", protected.ThenFunc())
 
 	mux.Handle("/post/like", protected.ThenFunc(app.LikePostHandler))
 	mux.Handle("/post/dislike", protected.ThenFunc(app.DislikePostHandler))
@@ -52,3 +55,5 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 
 	return standard.Then(mux)
 }
+
+// hello world
