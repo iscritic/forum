@@ -10,31 +10,27 @@ func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//app.logger.InfoLog.Printf("SessionMiddleware called for: %s", r.URL.Path)
 
-		// 2. Get session cookie
+		//Get session cookie
 		cookie, err := r.Cookie("session_token")
 		if err != nil {
 			if err != http.ErrNoCookie {
 				app.logger.ErrorLog.Printf("Error getting session cookie: %v", err)
 			}
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, "/", http.StatusUnauthorized)
 			return
 		}
 
-		//app.logger.InfoLog.Printf("Your session token: %v", cookie.Value)
-
-		// 3. Validate the session
 		session, err := app.storage.GetSessionByToken(cookie.Value)
 		if err != nil {
 			app.logger.ErrorLog.Printf("Error fetching session: %v", err)
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, "/login", http.StatusUnauthorized)
 			return
 		}
 
-		// 4. Handle session validation and potential renewal
 		if session == nil {
 			// No session found for the token, redirect to login
 			app.logger.ErrorLog.Println("Session not found")
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, "/login", http.StatusUnauthorized)
 			return
 		} else if session.ExpiredAt.Before(time.Now()) {
 			// Session expired, delete the old session and redirect to login
@@ -42,7 +38,7 @@ func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 			if err := app.storage.DeleteSession(cookie.Value); err != nil {
 				app.logger.ErrorLog.Printf("Error deleting expired session: %v", err) // Log the error
 			}
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, "/login", http.StatusUnauthorized)
 			return
 		} else {
 			// Session is valid, attach user info to context and proceed
