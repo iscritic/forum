@@ -5,7 +5,7 @@ import (
 	"forum/internal/repository"
 )
 
-func GetAllPostRelatedDataByCategory(db *repository.Storage, categoryID int) ([]entity.PostRelatedData, error) {
+func GetAllPostRelatedDataByCategory(db *repository.Storage, categoryID int) ([]*entity.PostRelatedData, error) {
 	data, err := db.GetAllPostRelatedDataByCategory(categoryID)
 	if err != nil {
 		return nil, err
@@ -14,7 +14,7 @@ func GetAllPostRelatedDataByCategory(db *repository.Storage, categoryID int) ([]
 	return data, nil
 }
 
-func GetAllPostRelatedDataByUserID(db *repository.Storage, userID int) ([]entity.PostRelatedData, error) {
+func GetAllPostRelatedDataByUserID(db *repository.Storage, userID int) ([]*entity.PostRelatedData, error) {
 	data, err := db.GetAllPostRelatedDataByUser(userID)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func GetAllPostRelatedDataByUserID(db *repository.Storage, userID int) ([]entity
 	return data, nil
 }
 
-func GetMyLikedPosts(db *repository.Storage, userID int) ([]entity.PostRelatedData, error) {
+func GetMyLikedPosts(db *repository.Storage, userID int) ([]*entity.PostRelatedData, error) {
 	data, err := db.GetMyLikedPosts(userID)
 	if err != nil {
 		return nil, err
