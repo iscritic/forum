@@ -78,3 +78,7 @@ func (s *Storage) GetCommentsByPostID(postID int) ([]entity.Comment, error) {
 
 	return result, nil
 }
+
+//TODO: Edit Comment
+
+//TODO: Delete Comment

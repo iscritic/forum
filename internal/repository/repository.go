@@ -3,6 +3,7 @@ package repository
 import (
 	"errors"
 	"fmt"
+
 	"forum/internal/entity"
 )
 
@@ -101,7 +102,6 @@ func (s *Storage) GetPostRelatedDataByPostID(postID int) (*entity.PostRelatedDat
 }
 
 func (s *Storage) GetAllCommentsRelatedDataByPostID(postID int) ([]entity.CommentRelatedData, error) {
-
 	rows, err := s.db.Query(`
         SELECT id, post_id, content, author_id, likes, dislikes, creation_date 
         FROM comments 
@@ -171,4 +171,154 @@ func (s *Storage) GetAllCommentsRelatedDataByPostID(postID int) ([]entity.Commen
 	}
 
 	return commentsRelatedData, nil
+}
+
+func (s *Storage) GetAllPostRelatedDataByCategory(categoryID int) ([]entity.PostRelatedData, error) {
+	// Получение всех постов
+	posts, err := s.GetAllPostByCategory(categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Слайс для хранения всех связанных данных
+	var postsRelatedData []entity.PostRelatedData
+
+	// Итерация по каждому посту для получения связанных данных
+	for _, post := range posts {
+		// Получение связанных комментариев
+		comments, err := s.GetAllCommentsRelatedDataByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации об авторе поста
+		author, err := s.GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации о категории
+		categoryName, err := s.GetCategoryById(post.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+
+		post.Likes, post.Dislikes, err = s.GetLikesAndDislikesForPost(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Заполнение структуры PostRelatedData для текущего поста
+		postRelatedData := entity.PostRelatedData{
+			Post:     *post,
+			CommentR: comments,
+			User:     *author,
+			Category: entity.Category{ID: post.CategoryID, Name: categoryName},
+		}
+
+		// Добавление в слайс
+		postsRelatedData = append(postsRelatedData, postRelatedData)
+	}
+
+	return postsRelatedData, nil
+}
+
+func (s *Storage) GetAllPostRelatedDataByUser(userID int) ([]entity.PostRelatedData, error) {
+	// Получение всех постов
+	posts, err := s.GetAllPostByUser(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Слайс для хранения всех связанных данных
+	var postsRelatedData []entity.PostRelatedData
+
+	// Итерация по каждому посту для получения связанных данных
+	for _, post := range posts {
+		// Получение связанных комментариев
+		comments, err := s.GetAllCommentsRelatedDataByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации об авторе поста
+		author, err := s.GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации о категории
+		categoryName, err := s.GetCategoryById(post.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+
+		post.Likes, post.Dislikes, err = s.GetLikesAndDislikesForPost(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Заполнение структуры PostRelatedData для текущего поста
+		postRelatedData := entity.PostRelatedData{
+			Post:     *post,
+			CommentR: comments,
+			User:     *author,
+			Category: entity.Category{ID: post.CategoryID, Name: categoryName},
+		}
+
+		// Добавление в слайс
+		postsRelatedData = append(postsRelatedData, postRelatedData)
+	}
+
+	return postsRelatedData, nil
+}
+
+func (s *Storage) GetMyLikedPosts(userID int) ([]entity.PostRelatedData, error) {
+	// Получение всех постов
+	posts, err := s.GetAllLikedPosts(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Слайс для хранения всех связанных данных
+	var postsRelatedData []entity.PostRelatedData
+
+	// Итерация по каждому посту для получения связанных данных
+	for _, post := range posts {
+		// Получение связанных комментариев
+		comments, err := s.GetAllCommentsRelatedDataByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации об авторе поста
+		author, err := s.GetUserByID(post.AuthorID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Получение информации о категории
+		categoryName, err := s.GetCategoryById(post.CategoryID)
+		if err != nil {
+			return nil, err
+		}
+
+		post.Likes, post.Dislikes, err = s.GetLikesAndDislikesForPost(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		// Заполнение структуры PostRelatedData для текущего поста
+		postRelatedData := entity.PostRelatedData{
+			Post:     *post,
+			CommentR: comments,
+			User:     *author,
+			Category: entity.Category{ID: post.CategoryID, Name: categoryName},
+		}
+
+		// Добавление в слайс
+		postsRelatedData = append(postsRelatedData, postRelatedData)
+	}
+
+	return postsRelatedData, nil
 }
