@@ -10,14 +10,16 @@
     <div class="wrapper">
         <header>
             <nav>
-                <a href="/login" class="href">Log in</a>
-                <a href="/register" class="href"><button class="sign-button">Sign Up</button></a>
+                <a href="/login" class="href"><button class="button">Log In</button></a>
+                <a href="/register" class="href"><button class="button">Sign Up</button></a>
+
+                <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>
+                <a href="/likedposts" class="href"><button class="nav-button">My Liked Posts</button></a>
+                <a href="/createdposts" class="href"><button class="nav-button">My Created Posts</button></a>
             </nav>
         </header>
         <main>
             <div class="posts">
-
-
                 {{ range . }}
                 <a href="/post/{{ .Post.ID }}" class="Post">
                     <div class="post">
@@ -27,18 +29,18 @@
                         <p>{{ .Post.Content }}</p>
 
                         <div class="PostLikeForm">
-                        <span>
-                            <form method="POST" action="/post/like">
-                                <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                <button type="submit">❤️ {{.Post.Likes}}</button>
-                            </form>
-                        </span>
                             <span>
-                            <form method="POST" action="/post/dislike">
-                                <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                <button type="submit">💔 {{.Post.Dislikes}}</button>
-                            </form>
-                        </span>
+                                <form method="POST" action="/post/like">
+                                    <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                                    <button type="submit">❤️ {{.Post.Likes}}</button>
+                                </form>
+                            </span>
+                            <span>
+                                <form method="POST" action="/post/dislike">
+                                    <input type="hidden" name="post_id" value="{{.Post.ID}}">
+                                    <button type="submit">💔 {{.Post.Dislikes}}</button>
+                                </form>
+                            </span>
                         </div>
                     </div>
                 </a>
@@ -53,7 +55,6 @@
         function showForm() {
             document.querySelector('.prompt').style.display = 'none';
             document.getElementById('create-post-form').classList.remove('hidden');
-
         }
     </script>
 </body>
