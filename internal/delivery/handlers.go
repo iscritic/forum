@@ -151,8 +151,6 @@ func (app *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	fmt.Println("Looking by id: ", id)
-
 	posts, err := service.GetAllPostRelatedDataByCategory(app.storage, id)
 	if err != nil {
 		app.logger.ErrorLog.Println(err)

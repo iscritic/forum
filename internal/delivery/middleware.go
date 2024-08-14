@@ -16,21 +16,21 @@ func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 			if err != http.ErrNoCookie {
 				app.logger.ErrorLog.Printf("Error getting session cookie: %v", err)
 			}
-			http.Redirect(w, r, "/", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
 		session, err := app.storage.GetSessionByToken(cookie.Value)
 		if err != nil {
 			app.logger.ErrorLog.Printf("Error fetching session: %v", err)
-			http.Redirect(w, r, "/login", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 
 		if session == nil {
 			// No session found for the token, redirect to login
 			app.logger.ErrorLog.Println("Session not found")
-			http.Redirect(w, r, "/login", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		} else if session.ExpiredAt.Before(time.Now()) {
 			// Session expired, delete the old session and redirect to login
@@ -38,7 +38,7 @@ func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 			if err := app.storage.DeleteSession(cookie.Value); err != nil {
 				app.logger.ErrorLog.Printf("Error deleting expired session: %v", err) // Log the error
 			}
-			http.Redirect(w, r, "/login", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		} else {
 			// Session is valid, attach user info to context and proceed

@@ -180,8 +180,6 @@ func (s *Storage) GetAllPostRelatedDataByCategory(categoryID int) ([]entity.Post
 		return nil, err
 	}
 
-	fmt.Println("Found some posts:", posts)
-
 	// Слайс для хранения всех связанных данных
 	var postsRelatedData []entity.PostRelatedData
 
@@ -222,8 +220,6 @@ func (s *Storage) GetAllPostRelatedDataByCategory(categoryID int) ([]entity.Post
 		postsRelatedData = append(postsRelatedData, postRelatedData)
 	}
 
-	fmt.Println("+++++++++++++++", postsRelatedData)
-
 	return postsRelatedData, nil
 }
 
@@ -233,8 +229,6 @@ func (s *Storage) GetAllPostRelatedDataByUser(userID int) ([]entity.PostRelatedD
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("Found some posts:", posts)
 
 	// Слайс для хранения всех связанных данных
 	var postsRelatedData []entity.PostRelatedData
@@ -285,8 +279,6 @@ func (s *Storage) GetMyLikedPosts(userID int) ([]entity.PostRelatedData, error) 
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("Found some posts:", posts)
 
 	// Слайс для хранения всех связанных данных
 	var postsRelatedData []entity.PostRelatedData
