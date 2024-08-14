@@ -10,7 +10,7 @@ func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//app.logger.InfoLog.Printf("SessionMiddleware called for: %s", r.URL.Path)
 
-		// 2. Get session cookie
+		//Get session cookie
 		cookie, err := r.Cookie("session_token")
 		if err != nil {
 			if err != http.ErrNoCookie {
@@ -20,9 +20,6 @@ func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 			return
 		}
 
-		//app.logger.InfoLog.Printf("Your session token: %v", cookie.Value)
-
-		// 3. Validate the session
 		session, err := app.storage.GetSessionByToken(cookie.Value)
 		if err != nil {
 			app.logger.ErrorLog.Printf("Error fetching session: %v", err)
@@ -30,7 +27,6 @@ func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 			return
 		}
 
-		// 4. Handle session validation and potential renewal
 		if session == nil {
 			// No session found for the token, redirect to login
 			app.logger.ErrorLog.Println("Session not found")

@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 type Storage struct {
@@ -20,7 +20,7 @@ func New(path string) (*Storage, error) {
 		return nil, fmt.Errorf("can't connect to database: %w", err)
 	}
 
-	querry, err := ioutil.ReadFile("./storage/schema.sql")
+	querry, err := os.ReadFile("./storage/schema.sql")
 	if err != nil {
 		return nil, fmt.Errorf("can't read file: %v", err)
 	}
