@@ -43,13 +43,6 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.Handle("/createdposts", protected.ThenFunc(app.MyPostsHandler))
 	mux.Handle("/likedposts", protected.ThenFunc(app.MyLikedPostsHandler))
 
-	// mux.Handle("/likedposts", protected.ThenFunc())
-
-	mux.Handle("/post/like", protected.ThenFunc(app.LikePostHandler))
-	mux.Handle("/post/dislike", protected.ThenFunc(app.DislikePostHandler))
-	mux.Handle("/comment/like", protected.ThenFunc(app.LikeCommentHandler))
-	mux.Handle("/comment/dislike", protected.ThenFunc(app.DislikeCommentHandler))
-
 	mux.Handle("/post/like", protected.ThenFunc(app.LikePostHandler))
 	mux.Handle("/post/dislike", protected.ThenFunc(app.DislikePostHandler))
 	mux.Handle("/comment/like", protected.ThenFunc(app.LikeCommentHandler))
