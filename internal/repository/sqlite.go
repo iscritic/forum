@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+
+	"forum/internal/entity"
 )
 
 type Storage struct {
@@ -31,4 +33,26 @@ func New(path string) (*Storage, error) {
 	}
 
 	return &Storage{db: db}, nil
+}
+
+func (storage *Storage) GetAllCategories() ([]entity.Category, error) {
+	categories := []entity.Category{}
+
+	rows, err := storage.db.Query("SELECT id, name FROM category")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var category entity.Category
+		if err := rows.Scan(&category.ID, &category.Name); err != nil {
+			return nil, err
+		}
+		categories = append(categories, category)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return categories, nil
 }

@@ -8,20 +8,28 @@
 </head>
 <body>
     <div class="wrapper">
-<h1>Create Post</h1>
-<form action="/post/create" method="POST">
-    <div>
-        <label for="title">Title:</label><br>
-        <input type="text" id="title" name="title" required>
+        <h1>Create Post</h1>
+        <form action="/post/create" method="POST">
+            <div>
+                <label for="title">Title:</label><br>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div>
+                <label for="content">Content:</label><br>
+                <textarea id="content" name="content" rows="4" cols="50" required></textarea>
+            </div>
+            <div>
+                <label for="category">Category:</label><br>
+                <select id="category" name="category" required>
+                    {{range .}}
+                    <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
     </div>
-    <div>
-        <label for="content">Content:</label><br>
-        <textarea id="content" name="content" rows="4" cols="50" required></textarea>
-    </div>
-    <div>
-        <button type="submit">Submit</button>
-    </div>
-</form>
-</div>
 </body>
 </html>

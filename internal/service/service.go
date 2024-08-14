@@ -32,3 +32,13 @@ func GetAllLikedPostsById(db *repository.Storage, id int) ([]entity.PostRelatedD
 
 	return data, nil
 }
+
+func GetCategories(db *repository.Storage) ([]entity.Category, error) {
+	categories, err := db.GetAllCategories()
+	if err != nil {
+		return nil, err
+	}
+	// todo fix, internal
+
+	return categories, nil
+}

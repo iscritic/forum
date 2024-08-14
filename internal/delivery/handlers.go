@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -34,16 +33,20 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-
 	case http.MethodGet:
-		// Использование шаблона для рендеринга формы создания поста
-		template.RenderTemplate(w, app.templateCache, "./web/html/post_create.html", nil)
+		categories, err := service.GetCategories(app.storage)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
+			return
+		}
+		template.RenderTemplate(w, app.templateCache, "./web/html/post_create.html", categories)
 		return
 
 	case http.MethodPost:
-
 		err := r.ParseForm()
 		if err != nil {
+			http.Error(w, "Failed to parse form", http.StatusInternalServerError)
 			return
 		}
 
@@ -51,9 +54,10 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 
 		title := r.Form.Get("title")
 		content := r.Form.Get("content")
+		categoryIDStr := r.Form.Get("category")
 
-		if title == "" || content == "" {
-			http.Error(w, "Tittle and content are required", http.StatusBadRequest)
+		if title == "" || content == "" || categoryIDStr == "" {
+			http.Error(w, "Title, content, and category are required", http.StatusBadRequest)
 			return
 		}
 
@@ -61,11 +65,14 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		post.Content = content
 		post.CreationDate = time.Now()
 
-		//  r.Context().Value("userID")
 		post.AuthorID = r.Context().Value("userID").(int)
-		post.CategoryID = 9
 
-		fmt.Println(post.AuthorID)
+		categoryID, err := strconv.Atoi(categoryIDStr)
+		if err != nil {
+			http.Error(w, "Invalid category ID", http.StatusBadRequest)
+			return
+		}
+		post.CategoryID = categoryID
 
 		lastID, err := app.storage.CreatePost(post)
 		if err != nil {
@@ -74,6 +81,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		}
 
 		http.Redirect(w, r, "/post/"+strconv.Itoa(lastID), http.StatusSeeOther)
+
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
@@ -193,3 +201,11 @@ func (app *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Reque
 
 	template.RenderTemplate(w, app.templateCache, "./web/html/home.html", posts)
 }
+
+// func (app *application) GetAllCategoriesHandler(w http.ResponseWriter, r *http.Request) {
+// 	categories, err := service.GetAllCategories(app.storage)
+// 	if err != nil {
+// 		http.Error(w, "Unable to get categories", http.StatusInternalServerError)
+// 		return
+// 	}
+// }
