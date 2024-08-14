@@ -14,13 +14,13 @@ func GetAllPostRelatedData(db *repository.Storage) ([]*entity.PostRelatedData, e
 	return data, nil
 }
 
-func GetPostRelatedData(db *repository.Storage, id int) (entity.PostRelatedData, error) {
+func GetPostRelatedData(db *repository.Storage, id int) (*entity.PostRelatedData, error) {
 	post, err := db.GetPostRelatedDataByPostID(id)
 	if err != nil {
-		return entity.PostRelatedData{}, err
+		return nil, err
 	}
 
-	return *post, nil
+	return post, nil
 }
 
 func GetAllLikedPostsById(db *repository.Storage, id int) ([]*entity.PostRelatedData, error) {
