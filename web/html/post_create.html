@@ -12,11 +12,11 @@
         <form action="/post/create" method="POST">
             <div>
                 <label for="title">Title:</label><br>
-                <input type="text" id="title" name="title" required>
+                <input type="text" id="title" name="title" required minlength="3" maxlength="15" >
             </div>
             <div>
                 <label for="content">Content:</label><br>
-                <textarea id="content" name="content" rows="4" cols="50" required></textarea>
+                <textarea id="content" name="content" rows="4" cols="50" required minlength="10" maxlength="250"></textarea>
             </div>
             <div>
                 <label for="category">Category:</label><br>
