@@ -85,12 +85,42 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   sessionToken,
-		Expires: time.Now().Add(20 * time.Minute),
-		Path:    "/",
+		Name:     "session_token",
+		Value:    sessionToken,
+		Expires:  time.Now().Add(20 * time.Minute),
+		Path:     "/",
+		HttpOnly: true,
 	})
 
 	// Перенаправляем пользователя на домашнюю страницу
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	// Retrieve the userID from the context
+	userId, ok := r.Context().Value("userID").(int)
+	if !ok {
+		http.Error(w, "User ID not found in context", http.StatusInternalServerError)
+		return
+	}
+
+	// Delete all sessions for the user
+	err := app.storage.DeleteAllSessionsForUser(userId)
+	if err != nil {
+		app.logger.ErrorLog.Printf("Failed to delete existing sessions: %v", err)
+		http.Error(w, "Failed to log out", http.StatusInternalServerError)
+		return
+	}
+
+	// Clear the session cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "session_token",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0), // Expire the cookie
+		HttpOnly: true,
+	})
+
+	// Redirect to the home page after successful logout
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

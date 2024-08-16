@@ -25,17 +25,58 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	posts, err := service.GetAllPostRelatedData(app.storage)
 	if err != nil {
 		app.logger.ErrorLog.Println(err)
+		http.Error(w, "Unable to fetch posts", http.StatusInternalServerError)
 		return
 	}
 
-	//categories, err := service.GetCategories(app.storage)
-	//if err != nil {
-	//	app.logger.ErrorLog.Println(err)
-	//	http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
-	//	return
-	//}
+	categories, err := service.GetCategories(app.storage)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
+		return
+	}
 
-	template.RenderTemplate(w, app.templateCache, "./web/html/home.html", posts)
+	var userInfo *entity.User
+	role, ok := r.Context().Value("role").(string)
+	if !ok {
+		app.logger.ErrorLog.Println("Role is not a string")
+		http.Error(w, "Invalid user role", http.StatusInternalServerError)
+		return
+	}
+
+	if role != "guest" {
+		userID, ok := r.Context().Value("userID").(int)
+		if !ok {
+			app.logger.ErrorLog.Println("UserID is not an int")
+			http.Error(w, "Invalid user ID", http.StatusInternalServerError)
+			return
+		}
+
+		userInfo, err = app.storage.GetUserByID(userID)
+		if err != nil {
+			app.logger.ErrorLog.Println(err)
+			http.Error(w, "Unable to fetch user info", http.StatusInternalServerError)
+			return
+		}
+	} else {
+		userInfo = &entity.User{Role: role}
+	}
+
+	data := struct {
+		Posts      []*entity.PostRelatedData
+		Categories []entity.Category
+		UserInfo   *entity.User
+	}{
+		Posts:      posts,
+		Categories: categories,
+		UserInfo:   userInfo,
+	}
+
+	err = template.RenderTemplate(w, app.templateCache, "./web/html/home.html", data)
+	if err != nil {
+		app.logger.ErrorLog.Println(err)
+		http.Error(w, "Unable to render template", http.StatusInternalServerError)
+	}
 }
 
 func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {

@@ -79,9 +79,9 @@ func (app *application) requireRole(allowedRoles ...string) func(http.Handler) h
 				}
 			}
 
-			// Role not allowed, redirect to login
+			// Role not allowed, 403 - forbidden
 			app.logger.InfoLog.Printf("Role '%s' not authorized for this route", role)
-			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		})
 	}
 }
