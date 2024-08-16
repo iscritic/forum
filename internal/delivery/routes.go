@@ -35,7 +35,7 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.HandleFunc("/login", app.LoginHandler)
 
 	// require authentication
-	protected := mw.New(app.requiredAuthentication)
+	protected := mw.New(app.requireRole("user", "moderator", "admin"))
 
 	mux.Handle("/post/create", protected.ThenFunc(app.CreatePostHandler))
 	mux.Handle("/post/comment", protected.ThenFunc(app.CreateComment))
@@ -48,10 +48,12 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.Handle("/comment/like", protected.ThenFunc(app.LikeCommentHandler))
 	mux.Handle("/comment/dislike", protected.ThenFunc(app.DislikeCommentHandler))
 
+	protected = mw.New(app.requireRole("admin"))
+
+	mux.Handle("/admin", protected.ThenFunc(app.adminPageHandler))
+
 	// standard midllewares for all routes
-	standard := mw.New(app.logRequest, app.recoverPanic, secureHeaders)
+	standard := mw.New(app.logRequest, app.recoverPanic, secureHeaders, app.sessionManager)
 
 	return standard.Then(mux)
 }
-
-// hello world

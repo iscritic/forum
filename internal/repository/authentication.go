@@ -6,7 +6,7 @@ import (
 )
 
 func (storage *Storage) CreateUser(user entity.User) error {
-	_, err := storage.db.Exec(`INSERT INTO users (username, email, password) VALUES (?, ?, ?)`, user.Username, user.Email, user.Password)
+	_, err := storage.db.Exec(`INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)`, user.Username, user.Email, user.Password, user.Role)
 	if err != nil {
 		return err
 	}
@@ -15,11 +15,11 @@ func (storage *Storage) CreateUser(user entity.User) error {
 }
 
 func (storage *Storage) GetUserByUsername(username string) (*entity.User, error) {
-	row := storage.db.QueryRow(`SELECT id, username, email, password FROM users WHERE username = ?`, username)
+	row := storage.db.QueryRow(`SELECT id, username, email, password, role FROM users WHERE username = ?`, username)
 
 	var user entity.User // Создаем переменную user
 
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password) // Передаем адреса полей структуры для сканирования
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Role) // Передаем адреса полей структуры для сканирования
 	if err != nil {
 		return nil, err
 	}
@@ -32,11 +32,11 @@ func (storage *Storage) GetUserByUsername(username string) (*entity.User, error)
 }
 
 func (storage *Storage) GetUserByID(id int) (*entity.User, error) {
-	row := storage.db.QueryRow(`SELECT id, username, email, password FROM users WHERE id = ?`, id)
+	row := storage.db.QueryRow(`SELECT id, username, email, password, role FROM users WHERE id = ?`, id)
 
 	var user entity.User // Создаем переменную user
 
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password) // Передаем адреса полей структуры для сканирования
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Role) // Передаем адреса полей структуры для сканирования
 	if err != nil {
 		return nil, err
 	}
