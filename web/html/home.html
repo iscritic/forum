@@ -23,7 +23,7 @@
                     <div class="post">
                         <h4 class="author">Author: {{ .User.Username }}</h4>
                         <h2>{{ .Post.Title }}</h2>
-                        <p class="date">Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
+                        <p class="date">{{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
                         <p>{{ .Post.Content }}</p>
 
                         <div class="PostLikeForm">
