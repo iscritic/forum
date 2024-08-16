@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+
 	"forum/internal/entity"
 )
 
@@ -21,7 +22,6 @@ func (Storage *Storage) CreatePost(post entity.Post) (int, error) {
 }
 
 func (Storage *Storage) GetAllPost() ([]*entity.Post, error) {
-
 	query := "SELECT  id, title, content, author_id, category_id, creation_date FROM posts ORDER BY id DESC"
 
 	rows, err := Storage.db.Query(query)
@@ -63,7 +63,3 @@ func (Storage *Storage) GetPostByID(id int) (*entity.Post, error) {
 
 	return post, nil
 }
-
-//TODO: Edit Post
-
-//TODO: Delete Post
