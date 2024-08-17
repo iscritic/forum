@@ -13,12 +13,12 @@ import (
 
 func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		template.RenderError(w, "Not Found", http.StatusNotFound)
 		return
 	}
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		template.RenderError(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -37,7 +37,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		categories, err := service.GetCategories(app.storage)
 		if err != nil {
 			app.logger.ErrorLog.Println(err)
-			http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
+			template.RenderError(w, "Unable to fetch categories", http.StatusInternalServerError)
 			return
 		}
 		template.RenderTemplate(w, app.templateCache, "./web/html/post_create.html", categories)
@@ -46,7 +46,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 	case http.MethodPost:
 		err := r.ParseForm()
 		if err != nil {
-			http.Error(w, "Failed to parse form", http.StatusInternalServerError)
+			template.RenderError(w, "Failed to parse form", http.StatusInternalServerError)
 			return
 		}
 
@@ -57,7 +57,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		categoryIDStr := r.Form.Get("category")
 
 		if title == "" || content == "" || categoryIDStr == "" {
-			http.Error(w, "Title, content, and category are required", http.StatusBadRequest)
+			template.RenderError(w, "Title, content, and category are required", http.StatusBadRequest)
 			return
 		}
 
@@ -69,7 +69,7 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 
 		categoryID, err := strconv.Atoi(categoryIDStr)
 		if err != nil {
-			http.Error(w, "Invalid category ID", http.StatusBadRequest)
+			template.RenderError(w, "Invalid category ID", http.StatusBadRequest)
 			return
 		}
 		post.CategoryID = categoryID
@@ -83,21 +83,21 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		http.Redirect(w, r, "/post/"+strconv.Itoa(lastID), http.StatusSeeOther)
 
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		template.RenderError(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 }
 
 func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		template.RenderError(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	idStr := strings.TrimPrefix(r.URL.Path, "/post/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		template.RenderError(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
@@ -112,12 +112,12 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 
 func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		template.RenderError(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Failed to parse form", http.StatusInternalServerError)
+		template.RenderError(w, "Failed to parse form", http.StatusInternalServerError)
 		return
 	}
 
@@ -127,7 +127,7 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	postIDStr := r.Form.Get("post_id")
 	postID, err := strconv.Atoi(postIDStr)
 	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		template.RenderError(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
@@ -148,14 +148,14 @@ func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		template.RenderError(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	idStr := strings.TrimPrefix(r.URL.Path, "/category/")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		template.RenderError(w, "Invalid category ID", http.StatusBadRequest)
 		return
 	}
 
@@ -170,7 +170,7 @@ func (app *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.R
 
 func (app *application) MyPostsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		template.RenderError(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -187,7 +187,7 @@ func (app *application) MyPostsHandler(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		template.RenderError(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -205,29 +205,7 @@ func (app *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Reque
 // func (app *application) GetAllCategoriesHandler(w http.ResponseWriter, r *http.Request) {
 // 	categories, err := service.GetAllCategories(app.storage)
 // 	if err != nil {
-// 		http.Error(w, "Unable to get categories", http.StatusInternalServerError)
+// 		template.RenderError(w, "Unable to get categories", http.StatusInternalServerError)
 // 		return
-// 	}
-// }
-
-// func renderError(w http.ResponseWriter, r *http.Request, status int, message string) {
-// 	w.WriteHeader(status)
-// 	ts, err := template.ParseFiles("./web/html/error.html")
-// 	if err != nil {
-// 		lg.ErrorLog.Println(err)
-// 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	data := struct {
-// 		StatusCode   int
-// 		ErrorMessage string
-// 	}{
-// 		StatusCode:   status,
-// 		ErrorMessage: message,
-// 	}
-// 	err = ts.Execute(w, data)
-// 	if err != nil {
-// 		lg.ErrorLog.Println(err)
-// 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 // 	}
 // }

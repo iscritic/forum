@@ -1,12 +1,13 @@
 package delivery
 
 import (
+	"net/http"
+	"time"
+
 	"forum/internal/entity"
 	"forum/internal/helpers/template"
 	"forum/internal/service"
 	"forum/internal/service/session"
-	"net/http"
-	"time"
 )
 
 func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -46,14 +47,14 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		template.RenderTemplate(w, app.templateCache, "./web/html/login.html", nil)
 		return
 	case r.Method != http.MethodPost:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		template.RenderError(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
 		// Обработка ошибки
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		template.RenderError(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -65,18 +66,16 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := app.storage.GetUserByUsername(username)
 	if err != nil {
 		// Обработка ошибки
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		template.RenderError(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
 	// Проверяем соответствие пароля
 	if user.Password != password {
 		// Обработка ошибки
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		template.RenderError(w, "Invalid credentials", http.StatusUnauthorized)
 		return
 	}
-
-	app.logger.ErrorLog.Println("we are here")
 
 	// Создаем сессию и устанавливаем cookie
 	sessionToken, err := session.CreateSession(app.storage, user)

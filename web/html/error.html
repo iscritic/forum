@@ -4,45 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .error-container {
-            text-align: center;
-            margin-top: 50px;
-        }
-        .error-code {
-            font-size: 96px;
-            font-weight: bold;
-        }
-        .error-message {
-            font-size: 24px;
-        }
-        .error-suggestions {
-            margin-top: 20px;
-        }
-        .btn-home {
-            margin-top: 20px;
-            background-color: black;
-            color: white;
-            border: none;
-        }
-        .btn-home:hover {
-            background-color: #333;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="/web/static/style.css">
 </head>
 <body>
-    <div class="container error-container">
-        <div class="error-code">{{.StatusCode}}</div>
-        <div class="error-message">{{.ErrorMessage}}</div>
-        <div class="error-suggestions">
-            <a href="/" class="btn btn-home">Home</a>
-        </div>
+    <header>
+        <!-- content  -->
+    </header>
+
+    <div class="wrapper">
+        <main>
+            <div class="post" style="text-align: center; padding: 50px; background-color: rgba(0, 0, 0, 0.70);">
+                <div class="error-code" style="font-size: 100px; font-weight: bold; color: #fff;">
+                    {{.StatusCode}}
+                </div>
+                <div class="error-message" style="font-size: 24px; color: #fff;">
+                    {{.ErrorMessage}}
+                </div>
+                <a href="/" class="nav-button" style="margin-top: 20px;">Home</a>
+            </div>
+        </main>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <footer>
+        <!--footer -->
+    </footer>
 </body>
 </html>

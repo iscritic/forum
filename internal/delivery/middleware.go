@@ -8,9 +8,9 @@ import (
 
 func (app *application) requiredAuthentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//app.logger.InfoLog.Printf("SessionMiddleware called for: %s", r.URL.Path)
+		// app.logger.InfoLog.Printf("SessionMiddleware called for: %s", r.URL.Path)
 
-		//Get session cookie
+		// Get session cookie
 		cookie, err := r.Cookie("session_token")
 		if err != nil {
 			if err != http.ErrNoCookie {
