@@ -37,6 +37,7 @@ nav {
     font-family: 'Montserrat', sans-serif;
     text-transform: uppercase;
     font-weight: bold;
+   margin: 15px;
 }
 
 .site-title a {
