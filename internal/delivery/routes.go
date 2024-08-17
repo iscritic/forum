@@ -48,6 +48,8 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.Handle("/comment/like", protected.ThenFunc(app.LikeCommentHandler))
 	mux.Handle("/comment/dislike", protected.ThenFunc(app.DislikeCommentHandler))
 
+	mux.Handle("/logout", protected.ThenFunc(app.LogoutHandler))
+
 	protected = mw.New(app.requireRole("admin"))
 
 	mux.Handle("/admin", protected.ThenFunc(app.adminPageHandler))

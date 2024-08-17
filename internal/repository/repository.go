@@ -50,7 +50,7 @@ func (s *Storage) GetPostRelatedDataByPostID(postID int) (*entity.PostRelatedDat
 	}
 
 	// 4. Fetch category information
-	categoryName, err := s.GetCategoryById(post.CategoryID)
+	category, err := s.GetCategoryById(post.CategoryID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch category: %w", err) // Wrap the error
 	}
@@ -60,7 +60,7 @@ func (s *Storage) GetPostRelatedDataByPostID(postID int) (*entity.PostRelatedDat
 		Post:     *post,
 		CommentR: comments,
 		User:     *author,
-		Category: entity.Category{ID: post.CategoryID, Name: categoryName},
+		Category: *category,
 	}
 
 	return postRelatedData, nil
@@ -201,7 +201,7 @@ func (s *Storage) postAdoptionCenter(posts []*entity.Post) ([]*entity.PostRelate
 		}
 
 		// Получение информации о категории
-		categoryName, err := s.GetCategoryById(post.CategoryID)
+		category, err := s.GetCategoryById(post.CategoryID)
 		if err != nil {
 			return nil, err
 		}
@@ -216,7 +216,7 @@ func (s *Storage) postAdoptionCenter(posts []*entity.Post) ([]*entity.PostRelate
 			Post:     *post,
 			CommentR: comments,
 			User:     *author,
-			Category: entity.Category{ID: post.CategoryID, Name: categoryName},
+			Category: *category,
 		}
 
 		// Добавление указателя в слайс

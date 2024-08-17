@@ -2,12 +2,6 @@ package repository
 
 import "forum/internal/entity"
 
-func (s *Storage) GetCategoryById(categoryID int) (string, error) {
-	var category string
-
-	return category, nil
-}
-
 func (s Storage) GetAllPostByCategory(categoryID int) ([]*entity.Post, error) {
 	query := `
 SELECT p.id, p.title, p.content, p.author_id, p.category_id, p.creation_date
@@ -104,4 +98,16 @@ WHERE
 	}
 
 	return posts, nil
+}
+
+func (s *Storage) GetCategoryById(categoryID int) (*entity.Category, error) {
+	var category entity.Category
+
+	query := `SELECT id, name FROM category WHERE id = $1`
+	err := s.db.QueryRow(query, categoryID).Scan(&category.ID, &category.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &category, nil
 }

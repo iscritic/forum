@@ -1,120 +1,165 @@
-body{
+body {
     color: white;
-    background-image: linear-gradient(to right top, #e6e0e2, #e3d1dc, #dbc4db, #ccb9de, #b5b0e2, #aab2e5, #9eb4e8, #91b6e9, #9cc0e9, #aacaea, #b9d4ea, #caddea);
-    background-size: cover;
-    background-attachment: fixed;
-    background-repeat: no-repeat;
+    background-color: #161617;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-.wrapper{
-    margin-right: 30%;
-    margin-left: 30%;
+.wrapper {
+    margin: 0 auto;
+    max-width: 1200px;
 }
-a.Post{
+
+a.Post {
     text-decoration: none;
     color: inherit;
 }
 
-header{
-    padding: 10px;
-    display: flex; 
-    justify-content: flex-end;
+nav {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.site-title {
+    font-size: 24px;
+    color: white;
+    margin-left: 20px;
+    font-family: 'Montserrat', sans-serif;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.site-title a {
+    color: inherit; /* Ensures the color is inherited and not blue */
+    text-decoration: none; /* Removes the underline */
+}
+
+
+.nav-links {
+    display: flex;
     align-items: center;
 }
 
-nav{
-    float: left;
-}
-
-main {
-    display: flex;
-    flex: 1;
-
-}
-.nav-button {
+.nav-button, .auth-button {
     background-color: #4CAF50;
     border: none;
     color: white;
     padding: 10px 15px;
     text-align: center;
+    font-size: 16px;
+    margin: 4px 10px;
+    cursor: pointer;
+    border-radius: 5px;
     text-decoration: none;
     display: inline-block;
+    white-space: nowrap;
+}
+
+.aside-button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    color: white;
+    padding: 10px 15px;
+    margin: 5px 0;
+    text-decoration: none;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.aside-button:hover {
+    background-color: #3c3c3c;
+}
+
+.auth-button {
+    background-color: #005bfa;
+}
+
+.welcome-info {
+    background-color: #2c2c2c;
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    text-align: center;
     font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
+    margin: 4px 10px;
     border-radius: 5px;
 }
 
-.nav-button:hover {
-    background-color: #45a049; 
+.nav-button:hover, .auth-button:hover, .aside-button:hover, .like-button:hover, .dislike-button:hover {
+    background-color: #3d3d3d;
 }
 
+a:hover {
+    color: white;
+}
 
-.post{
-    background-color: rgba(0, 0, 0, 0.40);
-    border: solid 1px;
-    border-radius: 30px;
+.post {
+    background-color: #232324;
+    border-radius: 15px;
     margin-bottom: 30px;
     padding: 20px;
-    width: 100%;
-    /* max-width: 1000px; */
+    width: 60%;
     box-sizing: border-box;
 }
 
-.minimalistic-form{
-    background-color: rgba(0, 0, 0, 0.40);
-    border: solid 1px;
-    border-radius: 30px;
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.aside {
+    width: 20%;
+    float: left;
+}
+
+.main {
+    width: 75%;
+    float: right;
+}
+
+.PostLikeForm {
+    display: flex;
+    justify-content: start;
+    gap: 10px;
+}
+
+.like-dislike-button form {
+    display: inline-block;
+    margin: 0;
+}
+
+.like-button, .dislike-button {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #2c2c2c;
+    color: white;
+    cursor: pointer;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
     margin-bottom: 30px;
-    padding: 20px;
+    background-color: #1c1c1c;
     width: 100%;
-    max-width: 1000px;
+    color: white;
+    text-align: center;
     box-sizing: border-box;
 }
 
-.create-post-form {
-    background-color: rgba(0, 0, 0, 0.40);
-    border: solid 1px;
-    border-radius: 30px;
-    margin-bottom: 30px;
-    padding: 20px;
-    width: 100%;
-    max-width: 1000px;
-    box-sizing: border-box;
-}
-
-.posts {
-    width: fit-content;
-    margin: 0 auto;  
-  }
-.hidden {
-    display: none;
-}
-
-footer{ 
-
+footer {
     text-align: center;
     padding: 10px 0;
-}
-
-.comment_card{
-    background-color: rgba(0, 0, 0, 0.40);
-    border: solid 1px;
-    border-radius: 30px;
-    margin-bottom: 30px;
-    padding: 20px;
     width: 100%;
-    /* max-width: 1000px; */
-    box-sizing: border-box;
-}
-
-.comment-form{
-    background-color: rgba(0, 0, 0, 0.40);
-    border: solid 1px;
-    border-radius: 30px;
-    margin-bottom: 30px;
-    padding: 20px;
-    width: 100%;
-    /* max-width: 1000px; */
+    background-color: #1c1c1c;
+    clear: both;
     box-sizing: border-box;
 }

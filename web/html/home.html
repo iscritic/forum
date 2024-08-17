@@ -7,65 +7,79 @@
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-<div class="wrapper">
-    <header>
-        <nav>
-            {{ if .UserInfo.Username }}
-            <span>Welcome, {{ .UserInfo.Username }} (Role: {{ .UserInfo.Role }})</span>
-            <a href="/logout" class="href"><button class="button">Log Out</button></a>
-            {{ else }}
-            <a href="/login" class="href"><button class="button">Log In</button></a>
-            <a href="/register" class="href"><button class="button">Sign Up</button></a>
-            {{ end }}
-
-            <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>
-            <a href="/likedposts" class="href"><button class="nav-button">My Liked Posts</button></a>
-            <a href="/createdposts" class="href"><button class="nav-button">My Created Posts</button></a>
-        </nav>
-    </header>
-    <aside>
-        <div class="categories">
-            <h3>Categories</h3>
-            <ul>
-                {{ range .Categories }}
-                <li><a href="/category/{{ .ID }}">{{ .Name }}</a></li>
-                {{ end }}
-            </ul>
+<header>
+    <nav>
+        <div class="site-title">
+            <a href="/" class="href" style="text-decoration: none; color: inherit;">Forum</a>
         </div>
-    </aside>
-    <main>
-        <div class="posts">
-            {{ range .Posts }}
-            <a href="/post/{{ .Post.ID }}" class="Post">
-                <div class="post">
-                    <h4 class="author">Author: {{ .User.Username }}</h4>
-                    <h2>{{ .Post.Title }}</h2>
-                    <p class="date">Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
-                    <p>{{ .Post.Content }}</p>
-
-                    <div class="PostLikeForm">
+        <div class="nav-links">
+            {{ if .UserInfo.Username }}
+            <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>
+            <div class="welcome-info">Welcome, {{ .UserInfo.Username }} ✌️</div>
+            <a href="/logout" class="href"><button class="auth-button">Log Out</button></a>
+            {{ else }}
+            <a href="/login" class="href"><button class="auth-button">Log In</button></a>
+            <a href="/register" class="href"><button class="auth-button">Sign Up</button></a>
+            {{ end }}
+        </div>
+    </nav>
+</header>
+<div class="wrapper">
+    <div class="content">
+        <aside class="aside">
+            {{ if .UserInfo.Username }}
+            <div class="activity">
+                <h3>Activity</h3>
+                <a href="/likedposts" class="aside-button">My Liked Posts</a>
+                <a href="/createdposts" class="aside-button">My Created Posts</a>
+            </div>
+            {{ end }}
+            <div class="categories">
+                <h3>Categories</h3>
+                {{ range .Categories }}
+                <a href="/category/{{ .ID }}" class="aside-button">{{ .Name }}</a>
+                {{ end }}
+            </div>
+        </aside>
+        <main class="main">
+            <div class="posts">
+                {{ range .Posts }}
+                <a href="/post/{{ .Post.ID }}" class="Post">
+                    <div class="post">
+                        <div class="post-header">
+                            <h4 class="author">{{ .User.Username }}</h4>
+                            <p class="date">{{ .Post.CreationDate.Format "02/01/06 15:04" }}</p>
+                        </div>
+                        <div class="post-content">
+                            <p>{{ .Post.Content }}</p>
+                        </div>
+                        <div class="post-category">
+                            <p>#{{ .Category.Name }}</p>
+                        </div>
+                        <div class="PostLikeForm">
                             <span>
                                 <form method="POST" action="/post/like">
                                     <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                    <button type="submit">❤️ {{.Post.Likes}}</button>
+                                    <button type="submit" class="like-button">❤️ {{.Post.Likes}}</button>
                                 </form>
                             </span>
-                        <span>
+                                                    <span>
                                 <form method="POST" action="/post/dislike">
                                     <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                    <button type="submit">💔 {{.Post.Dislikes}}</button>
+                                    <button type="submit" class="dislike-button">💔 {{.Post.Dislikes}}</button>
                                 </form>
                             </span>
-                    </div>
-                </div>
-            </a>
-            {{ end }}
-        </div>
-    </main>
-    <footer>
-        <p>&copy; 2024 Forum</p>
-    </footer>
-</div>
+                        </div>
 
+                    </div>
+                </a>
+                {{ end }}
+            </div>
+        </main>
+    </div>
+</div>
+<footer>
+    <p>&copy; 2024 Forum</p>
+</footer>
 </body>
 </html>
