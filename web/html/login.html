@@ -1,28 +1,54 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Home</title>
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-    <div class="wrapper">
-<div class="login-container">
-    <h1>Login</h1>
-    <form action="/login" method="post">
-        <div class="form-group">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
+<header>
+    <nav>
+        <div class="site-title">
+            <a href="/" class="href" style="text-decoration: none; color: inherit;">Forum</a>
         </div>
-        <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-        </div>
-        <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account? <a href="/register">Register</a></p>
+<!--        <div class="nav-links">-->
+<!--            {{ if .UserInfo.Username }}-->
+<!--            <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>-->
+<!--            <div class="welcome-info">Welcome, {{ .UserInfo.Username }} ✌️</div>-->
+<!--            <a href="/logout" class="href"><button class="auth-button">Log Out</button></a>-->
+<!--            {{ else }}-->
+<!--            <a href="/login" class="href"><button class="auth-button">Log In</button></a>-->
+<!--            <a href="/register" class="href"><button class="auth-button">Sign Up</button></a>-->
+<!--            {{ end }}-->
+<!--        </div>-->
+    </nav>
+</header>
+<div class="wrapper">
+    <div class="content">
+        <main class="main">
+            <div class="login-container">
+                <h1>Login</h1>
+                <form action="/login" method="post">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <p>Don't have an account? <a href="/register">Register</a></p>
+                <p><a href="/">Continue as a guest </a></p>
+
+        </main>
+    </div>
 </div>
-</div>
+<footer>
+    <p>&copy; 2024 Forum</p>
+</footer>
 </body>
 </html>
