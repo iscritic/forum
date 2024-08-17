@@ -1,8 +1,8 @@
 package delivery
 
 import (
-	"forum/internal/helpers/tmpl"
 	"forum/internal/service"
+	"forum/internal/utils/tmpl"
 	"net/http"
 	"strconv"
 	"strings"

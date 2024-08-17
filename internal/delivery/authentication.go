@@ -2,9 +2,9 @@ package delivery
 
 import (
 	"forum/internal/entity"
-	"forum/internal/helpers/tmpl"
 	"forum/internal/service"
 	"forum/internal/service/session"
+	"forum/internal/utils/tmpl"
 	"net/http"
 	"time"
 )

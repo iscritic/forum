@@ -3,8 +3,8 @@ package delivery
 import (
 	"net/http"
 
-	"forum/internal/helpers/tmpl"
 	"forum/internal/repository"
+	"forum/internal/utils/tmpl"
 	"forum/pkg/flog"
 	"forum/pkg/mw"
 )

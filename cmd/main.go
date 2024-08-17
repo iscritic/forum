@@ -6,8 +6,8 @@ import (
 
 	"forum/internal/config"
 	"forum/internal/delivery"
-	"forum/internal/helpers/tmpl"
 	"forum/internal/repository"
+	"forum/internal/utils/tmpl"
 	"forum/pkg/flog"
 
 	_ "github.com/mattn/go-sqlite3"
