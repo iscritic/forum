@@ -6,25 +6,27 @@ import (
 
 	"forum/internal/config"
 	"forum/internal/delivery"
-	"forum/internal/helpers/template"
+	"forum/internal/helpers/tmpl"
 	"forum/internal/repository"
-	"forum/pkg/logger"
+	"forum/pkg/flog"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
-	lg := logger.NewLogger()
 
 	cfg := config.MustLoad()
-	lg.InfoLog.Printf("config is set: %s\n", cfg)
+	lg := flog.NewLogger(cfg.LogLevel)
+
+	lg.Debug("config is set: %s\n", cfg)
 
 	db, err := repository.New(cfg.StoragePath)
 	if err != nil {
 		panic(err)
 	}
-	templateCache := template.NewTemplateCache()
-	if err := template.LoadTemplates(templateCache, "./web/html"); err != nil {
+
+	templateCache := tmpl.NewTemplateCache()
+	if err := tmpl.LoadTemplates(templateCache, "./web/html"); err != nil {
 		log.Fatalf("failed to load templates: %v", err)
 	}
 
@@ -35,7 +37,6 @@ func main() {
 		IdleTimeout: config.ParseTime(cfg.HTTPServer.IdleTimeout),
 	}
 
-	lg.InfoLog.Printf("Listening serven on http://%s...\n", cfg.HTTPServer.Address)
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatalln(err)

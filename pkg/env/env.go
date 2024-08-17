@@ -1,3 +1,5 @@
+// Package env provides functionality for loading environment variables from a file.
+
 package env
 
 import (
@@ -6,6 +8,8 @@ import (
 	"strings"
 )
 
+// LoadEnv loads environment variables from a specified file.
+// The file format should be "key=value" on each line.
 func LoadEnv(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {

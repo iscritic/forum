@@ -3,25 +3,25 @@ package delivery
 import (
 	"net/http"
 
-	"forum/internal/helpers/template"
+	"forum/internal/helpers/tmpl"
 	"forum/internal/repository"
-	"forum/pkg/logger"
+	"forum/pkg/flog"
 	"forum/pkg/mw"
 )
 
 type application struct {
-	logger        *logger.Logger
-	storage       *repository.Storage
-	templateCache *template.TemplateCache
+	log       *flog.Logger
+	storage   *repository.Storage
+	tmplcache *tmpl.TemplateCache
 }
 
-func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache) http.Handler {
+func Routes(l *flog.Logger, db *repository.Storage, tc *tmpl.TemplateCache) http.Handler {
 	mux := http.NewServeMux()
 
 	app := &application{
-		logger:        l,
-		storage:       db,
-		templateCache: tc,
+		log:       l,
+		storage:   db,
+		tmplcache: tc,
 	}
 
 	fileServer := http.FileServer(http.Dir("./web/static"))

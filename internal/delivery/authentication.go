@@ -2,7 +2,7 @@ package delivery
 
 import (
 	"forum/internal/entity"
-	"forum/internal/helpers/template"
+	"forum/internal/helpers/tmpl"
 	"forum/internal/service"
 	"forum/internal/service/session"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		template.RenderTemplate(w, app.templateCache, "./web/html/register.html", nil)
+		tmpl.RenderTemplate(w, app.tmplcache, "./web/html/register.html", nil)
 		return
 	case http.MethodPost:
 		err := r.ParseForm()
@@ -36,14 +36,14 @@ func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) 
 		service.Register(app.storage, newUser)
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-		app.logger.InfoLog.Printf("New user detected: %v", newUser)
+		app.log.InfoLog.Printf("New user detected: %v", newUser)
 	}
 }
 
 func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodGet:
-		template.RenderTemplate(w, app.templateCache, "./web/html/login.html", nil)
+		tmpl.RenderTemplate(w, app.tmplcache, "./web/html/login.html", nil)
 		return
 	case r.Method != http.MethodPost:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -76,12 +76,12 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.logger.ErrorLog.Println("we are here")
+	app.log.ErrorLog.Println("we are here")
 
 	// Создаем сессию и устанавливаем cookie
 	sessionToken, err := session.CreateSession(app.storage, user)
 	if err != nil {
-		app.logger.InfoLog.Println(err)
+		app.log.InfoLog.Println(err)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -107,7 +107,7 @@ func (app *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Delete all sessions for the user
 	err := app.storage.DeleteAllSessionsForUser(userId)
 	if err != nil {
-		app.logger.ErrorLog.Printf("Failed to delete existing sessions: %v", err)
+		app.log.ErrorLog.Printf("Failed to delete existing sessions: %v", err)
 		http.Error(w, "Failed to log out", http.StatusInternalServerError)
 		return
 	}

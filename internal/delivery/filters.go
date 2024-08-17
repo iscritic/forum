@@ -1,7 +1,7 @@
 package delivery
 
 import (
-	"forum/internal/helpers/template"
+	"forum/internal/helpers/tmpl"
 	"forum/internal/service"
 	"net/http"
 	"strconv"
@@ -23,17 +23,17 @@ func (app *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.R
 
 	posts, err := service.GetAllPostRelatedDataByCategory(app.storage, id)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	app.logger.InfoLog.Println("Sorted by category id:", id)
-	app.logger.InfoLog.Println("Posts:", posts)
+	app.log.InfoLog.Println("Sorted by category id:", id)
+	app.log.InfoLog.Println("Posts:", posts)
 
-	err = template.RenderTemplate(w, app.templateCache, "./web/html/sorted.html", posts)
+	err = tmpl.RenderTemplate(w, app.tmplcache, "./web/html/sorted.html", posts)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -49,11 +49,11 @@ func (app *application) MyPostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	posts, err := service.GetAllPostRelatedDataByUserID(app.storage, userID)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		return
 	}
 
-	template.RenderTemplate(w, app.templateCache, "./web/html/sorted.html", posts)
+	tmpl.RenderTemplate(w, app.tmplcache, "./web/html/sorted.html", posts)
 }
 
 func (app *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,9 +66,9 @@ func (app *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Reque
 
 	posts, err := service.GetAllLikedPostsById(app.storage, userID)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		return
 	}
 
-	template.RenderTemplate(w, app.templateCache, "./web/html/sorted.html", posts)
+	tmpl.RenderTemplate(w, app.tmplcache, "./web/html/sorted.html", posts)
 }

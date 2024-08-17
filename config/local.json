@@ -1,5 +1,6 @@
 {
   "env": "local",
+  "log_level": "debug",
   "storage_path": "./storage/store.db",
   "http_server": {
     "address": "localhost:4269",
@@ -7,4 +8,3 @@
     "idle_timeout": "60s"
   }
 }
-

@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"forum/internal/entity"
-	"forum/internal/helpers/template"
+	"forum/internal/helpers/tmpl"
 	"forum/internal/service"
 )
 
-func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -22,79 +22,46 @@ func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := service.GetAllPostRelatedData(app.storage)
+	data, err := service.GetHomePageData(a.storage, r.Context())
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		http.Error(w, "Unable to fetch posts", http.StatusInternalServerError)
+		a.log.Error(err.Error())
+		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	categories, err := service.GetCategories(app.storage)
+	err = tmpl.RenderTemplate(w, a.tmplcache, "./web/html/home.html", data)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
+		a.log.Error(err.Error())
+		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
-	}
-
-	var userInfo *entity.User
-	role, ok := r.Context().Value("role").(string)
-	if !ok {
-		app.logger.ErrorLog.Println("Role is not a string")
-		http.Error(w, "Invalid user role", http.StatusInternalServerError)
-		return
-	}
-
-	if role != "guest" {
-		userID, ok := r.Context().Value("userID").(int)
-		if !ok {
-			app.logger.ErrorLog.Println("UserID is not an int")
-			http.Error(w, "Invalid user ID", http.StatusInternalServerError)
-			return
-		}
-
-		userInfo, err = app.storage.GetUserByID(userID)
-		if err != nil {
-			app.logger.ErrorLog.Println(err)
-			http.Error(w, "Unable to fetch user info", http.StatusInternalServerError)
-			return
-		}
-	} else {
-		userInfo = &entity.User{Role: role}
-	}
-
-	data := struct {
-		Posts      []*entity.PostRelatedData
-		Categories []entity.Category
-		UserInfo   *entity.User
-	}{
-		Posts:      posts,
-		Categories: categories,
-		UserInfo:   userInfo,
-	}
-
-	err = template.RenderTemplate(w, app.templateCache, "./web/html/home.html", data)
-	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		http.Error(w, "Unable to render template", http.StatusInternalServerError)
 	}
 }
 
-func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+
 	case http.MethodGet:
-		categories, err := service.GetCategories(app.storage)
+
+		categories, err := service.GetCategories(a.storage)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
-			http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-		template.RenderTemplate(w, app.templateCache, "./web/html/post_create.html", categories)
+
+		err = tmpl.RenderTemplate(w, a.tmplcache, "./web/html/post_create.html", categories)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 		return
 
 	case http.MethodPost:
 		err := r.ParseForm()
 		if err != nil {
-			http.Error(w, "Failed to parse form", http.StatusInternalServerError)
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
@@ -122,9 +89,9 @@ func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request
 		}
 		post.CategoryID = categoryID
 
-		lastID, err := app.storage.CreatePost(post)
+		lastID, err := a.storage.CreatePost(post)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			a.log.ErrorLog.Println(err)
 			return
 		}
 
@@ -151,11 +118,11 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 
 	postData, err := service.GetPostRelatedData(app.storage, id)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		return
 	}
 
-	template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
+	tmpl.RenderTemplate(w, app.tmplcache, "./web/html/post_view.html", postData)
 }
 
 func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {

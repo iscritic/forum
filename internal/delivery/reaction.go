@@ -23,7 +23,7 @@ func (app *application) LikePostHandler(w http.ResponseWriter, r *http.Request) 
 
 	hasLiked, err := app.storage.HasLikedPost(userID, postID)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -31,28 +31,28 @@ func (app *application) LikePostHandler(w http.ResponseWriter, r *http.Request) 
 	if hasLiked {
 		err = app.storage.RemoveLike(userID, postID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 	} else {
 		hasDisliked, err := app.storage.HasDislikedPost(userID, postID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		if hasDisliked {
 			err = app.storage.RemoveDislike(userID, postID)
 			if err != nil {
-				app.logger.ErrorLog.Println(err)
+				app.log.ErrorLog.Println(err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 		}
 		err = app.storage.LikePost(userID, postID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -85,7 +85,7 @@ func (app *application) DislikePostHandler(w http.ResponseWriter, r *http.Reques
 
 	hasDisliked, err := app.storage.HasDislikedPost(userID, postID)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -93,28 +93,28 @@ func (app *application) DislikePostHandler(w http.ResponseWriter, r *http.Reques
 	if hasDisliked {
 		err = app.storage.RemoveDislike(userID, postID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 	} else {
 		hasLiked, err := app.storage.HasLikedPost(userID, postID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		if hasLiked {
 			err = app.storage.RemoveLike(userID, postID)
 			if err != nil {
-				app.logger.ErrorLog.Println(err)
+				app.log.ErrorLog.Println(err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 		}
 		err = app.storage.DislikePost(userID, postID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -146,7 +146,7 @@ func (app *application) LikeCommentHandler(w http.ResponseWriter, r *http.Reques
 
 	hasLiked, err := app.storage.HasLikedComment(userID, commentID)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -154,28 +154,28 @@ func (app *application) LikeCommentHandler(w http.ResponseWriter, r *http.Reques
 	if hasLiked {
 		err = app.storage.UnlikeComment(userID, commentID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 	} else {
 		hasDisliked, err := app.storage.HasDislikedComment(userID, commentID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		if hasDisliked {
 			err = app.storage.UndislikeComment(userID, commentID)
 			if err != nil {
-				app.logger.ErrorLog.Println(err)
+				app.log.ErrorLog.Println(err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 		}
 		err = app.storage.LikeComment(userID, commentID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -201,7 +201,7 @@ func (app *application) DislikeCommentHandler(w http.ResponseWriter, r *http.Req
 
 	hasDisliked, err := app.storage.HasDislikedComment(userID, commentID)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		app.log.ErrorLog.Println(err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -209,28 +209,28 @@ func (app *application) DislikeCommentHandler(w http.ResponseWriter, r *http.Req
 	if hasDisliked {
 		err = app.storage.UndislikeComment(userID, commentID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 	} else {
 		hasLiked, err := app.storage.HasLikedComment(userID, commentID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 		if hasLiked {
 			err = app.storage.UnlikeComment(userID, commentID)
 			if err != nil {
-				app.logger.ErrorLog.Println(err)
+				app.log.ErrorLog.Println(err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 		}
 		err = app.storage.DislikeComment(userID, commentID)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			app.log.ErrorLog.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
