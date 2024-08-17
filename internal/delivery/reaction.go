@@ -58,7 +58,14 @@ func (app *application) LikePostHandler(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	http.Redirect(w, r, "/post/"+postIDStr, http.StatusSeeOther)
+	referer := r.Referer()
+
+	if referer == "/" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, referer, http.StatusSeeOther)
+	}
+
 }
 
 func (app *application) DislikePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,7 +120,13 @@ func (app *application) DislikePostHandler(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	http.Redirect(w, r, "/post/"+postIDStr, http.StatusSeeOther)
+	referer := r.Referer()
+
+	if referer == "/" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, referer, http.StatusSeeOther)
+	}
 }
 
 func (app *application) LikeCommentHandler(w http.ResponseWriter, r *http.Request) {
