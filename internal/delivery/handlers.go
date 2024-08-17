@@ -209,3 +209,25 @@ func (app *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Reque
 // 		return
 // 	}
 // }
+
+// func renderError(w http.ResponseWriter, r *http.Request, status int, message string) {
+// 	w.WriteHeader(status)
+// 	ts, err := template.ParseFiles("./web/html/error.html")
+// 	if err != nil {
+// 		lg.ErrorLog.Println(err)
+// 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+// 		return
+// 	}
+// 	data := struct {
+// 		StatusCode   int
+// 		ErrorMessage string
+// 	}{
+// 		StatusCode:   status,
+// 		ErrorMessage: message,
+// 	}
+// 	err = ts.Execute(w, data)
+// 	if err != nil {
+// 		lg.ErrorLog.Println(err)
+// 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+// 	}
+// }
