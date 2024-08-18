@@ -4,15 +4,15 @@ import (
 	"forum/internal/entity"
 	"forum/internal/service"
 	"forum/internal/service/session"
-	"forum/internal/utils/tmpl"
+	tmpl2 "forum/pkg/tmpl"
 	"net/http"
 	"time"
 )
 
-func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		tmpl.RenderTemplate(w, app.tmplcache, "./web/html/register.html", nil)
+		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/register.html", nil)
 		return
 	case http.MethodPost:
 		err := r.ParseForm()
@@ -33,17 +33,17 @@ func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) 
 			Role:     "user", // Устанавливаем роль по умолчанию
 		}
 
-		service.Register(app.storage, newUser)
+		service.Register(a.storage, newUser)
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-		app.log.InfoLog.Printf("New user detected: %v", newUser)
+		a.log.Info("New user detected: %v", newUser)
 	}
 }
 
-func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodGet:
-		tmpl.RenderTemplate(w, app.tmplcache, "./web/html/login.html", nil)
+		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", nil)
 		return
 	case r.Method != http.MethodPost:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -62,7 +62,7 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 
 	// Проверяем существование пользователя с заданными данными
-	user, err := app.storage.GetUserByUsername(username)
+	user, err := a.storage.GetUserByUsername(username)
 	if err != nil {
 		// Обработка ошибки
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
@@ -76,12 +76,11 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.log.ErrorLog.Println("we are here")
-
 	// Создаем сессию и устанавливаем cookie
-	sessionToken, err := session.CreateSession(app.storage, user)
+	sessionToken, err := session.CreateSession(a.storage, user)
 	if err != nil {
-		app.log.InfoLog.Println(err)
+		a.log.Error("CreateSession: %v", err)
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -96,7 +95,7 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (app *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the userID from the context
 	userId, ok := r.Context().Value("userID").(int)
 	if !ok {
@@ -105,9 +104,9 @@ func (app *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete all sessions for the user
-	err := app.storage.DeleteAllSessionsForUser(userId)
+	err := a.storage.DeleteAllSessionsForUser(userId)
 	if err != nil {
-		app.log.ErrorLog.Printf("Failed to delete existing sessions: %v", err)
+		a.log.Error("Failed to delete existing sessions: %v", err)
 		http.Error(w, "Failed to log out", http.StatusInternalServerError)
 		return
 	}

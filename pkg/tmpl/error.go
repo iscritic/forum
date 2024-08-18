@@ -1,16 +1,19 @@
 package tmpl
 
-import "net/http"
+import (
+	"net/http"
+)
 
-// RenderErrorPage renders a template using the TemplateCache.
+// RenderErrorPage renders a custom error page using the TemplateCache.
 func RenderErrorPage(w http.ResponseWriter, tc *TemplateCache, statusCode int, message string) {
-	tmpl, ok := tc.Get("./web/html/error.html")
+	tmpl, ok := tc.Get("error.html")
 	if !ok {
 		http.Error(w, "Error page template not found", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(statusCode)
+
 	err := tmpl.Execute(w, map[string]interface{}{
 		"ErrorCode":    statusCode,
 		"ErrorMessage": message,

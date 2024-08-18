@@ -32,13 +32,14 @@ type Logger struct {
 }
 
 // NewLogger creates and initializes a new Logger instance with the specified minimum log level.
-func NewLogger(level LogLevel) *Logger {
+func NewLogger(level int) *Logger {
+
 	return &Logger{
-		debugLogger: log.New(os.Stdout, color.Make("DEBUG\t", color.Blue), log.Ldate|log.Ltime|log.Lshortfile),
+		debugLogger: log.New(os.Stdout, color.Make("DEBUG\t", color.Blue), log.Ldate|log.Ltime),
 		infoLogger:  log.New(os.Stdout, color.Make("INFO\t", color.Green), log.Ldate|log.Ltime),
 		warnLogger:  log.New(os.Stdout, color.Make("WARN\t", color.Yellow), log.Ldate|log.Ltime),
-		errorLogger: log.New(os.Stderr, color.Make("ERROR\t", color.Red), log.Ldate|log.Ltime|log.Lshortfile),
-		level:       level,
+		errorLogger: log.New(os.Stderr, color.Make("ERROR\t", color.Red), log.Ldate|log.Ltime),
+		level:       LogLevel(level),
 	}
 }
 

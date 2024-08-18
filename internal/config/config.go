@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"forum/pkg/flog"
 	"log"
 	"os"
 	"time"
@@ -11,10 +10,10 @@ import (
 )
 
 type Config struct {
-	Env         string        `json:"env"`
-	LogLevel    flog.LogLevel `json:"log_level"`
-	StoragePath string        `json:"storage_path"`
-	HTTPServer  HTTPServer    `json:"http_server"`
+	Env         string     `json:"env"`
+	LogLevel    int        `json:"log_level"`
+	StoragePath string     `json:"storage_path"`
+	HTTPServer  HTTPServer `json:"http_server"`
 }
 
 type HTTPServer struct {

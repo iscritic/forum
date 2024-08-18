@@ -1,10 +1,10 @@
 package delivery
 
 import (
+	"forum/pkg/tmpl"
 	"net/http"
 
 	"forum/internal/repository"
-	"forum/internal/utils/tmpl"
 	"forum/pkg/flog"
 	"forum/pkg/mw"
 )

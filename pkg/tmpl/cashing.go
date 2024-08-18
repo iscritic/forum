@@ -2,6 +2,7 @@ package tmpl
 
 import (
 	"html/template"
+	"log"
 	"path/filepath"
 	"sync"
 )
@@ -48,7 +49,8 @@ func LoadTemplates(tc *TemplateCache, dir string) error {
 		if err != nil {
 			return err
 		}
-		tc.Set(tmpl, t)
+		tc.Set(filepath.Base(tmpl), t)
+		log.Printf("Загружен шаблон: %s", filepath.Base(tmpl))
 	}
 
 	return nil

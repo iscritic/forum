@@ -1,13 +1,13 @@
 package main
 
 import (
+	"forum/pkg/tmpl"
 	"log"
 	"net/http"
 
 	"forum/internal/config"
 	"forum/internal/delivery"
 	"forum/internal/repository"
-	"forum/internal/utils/tmpl"
 	"forum/pkg/flog"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -37,8 +37,9 @@ func main() {
 		IdleTimeout: config.ParseTime(cfg.HTTPServer.IdleTimeout),
 	}
 
+	lg.Info("Server is listening: http://%s\n", srv.Addr)
 	err = srv.ListenAndServe()
 	if err != nil {
-		log.Fatalln(err)
+		lg.Error(err.Error())
 	}
 }
