@@ -3,11 +3,12 @@ package service
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"forum/internal/entity"
 	"forum/internal/utils"
 	"forum/pkg/validator"
-	"net/http"
-	"strings"
 )
 
 // DecodePost decodes and validates post data from an HTTP request form
@@ -56,7 +57,7 @@ func DecodeComment(r *http.Request) (*entity.Comment, error) {
 
 	content := strings.TrimSpace(r.Form.Get("content"))
 
-	if !validator.IsLengthValid(content, 0, 500) {
+	if !validator.IsLengthValid(content, 1, 500) {
 		return nil, errors.New("content is too long")
 	}
 
@@ -67,7 +68,6 @@ func DecodeComment(r *http.Request) (*entity.Comment, error) {
 	}
 
 	return comment, nil
-
 }
 
 func DecodeUser(r *http.Request) (*entity.User, error) {
@@ -80,19 +80,28 @@ func DecodeUser(r *http.Request) (*entity.User, error) {
 	email := strings.TrimSpace(r.Form.Get("email"))
 	password := strings.TrimSpace(r.Form.Get("password"))
 
-	if !validator.ValidateUsername(username) ||
-		!validator.ValidatePassword(password) {
-		return nil, errors.New("invalid username or password")
+	if !validator.IsLengthValid(username, 4, 30) {
+		return nil, errors.New("username must be between 4 and 30 characters long")
+	}
+
+	if !validator.ValidateUsername(username) {
+		return nil, errors.New("username can only contain letters, numbers, underscores, and hyphens")
+	}
+
+	if !validator.IsLengthValid(email, 1, 256) {
+		return nil, errors.New("email is too long")
 	}
 
 	if !validator.ValidateEmail(email) {
-		return nil, fmt.Errorf("email is invalid")
+		return nil, fmt.Errorf("invalid email format")
 	}
 
-	if !validator.IsLengthValid(username, 4, 30) ||
-		!validator.IsLengthValid(password, 8, 50) ||
-		!validator.IsLengthValid(email, 1, 256) {
-		return nil, errors.New("username, password, or email is too long")
+	if !validator.IsLengthValid(password, 8, 50) {
+		return nil, errors.New("password must be between 8 and 50 characters long")
+	}
+
+	if !validator.ValidatePassword(password) {
+		return nil, errors.New("password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
 	}
 
 	newUser := &entity.User{

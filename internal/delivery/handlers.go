@@ -1,23 +1,14 @@
 package delivery
 
 import (
-<<<<<<< HEAD
-	"forum/internal/entity"
-	"forum/internal/helpers/template"
-	"forum/internal/service"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
-=======
-	"fmt"
+
 	"forum/internal/service"
 	"forum/internal/utils"
 	tmpl2 "forum/pkg/tmpl"
-	"net/http"
-	"strconv"
-	"strings"
->>>>>>> arti
 )
 
 func (a *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -116,20 +107,10 @@ func (a *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	err = template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
-	app.logger.ErrorLog.Println(err.Error())
-}
-
-func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-=======
 	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/post_view.html", postData)
 	if err != nil {
 		a.log.Error(err.Error())
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
->>>>>>> arti
 		return
 	}
 }

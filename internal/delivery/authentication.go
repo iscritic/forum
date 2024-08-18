@@ -1,11 +1,12 @@
 package delivery
 
 import (
+	"net/http"
+	"time"
+
 	"forum/internal/service"
 	"forum/internal/service/session"
 	tmpl2 "forum/pkg/tmpl"
-	"net/http"
-	"time"
 )
 
 func (a *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +24,10 @@ func (a *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		user, err := service.DecodeUser(r)
 		if err != nil {
 			a.log.Error(err.Error())
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/register.html", map[string]interface{}{
+				"error": err.Error(),
+				"user":  user,
+			})
 			return
 		}
 

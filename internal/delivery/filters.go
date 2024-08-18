@@ -2,11 +2,12 @@ package delivery
 
 import (
 	"fmt"
+	"net/http"
+	"strings"
+
 	"forum/internal/service"
 	"forum/internal/utils"
 	tmpl2 "forum/pkg/tmpl"
-	"net/http"
-	"strings"
 )
 
 func (a *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.Request) {

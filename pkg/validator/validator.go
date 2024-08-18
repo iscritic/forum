@@ -5,10 +5,10 @@ import (
 )
 
 const (
-	usernamePattern = `^[a-zA-Z][a-zA-Z0-9_-]$`
-	emailPattern    = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]$`
-	passwordPattern = `^[a-zA-Z][a-zA-Z0-9_-]$`
-	//passwordPattern = `^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@!#%^&*])[a-zA-Z\d@!#%^&*]$`
+	usernamePattern = `^[a-zA-Z0-9]+$`
+	emailPattern    = `^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`
+	passwordPattern = `^[a-zA-Z0-9]+$`
+	// passwordPattern = `^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@!#%^&*])[a-zA-Z\d@!#%^&*]$`
 )
 
 func IsLengthValid(str string, min, max int) bool {
