@@ -1,47 +1,37 @@
 package validator
 
 import (
-	"reflect"
 	"regexp"
 )
 
-func IsEmptyValue(v reflect.Value) bool {
-	switch v.Kind() {
-	case reflect.String:
-		return v.String() == ""
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-
-		return v.Int() == 0
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-
-		return v.Uint() == 0
-	case reflect.Float32, reflect.Float64:
-		return v.Float() == 0
-	case reflect.Bool:
-		return !v.Bool()
-	case reflect.Slice,
-		reflect.Map, reflect.Ptr, reflect.Interface:
-		return v.IsNil()
-	}
-	return false
-}
+const (
+	usernamePattern = `^[a-zA-Z][a-zA-Z0-9_-]$`
+	emailPattern    = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]$`
+	passwordPattern = `^[a-zA-Z][a-zA-Z0-9_-]$`
+	//passwordPattern = `^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@!#%^&*])[a-zA-Z\d@!#%^&*]$`
+)
 
 func IsLengthValid(str string, min, max int) bool {
 	length := len(str)
 	return length >= min && length <= max
 }
 
-func IsInSet(value interface{}, set ...interface{}) bool {
-	for _, item := range set {
-		if value == item {
-			return true
-		}
+func ValidateByPattern(pattern, s string) bool {
+	matched, err := regexp.MatchString(pattern, s)
+	if err != nil {
+		return false
 	}
-	return false
+	return matched
 }
 
-func IsEmailValid(email string) bool {
-	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
-	return emailRegex.MatchString(email)
+func ValidateUsername(username string) bool {
+	return ValidateByPattern(usernamePattern, username)
+}
 
+func ValidateEmail(email string) bool {
+	return ValidateByPattern(emailPattern, email)
+}
+
+func ValidatePassword(password string) bool {
+	return ValidateByPattern(passwordPattern, password)
 }

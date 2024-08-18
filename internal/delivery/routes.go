@@ -50,10 +50,6 @@ func Routes(l *flog.Logger, db *repository.Storage, tc *tmpl.TemplateCache) http
 
 	mux.Handle("/logout", protected.ThenFunc(app.LogoutHandler))
 
-	protected = mw.New(app.requireRole("admin"))
-
-	mux.Handle("/admin", protected.ThenFunc(app.adminPageHandler))
-
 	// standard midllewares for all routes
 	standard := mw.New(app.logRequest, app.recoverPanic, secureHeaders, app.sessionManager)
 

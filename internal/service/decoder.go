@@ -7,7 +7,7 @@ import (
 	"forum/internal/utils"
 	"forum/pkg/validator"
 	"net/http"
-	"reflect"
+	"strings"
 )
 
 // DecodePost decodes and validates post data from an HTTP request form
@@ -17,8 +17,8 @@ func DecodePost(r *http.Request) (*entity.Post, error) {
 		return nil, fmt.Errorf("error parsing form: %w", err)
 	}
 
-	title := r.Form.Get("title")
-	content := r.Form.Get("content")
+	title := strings.TrimSpace(r.Form.Get("title"))
+	content := strings.TrimSpace(r.Form.Get("content"))
 	categoryIDStr := r.Form.Get("category")
 
 	categoryID, err := utils.Etoi(categoryIDStr)
@@ -26,15 +26,8 @@ func DecodePost(r *http.Request) (*entity.Post, error) {
 		return nil, fmt.Errorf("invalid category ID: %w", err)
 	}
 
-	// Basic validation using your custom validator
-	if validator.IsEmptyValue(reflect.ValueOf(title)) ||
-		validator.IsEmptyValue(reflect.ValueOf(content)) ||
-		validator.IsEmptyValue(reflect.ValueOf(categoryIDStr)) {
-		return nil, fmt.Errorf("title, content, and category are required")
-	}
-
-	if !validator.IsLengthValid(title, 0, 100) ||
-		!validator.IsLengthValid(content, 0, 1000) {
+	if !validator.IsLengthValid(title, 1, 100) ||
+		!validator.IsLengthValid(content, 1, 1000) {
 		return nil, errors.New("title or content is too long")
 	}
 
@@ -61,12 +54,7 @@ func DecodeComment(r *http.Request) (*entity.Comment, error) {
 		return nil, fmt.Errorf("invalid post ID: %w", err)
 	}
 
-	content := r.Form.Get("content")
-
-	if validator.IsEmptyValue(reflect.ValueOf(postID)) ||
-		validator.IsEmptyValue(reflect.ValueOf(content)) {
-		return nil, fmt.Errorf("content is required")
-	}
+	content := strings.TrimSpace(r.Form.Get("content"))
 
 	if !validator.IsLengthValid(content, 0, 500) {
 		return nil, errors.New("content is too long")
@@ -80,4 +68,39 @@ func DecodeComment(r *http.Request) (*entity.Comment, error) {
 
 	return comment, nil
 
+}
+
+func DecodeUser(r *http.Request) (*entity.User, error) {
+	err := r.ParseForm()
+	if err != nil {
+		return nil, fmt.Errorf("error parsing form: %w", err)
+	}
+
+	username := strings.TrimSpace(r.Form.Get("username"))
+	email := strings.TrimSpace(r.Form.Get("email"))
+	password := strings.TrimSpace(r.Form.Get("password"))
+
+	if !validator.ValidateUsername(username) ||
+		!validator.ValidatePassword(password) {
+		return nil, errors.New("invalid username or password")
+	}
+
+	if !validator.ValidateEmail(email) {
+		return nil, fmt.Errorf("email is invalid")
+	}
+
+	if !validator.IsLengthValid(username, 4, 30) ||
+		!validator.IsLengthValid(password, 8, 50) ||
+		!validator.IsLengthValid(email, 1, 256) {
+		return nil, errors.New("username, password, or email is too long")
+	}
+
+	newUser := &entity.User{
+		Username: username,
+		Email:    email,
+		Password: password,
+		Role:     "user",
+	}
+
+	return newUser, nil
 }

@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"forum/internal/entity"
 	"forum/internal/service"
 	"forum/internal/service/session"
 	tmpl2 "forum/pkg/tmpl"
@@ -12,31 +11,31 @@ import (
 func (a *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/register.html", nil)
-		return
-	case http.MethodPost:
-		err := r.ParseForm()
+
+		err := tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/register.html", nil)
 		if err != nil {
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+	case http.MethodPost:
+
+		user, err := service.DecodeUser(r)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
-		// Получаем данные из формы регистрации
-		username := r.Form.Get("username")
-		email := r.Form.Get("email")
-		password := r.Form.Get("password")
-
-		// Создаем нового пользователя
-		newUser := entity.User{
-			Username: username,
-			Email:    email,
-			Password: password,
-			Role:     "user", // Устанавливаем роль по умолчанию
+		err = service.Register(a.storage, user)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
 		}
 
-		service.Register(a.storage, newUser)
-
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-		a.log.Info("New user detected: %v", newUser)
+		a.log.Info("New user detected: %v", user)
 	}
 }
 
