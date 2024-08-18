@@ -137,19 +137,39 @@ a:hover {
     gap: 10px;
 }
 
-.like-dislike-button form {
+/* .like-dislike-button form {
     display: inline-block;
     margin: 0;
-}
+} */
 
 .like-button, .dislike-button {
+    display: inline-block;
     padding: 5px 10px;
     border-radius: 5px;
     border: none;
     background-color: #2c2c2c;
     color: white;
     cursor: pointer;
+    margin-right: 10px;
 }
+
+.comment_card{
+    background-color: #232324;
+    border-radius: 15px;
+    margin: 30px 30px 30px 0;
+    padding: 20px;
+    width: 60%;
+    box-sizing: border-box;
+}
+
+.com-but{
+    border: none;
+    background-color: #3c3c3c;
+    color: white;
+    border-radius: 5px;
+    margin: 20px 20px 0 0;
+}
+
 
 header {
     display: flex;

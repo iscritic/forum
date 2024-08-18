@@ -30,13 +30,13 @@
                         <span>
                             <form method="POST" action="/post/like">
                                 <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                <button type="submit">❤️ {{.Post.Likes}}</button>
+                                <button type="submit" class="like-button">❤️ {{.Post.Likes}}</button>
                             </form>
                         </span>
                         <span>
                             <form method="POST" action="/post/dislike">
                                 <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                <button type="submit">💔 {{.Post.Dislikes}}</button>
+                                <button type="submit" class="dislike-button">💔 {{.Post.Dislikes}}</button>
                             </form>
                         </span>
                     </div>

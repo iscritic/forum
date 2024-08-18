@@ -1,14 +1,13 @@
 package delivery
 
 import (
+	"forum/internal/entity"
+	"forum/internal/helpers/template"
+	"forum/internal/service"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-
-	"forum/internal/entity"
-	"forum/internal/helpers/template"
-	"forum/internal/service"
 )
 
 func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +154,8 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
+	err = template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
+	app.logger.ErrorLog.Println(err.Error())
 }
 
 func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
