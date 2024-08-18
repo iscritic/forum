@@ -1,27 +1,27 @@
 package delivery
 
 import (
+	"forum/pkg/tmpl"
 	"net/http"
 
-	"forum/internal/helpers/template"
 	"forum/internal/repository"
-	"forum/pkg/logger"
+	"forum/pkg/flog"
 	"forum/pkg/mw"
 )
 
 type application struct {
-	logger        *logger.Logger
-	storage       *repository.Storage
-	templateCache *template.TemplateCache
+	log       *flog.Logger
+	storage   *repository.Storage
+	tmplcache *tmpl.TemplateCache
 }
 
-func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache) http.Handler {
+func Routes(l *flog.Logger, db *repository.Storage, tc *tmpl.TemplateCache) http.Handler {
 	mux := http.NewServeMux()
 
 	app := &application{
-		logger:        l,
-		storage:       db,
-		templateCache: tc,
+		log:       l,
+		storage:   db,
+		tmplcache: tc,
 	}
 
 	fileServer := http.FileServer(http.Dir("./web/static"))
@@ -49,10 +49,6 @@ func Routes(l *logger.Logger, db *repository.Storage, tc *template.TemplateCache
 	mux.Handle("/comment/dislike", protected.ThenFunc(app.DislikeCommentHandler))
 
 	mux.Handle("/logout", protected.ThenFunc(app.LogoutHandler))
-
-	protected = mw.New(app.requireRole("admin"))
-
-	mux.Handle("/admin", protected.ThenFunc(app.adminPageHandler))
 
 	// standard midllewares for all routes
 	standard := mw.New(app.logRequest, app.recoverPanic, secureHeaders, app.sessionManager)

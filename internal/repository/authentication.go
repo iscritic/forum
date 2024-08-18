@@ -5,7 +5,7 @@ import (
 	"forum/internal/entity"
 )
 
-func (storage *Storage) CreateUser(user entity.User) error {
+func (storage *Storage) CreateUser(user *entity.User) error {
 	_, err := storage.db.Exec(`INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)`, user.Username, user.Email, user.Password, user.Role)
 	if err != nil {
 		return err

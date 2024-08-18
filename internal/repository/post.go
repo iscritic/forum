@@ -7,7 +7,7 @@ import (
 	"forum/internal/entity"
 )
 
-func (Storage *Storage) CreatePost(post entity.Post) (int, error) {
+func (Storage *Storage) CreatePost(post *entity.Post) (int, error) {
 	res, err := Storage.db.Exec(`INSERT INTO posts (title, content, author_id, category_id) VALUES (?, ?, ?, ?)`,
 		post.Title, post.Content, post.AuthorID, post.CategoryID)
 	if err != nil {

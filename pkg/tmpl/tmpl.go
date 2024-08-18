@@ -1,8 +1,8 @@
-package template
+package tmpl
 
 import (
+	"html/template"
 	"net/http"
-	"text/template"
 )
 
 // RenderTemplate renders a template using the TemplateCache.
@@ -12,14 +12,14 @@ func RenderTemplate(w http.ResponseWriter, tc *TemplateCache, tmpl string, data 
 		var err error
 		t, err = template.ParseFiles(tmpl)
 		if err != nil {
-			return err // Return error to the caller
+			return err
 		}
 		tc.Set(tmpl, t)
 	}
 
 	err := t.Execute(w, data)
 	if err != nil {
-		return err // Return error to the caller
+		return err
 	}
 	return nil
 }

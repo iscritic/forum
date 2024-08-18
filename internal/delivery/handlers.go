@@ -1,6 +1,7 @@
 package delivery
 
 import (
+<<<<<<< HEAD
 	"forum/internal/entity"
 	"forum/internal/helpers/template"
 	"forum/internal/service"
@@ -8,152 +9,114 @@ import (
 	"strconv"
 	"strings"
 	"time"
+=======
+	"fmt"
+	"forum/internal/service"
+	"forum/internal/utils"
+	tmpl2 "forum/pkg/tmpl"
+	"net/http"
+	"strconv"
+	"strings"
+>>>>>>> arti
 )
 
-func (app *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.NotFound(w, r)
+		a.log.Debug(fmt.Sprintf("%s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 		return
 	}
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
-	posts, err := service.GetAllPostRelatedData(app.storage)
+	data, err := service.GetHomePageData(a.storage, r.Context())
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		http.Error(w, "Unable to fetch posts", http.StatusInternalServerError)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	categories, err := service.GetCategories(app.storage)
+	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/home.html", data)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
-	}
-
-	var userInfo *entity.User
-	role, ok := r.Context().Value("role").(string)
-	if !ok {
-		app.logger.ErrorLog.Println("Role is not a string")
-		http.Error(w, "Invalid user role", http.StatusInternalServerError)
-		return
-	}
-
-	if role != "guest" {
-		userID, ok := r.Context().Value("userID").(int)
-		if !ok {
-			app.logger.ErrorLog.Println("UserID is not an int")
-			http.Error(w, "Invalid user ID", http.StatusInternalServerError)
-			return
-		}
-
-		userInfo, err = app.storage.GetUserByID(userID)
-		if err != nil {
-			app.logger.ErrorLog.Println(err)
-			http.Error(w, "Unable to fetch user info", http.StatusInternalServerError)
-			return
-		}
-	} else {
-		userInfo = &entity.User{Role: role}
-	}
-
-	data := struct {
-		Posts      []*entity.PostRelatedData
-		Categories []entity.Category
-		UserInfo   *entity.User
-	}{
-		Posts:      posts,
-		Categories: categories,
-		UserInfo:   userInfo,
-	}
-
-	err = template.RenderTemplate(w, app.templateCache, "./web/html/home.html", data)
-	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		http.Error(w, "Unable to render template", http.StatusInternalServerError)
 	}
 }
 
-func (app *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+
 	case http.MethodGet:
-		categories, err := service.GetCategories(app.storage)
+
+		categories, err := service.GetCategories(a.storage)
 		if err != nil {
-			app.logger.ErrorLog.Println(err)
-			http.Error(w, "Unable to fetch categories", http.StatusInternalServerError)
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
-		template.RenderTemplate(w, app.templateCache, "./web/html/post_create.html", categories)
+
+		err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/post_create.html", categories)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 		return
 
 	case http.MethodPost:
-		err := r.ParseForm()
+
+		post, err := service.DecodePost(r)
 		if err != nil {
-			http.Error(w, "Failed to parse form", http.StatusInternalServerError)
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
 			return
 		}
 
-		var post entity.Post
-
-		title := r.Form.Get("title")
-		content := r.Form.Get("content")
-		categoryIDStr := r.Form.Get("category")
-
-		if title == "" || content == "" || categoryIDStr == "" {
-			http.Error(w, "Title, content, and category are required", http.StatusBadRequest)
-			return
-		}
-
-		post.Title = title
-		post.Content = content
-		post.CreationDate = time.Now()
-
-		post.AuthorID = r.Context().Value("userID").(int)
-
-		categoryID, err := strconv.Atoi(categoryIDStr)
+		lastID, err := a.storage.CreatePost(post)
 		if err != nil {
-			http.Error(w, "Invalid category ID", http.StatusBadRequest)
-			return
-		}
-		post.CategoryID = categoryID
-
-		lastID, err := app.storage.CreatePost(post)
-		if err != nil {
-			app.logger.ErrorLog.Println(err)
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
 		http.Redirect(w, r, "/post/"+strconv.Itoa(lastID), http.StatusSeeOther)
 
 	default:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
+
 	}
 }
 
-func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
 	idStr := strings.TrimPrefix(r.URL.Path, "/post/")
-	id, err := strconv.Atoi(idStr)
+	id, err := utils.Etoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		a.log.Warn(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 
-	postData, err := service.GetPostRelatedData(app.storage, id)
+	postData, err := service.GetPostRelatedData(a.storage, id)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 
+<<<<<<< HEAD
 	err = template.RenderTemplate(w, app.templateCache, "./web/html/post_view.html", postData)
 	app.logger.ErrorLog.Println(err.Error())
 }
@@ -161,35 +124,36 @@ func (app *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) 
 func (app *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Failed to parse form", http.StatusInternalServerError)
-		return
-	}
-
-	var comment entity.Comment
-
-	// Получаем ID поста из формы
-	postIDStr := r.Form.Get("post_id")
-	postID, err := strconv.Atoi(postIDStr)
+=======
+	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/post_view.html", postData)
 	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+>>>>>>> arti
+		return
+	}
+}
+
+func (a *application) CreateComment(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
-	comment.PostID = postID
-	comment.Content = r.Form.Get("content")
-
-	comment.AuthorID = r.Context().Value("userID").(int)
-
-	// TODO author comment id
-
-	err = app.storage.CreateComment(comment)
+	comment, err := service.DecodeComment(r)
 	if err != nil {
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	http.Redirect(w, r, "/post/"+postIDStr, http.StatusSeeOther)
+	err = a.storage.CreateComment(*comment)
+	if err != nil {
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 }

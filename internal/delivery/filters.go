@@ -1,74 +1,91 @@
 package delivery
 
 import (
-	"forum/internal/helpers/template"
+	"fmt"
 	"forum/internal/service"
+	"forum/internal/utils"
+	tmpl2 "forum/pkg/tmpl"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
-func (app *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
 	idStr := strings.TrimPrefix(r.URL.Path, "/category/")
-	id, err := strconv.Atoi(idStr)
+	id, err := utils.Etoi(idStr)
 	if err != nil {
-		http.Error(w, "Invalid category ID", http.StatusBadRequest)
+		a.log.Warn(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 
-	posts, err := service.GetAllPostRelatedDataByCategory(app.storage, id)
+	posts, err := service.GetAllPostRelatedDataByCategory(a.storage, id)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	app.logger.InfoLog.Println("Sorted by category id:", id)
-	app.logger.InfoLog.Println("Posts:", posts)
+	a.log.Debug("Sorted by category id: %v", id)
+	a.log.Debug("Posts: %v", posts)
 
-	err = template.RenderTemplate(w, app.templateCache, "./web/html/sorted.html", posts)
+	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/sorted.html", posts)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 }
 
-func (app *application) MyPostsHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) MyPostsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
 	userID := r.Context().Value("userID").(int)
 
-	posts, err := service.GetAllPostRelatedDataByUserID(app.storage, userID)
+	posts, err := service.GetAllPostRelatedDataByUserID(a.storage, userID)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	template.RenderTemplate(w, app.templateCache, "./web/html/sorted.html", posts)
+	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/sorted.html", posts)
+	if err != nil {
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
 }
 
-func (app *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
 	userID := r.Context().Value("userID").(int)
 
-	posts, err := service.GetAllLikedPostsById(app.storage, userID)
+	posts, err := service.GetAllLikedPostsById(a.storage, userID)
 	if err != nil {
-		app.logger.ErrorLog.Println(err)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	template.RenderTemplate(w, app.templateCache, "./web/html/sorted.html", posts)
+	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/sorted.html", posts)
+	if err != nil {
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
 }

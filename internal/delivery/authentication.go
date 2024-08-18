@@ -1,49 +1,48 @@
 package delivery
 
 import (
-	"forum/internal/entity"
-	"forum/internal/helpers/template"
 	"forum/internal/service"
 	"forum/internal/service/session"
+	tmpl2 "forum/pkg/tmpl"
 	"net/http"
 	"time"
 )
 
-func (app *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		template.RenderTemplate(w, app.templateCache, "./web/html/register.html", nil)
-		return
-	case http.MethodPost:
-		err := r.ParseForm()
+
+		err := tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/register.html", nil)
 		if err != nil {
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+	case http.MethodPost:
+
+		user, err := service.DecodeUser(r)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
-		// Получаем данные из формы регистрации
-		username := r.Form.Get("username")
-		email := r.Form.Get("email")
-		password := r.Form.Get("password")
-
-		// Создаем нового пользователя
-		newUser := entity.User{
-			Username: username,
-			Email:    email,
-			Password: password,
-			Role:     "user", // Устанавливаем роль по умолчанию
+		err = service.Register(a.storage, user)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
 		}
 
-		service.Register(app.storage, newUser)
-
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-		app.logger.InfoLog.Printf("New user detected: %v", newUser)
+		a.log.Info("New user detected: %v", user)
 	}
 }
 
-func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	switch {
 	case r.Method == http.MethodGet:
-		template.RenderTemplate(w, app.templateCache, "./web/html/login.html", nil)
+		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", nil)
 		return
 	case r.Method != http.MethodPost:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -62,7 +61,7 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.Form.Get("password")
 
 	// Проверяем существование пользователя с заданными данными
-	user, err := app.storage.GetUserByUsername(username)
+	user, err := a.storage.GetUserByUsername(username)
 	if err != nil {
 		// Обработка ошибки
 		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
@@ -76,12 +75,11 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.logger.ErrorLog.Println("we are here")
-
 	// Создаем сессию и устанавливаем cookie
-	sessionToken, err := session.CreateSession(app.storage, user)
+	sessionToken, err := session.CreateSession(a.storage, user)
 	if err != nil {
-		app.logger.InfoLog.Println(err)
+		a.log.Error("CreateSession: %v", err)
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, "Internal Server Error")
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -96,7 +94,7 @@ func (app *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (app *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (a *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the userID from the context
 	userId, ok := r.Context().Value("userID").(int)
 	if !ok {
@@ -105,9 +103,9 @@ func (app *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete all sessions for the user
-	err := app.storage.DeleteAllSessionsForUser(userId)
+	err := a.storage.DeleteAllSessionsForUser(userId)
 	if err != nil {
-		app.logger.ErrorLog.Printf("Failed to delete existing sessions: %v", err)
+		a.log.Error("Failed to delete existing sessions: %v", err)
 		http.Error(w, "Failed to log out", http.StatusInternalServerError)
 		return
 	}

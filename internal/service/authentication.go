@@ -5,9 +5,7 @@ import (
 	"forum/internal/repository"
 )
 
-func Register(db *repository.Storage, user entity.User) error {
-
-	//TODO: add validation
+func Register(db *repository.Storage, user *entity.User) error {
 
 	//TODO: checking duplicates
 

@@ -11,6 +11,7 @@ import (
 
 type Config struct {
 	Env         string     `json:"env"`
+	LogLevel    int        `json:"log_level"`
 	StoragePath string     `json:"storage_path"`
 	HTTPServer  HTTPServer `json:"http_server"`
 }
