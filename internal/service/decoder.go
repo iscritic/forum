@@ -27,9 +27,9 @@ func DecodePost(r *http.Request) (*entity.Post, error) {
 		return nil, fmt.Errorf("invalid category ID: %w", err)
 	}
 
-	if !validator.IsLengthValid(title, 1, 100) ||
-		!validator.IsLengthValid(content, 1, 1000) {
-		return nil, errors.New("title or content is too long")
+	if !validator.IsLengthValid(title, 3, 100) ||
+		!validator.IsLengthValid(content, 10, 1000) {
+		return nil, errors.New("title or content is too long or too short")
 	}
 
 	post := &entity.Post{
@@ -57,7 +57,7 @@ func DecodeComment(r *http.Request) (*entity.Comment, error) {
 
 	content := strings.TrimSpace(r.Form.Get("content"))
 
-	if !validator.IsLengthValid(content, 1, 500) {
+	if !validator.IsLengthValid(content, 4, 500) {
 		return nil, errors.New("content is too long")
 	}
 

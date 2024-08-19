@@ -15,21 +15,6 @@
         </nav>
 </header>
 <div class="wrapper">
-    <aside class="aside">
-        {{ if .UserInfo.Username }}
-        <div class="activity">
-            <h3>Activity</h3>
-            <a href="/likedposts" class="aside-button">My Liked Posts</a>
-            <a href="/createdposts" class="aside-button">My Created Posts</a>
-        </div>
-        {{ end }}
-        <div class="categories">
-            <h3>Categories</h3>
-            {{ range .Categories }}
-            <a href="/category/{{ .ID }}" class="aside-button">{{ .Name }}</a>
-            {{ end }}
-        </div>
-    </aside>
     <div class="post">
         <h1>{{ .Post.Title }}</h1>
         <p>{{ .Post.Content }}</p>
@@ -58,7 +43,7 @@
         <h2>Write a comment</h2>
         <form action="/post/comment" method="post">
             <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-            <textarea name="content" rows="4" cols="30px" placeholder="Write your comment here" required></textarea><br>
+            <textarea name="content" rows="4" cols="30px" placeholder="Write your comment here" required minlength="4" maxlength="100"></textarea><br>
             <button type="submit" class="com-but">Submit</button>
         </form>
     </div>

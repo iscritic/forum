@@ -64,7 +64,12 @@ func (a *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 		post, err := service.DecodePost(r)
 		if err != nil {
 			a.log.Error(err.Error())
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
+			data := struct {
+				Error string
+			}{
+				Error: err.Error(),
+			}
+			tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/home.html", data)
 			return
 		}
 
