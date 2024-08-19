@@ -9,6 +9,10 @@ import (
 	tmpl2 "forum/pkg/tmpl"
 )
 
+type TemplateData struct {
+	Error string
+}
+
 func (a *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
@@ -24,17 +28,20 @@ func (a *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		user, err := service.DecodeUser(r)
 		if err != nil {
 			a.log.Error(err.Error())
-			tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/register.html", map[string]interface{}{
-				"error": err.Error(),
-				"user":  user,
-			})
+			data := TemplateData{
+				Error: err.Error(),
+			}
+			tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/register.html", data)
 			return
 		}
 
 		err = service.Register(a.storage, user)
 		if err != nil {
 			a.log.Error(err.Error())
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			data := TemplateData{
+				Error: err.Error(),
+			}
+			tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/register.html", data)
 			return
 		}
 

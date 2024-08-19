@@ -97,7 +97,7 @@ func DecodeUser(r *http.Request) (*entity.User, error) {
 	}
 
 	if !validator.IsLengthValid(password, 8, 50) {
-		return nil, errors.New("password must be between 8 and 50 characters long")
+		return nil, errors.New("password must contain at least 8 characters")
 	}
 
 	if !validator.ValidatePassword(password) {
