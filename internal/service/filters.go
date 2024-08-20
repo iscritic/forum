@@ -1,33 +1,83 @@
 package service
 
 import (
+	"context"
+
 	"forum/internal/entity"
 	"forum/internal/repository"
 )
 
-func GetAllPostRelatedDataByCategory(db *repository.Storage, categoryID int) ([]*entity.PostRelatedData, error) {
-	data, err := db.GetAllPostRelatedDataByCategory(categoryID)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
+type PageData struct {
+	Posts      []*entity.PostRelatedData
+	Categories []entity.Category
+	UserInfo   entity.User
 }
 
-func GetAllPostRelatedDataByUserID(db *repository.Storage, userID int) ([]*entity.PostRelatedData, error) {
-	data, err := db.GetAllPostRelatedDataByUser(userID)
+func GetAllPostRelatedDataByCategory(ctx context.Context, db *repository.Storage, categoryID int) (PageData, error) {
+	posts, err := db.GetAllPostRelatedDataByCategory(categoryID)
 	if err != nil {
-		return nil, err
+		return PageData{}, err
 	}
 
-	return data, nil
+	categories, err := GetCategories(db)
+	if err != nil {
+		return PageData{}, err
+	}
+
+	userInfo, err := GetUserInfo(ctx, db)
+	if err != nil {
+		return PageData{}, err
+	}
+
+	return PageData{
+		Posts:      posts,
+		Categories: categories,
+		UserInfo:   *userInfo,
+	}, nil
 }
 
-func GetMyLikedPosts(db *repository.Storage, userID int) ([]*entity.PostRelatedData, error) {
-	data, err := db.GetMyLikedPosts(userID)
+func GetMyLikedPosts(ctx context.Context, db *repository.Storage, userID int) (PageData, error) {
+	posts, err := db.GetMyLikedPosts(userID)
 	if err != nil {
-		return nil, err
+		return PageData{}, err
 	}
 
-	return data, nil
+	categories, err := GetCategories(db)
+	if err != nil {
+		return PageData{}, err
+	}
+
+	userInfo, err := GetUserInfo(ctx, db)
+	if err != nil {
+		return PageData{}, err
+	}
+
+	return PageData{
+		Posts:      posts,
+		Categories: categories,
+		UserInfo:   *userInfo,
+	}, nil
+}
+
+func GetAllPostRelatedDataByUserID(ctx context.Context, db *repository.Storage, userID int) (PageData, error) {
+	posts, err := db.GetAllPostRelatedDataByUser(userID)
+	if err != nil {
+		return PageData{}, err
+	}
+
+	categories, err := GetCategories(db)
+	if err != nil {
+		return PageData{}, err
+	}
+
+	userInfo, err := GetUserInfo(ctx, db)
+	if err != nil {
+		return PageData{}, err
+	}
+
+	return PageData{
+		Posts:      posts,
+		Categories: categories,
+		UserInfo:   *userInfo,
+	}, nil
 }

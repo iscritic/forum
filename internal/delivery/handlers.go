@@ -105,7 +105,7 @@ func (a *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postData, err := service.GetPostRelatedData(a.storage, id)
+	postData, err := service.GetPostRelatedData(r.Context(), a.storage, id)
 	if err != nil {
 		a.log.Error(err.Error())
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))

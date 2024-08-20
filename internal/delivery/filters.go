@@ -25,7 +25,7 @@ func (a *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	posts, err := service.GetAllPostRelatedDataByCategory(a.storage, id)
+	posts, err := service.GetAllPostRelatedDataByCategory(r.Context(), a.storage, id)
 	if err != nil {
 		a.log.Error(err.Error())
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -52,7 +52,7 @@ func (a *application) MyPostsHandler(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.Context().Value("userID").(int)
 
-	posts, err := service.GetAllPostRelatedDataByUserID(a.storage, userID)
+	posts, err := service.GetAllPostRelatedDataByUserID(r.Context(), a.storage, userID)
 	if err != nil {
 		a.log.Error(err.Error())
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -76,7 +76,7 @@ func (a *application) MyLikedPostsHandler(w http.ResponseWriter, r *http.Request
 
 	userID := r.Context().Value("userID").(int)
 
-	posts, err := service.GetAllLikedPostsById(a.storage, userID)
+	posts, err := service.GetMyLikedPosts(r.Context(), a.storage, userID)
 	if err != nil {
 		a.log.Error(err.Error())
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

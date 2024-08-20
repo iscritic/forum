@@ -14,7 +14,7 @@ type HomePageData struct {
 	UserInfo   *entity.User
 }
 
-func getUserInfo(ctx context.Context, storage *repository.Storage) (*entity.User, error) {
+func GetUserInfo(ctx context.Context, storage *repository.Storage) (*entity.User, error) {
 	role, ok := ctx.Value("role").(string)
 	if !ok {
 		return nil, fmt.Errorf("role is not a string")
@@ -47,7 +47,7 @@ func GetHomePageData(db *repository.Storage, ctx context.Context) (HomePageData,
 		return HomePageData{}, err
 	}
 
-	userInfo, err := getUserInfo(ctx, db)
+	userInfo, err := GetUserInfo(ctx, db)
 	if err != nil {
 		return HomePageData{}, err
 	}

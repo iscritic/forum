@@ -9,6 +9,8 @@ COPY . .
 
 RUN go build -o forum ./cmd/
 
+RUN chmod +x ./forum
+
 EXPOSE 4269
 
 CMD ["./forum"]
