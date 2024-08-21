@@ -3,7 +3,6 @@ package delivery
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"forum/internal/service"
@@ -79,8 +78,9 @@ func (a *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
+		fmt.Println(lastID)
 
-		http.Redirect(w, r, "/post/"+strconv.Itoa(lastID), http.StatusSeeOther)
+		http.Redirect(w, r, "/createdposts", http.StatusSeeOther)
 
 	default:
 		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
