@@ -13,9 +13,9 @@
                 <a href="/" class="href" style="text-decoration: none; color: inherit;">Forum</a>
             </div>
             <div class="nav-links">
-                {{ if .UserInfo.Username }}
+                {{ if .User.Username }}
                 <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>
-                <div class="welcome-info">Welcome, {{ .UserInfo.Username }} ✌️</div>
+                <div class="welcome-info">Welcome, {{ .User.Username }} ✌️</div>
                 <a href="/logout" class="href"><button class="auth-button">Log Out</button></a>
                 {{ else }}
                 <a href="/login" class="href"><button class="auth-button">Log In</button></a>
@@ -25,26 +25,11 @@
         </nav>
     </header>
     <div class="wrapper">
-        <aside class="aside">
-            {{ if .UserInfo.Username }}
-            <div class="activity">
-                <h3>Activity</h3>
-                <a href="/likedposts" class="aside-button">My Liked Posts</a>
-                <a href="/createdposts" class="aside-button">My Created Posts</a>
-            </div>
-            {{ end }}
-            <div class="categories">
-                <h3>Categories</h3>
-                {{ range .Categories }}
-                <a href="/category/{{ .ID }}" class="aside-button">{{ .Name }}</a>
-                {{ end }}
-            </div>
-        </aside>
         <div class="post">
             <h1>{{ .Post.Title }}</h1>
             <p>{{ .Post.Content }}</p>
-            <p>Author: {{ .UserInfo.Username }}</p> <!-- Changed .User.User to .UserInfo.Username -->
-            <p>#{{ .Post.Category.Name }}</p> <!-- Ensure Category is part of the Post if needed -->
+            <p>Author: {{ .User.Username }}</p> 
+            <p>#{{ .Category.Name }}</p> 
             <p>Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
 
             <div class="PostLikeForm">
@@ -73,20 +58,20 @@
         </div>
 
         <div class="comments">
-            {{ range .Comments }}
+            {{ range .CommentR }}
             <div class="comment_card">
                 <p><strong>{{ .User.Username }}</strong></p>
-                <p class="com-content">{{ .Content }}</p> <!-- Changed .Comment.Content to .Content -->
-                <p>{{ .CreationDate.Format "Jan 2, 2006" }}</p>
-
+                <p>{{ .Comment.Content }}</p>
+                <p>{{ .Comment.CreationDate.Format "Jan 2, 2006" }}</p>
+    
                 <div class="CommentLikeForm">
                     <form method="POST" action="/comment/like">
-                        <input type="hidden" name="comment_id" value="{{ .ID }}">
-                        <button type="submit" class="like-button">❤️ {{ .Likes }}</button>
+                        <input type="hidden" name="comment_id" value="{{ .Comment.ID }}">
+                        <button type="submit">❤️ {{ .Comment.Likes }}</button>
                     </form>
                     <form method="POST" action="/comment/dislike">
-                        <input type="hidden" name="comment_id" value="{{ .ID }}">
-                        <button type="submit" class="dislike-button">💔 {{ .Dislikes }}</button>
+                        <input type="hidden" name="comment_id" value="{{ .Comment.ID }}">
+                        <button type="submit">💔 {{ .Comment.Dislikes }}</button>
                     </form>
                 </div>
             </div>

@@ -76,9 +76,9 @@ func DecodeUser(r *http.Request) (*entity.User, error) {
 		return nil, fmt.Errorf("error parsing form: %w", err)
 	}
 
-	username := strings.TrimSpace(r.Form.Get("username"))
-	email := strings.TrimSpace(r.Form.Get("email"))
-	password := strings.TrimSpace(r.Form.Get("password"))
+	username := r.Form.Get("username")
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
 
 	if !validator.IsLengthValid(username, 4, 30) {
 		return nil, errors.New("username must be between 4 and 30 characters long")

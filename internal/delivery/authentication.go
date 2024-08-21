@@ -62,35 +62,37 @@ func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		// Обработка ошибки
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		data := struct {
+			Error string
+		}{
+			Error: "Internal Server Error",
+		}
+		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", data)
 		return
 	}
 
-	// Получаем данные из формы авторизации
 	username := r.Form.Get("username")
 	password := r.Form.Get("password")
 
-	// Проверяем существование пользователя с заданными данными
 	user, err := a.storage.GetUserByUsername(username)
-	if err != nil {
-		// Обработка ошибки
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+	if err != nil || user.Password != password {
+		data := struct {
+			Error string
+		}{
+			Error: "Invalid credentials",
+		}
+		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", data)
 		return
 	}
 
-	// Проверяем соответствие пароля
-	if user.Password != password {
-		// Обработка ошибки
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
-		return
-	}
-
-	// Создаем сессию и устанавливаем cookie
 	sessionToken, err := session.CreateSession(a.storage, user)
 	if err != nil {
-		a.log.Error("CreateSession: %v", err)
-		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, "Internal Server Error")
+		data := struct {
+			Error string
+		}{
+			Error: "Internal Server Error",
+		}
+		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", data)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -101,7 +103,6 @@ func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	// Перенаправляем пользователя на домашнюю страницу
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 

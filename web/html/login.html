@@ -13,16 +13,10 @@
         <div class="site-title">
             <a href="/" class="href" style="text-decoration: none; color: inherit;">Forum</a>
         </div>
-<!--        <div class="nav-links">-->
-<!--            {{ if .UserInfo.Username }}-->
-<!--            <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>-->
-<!--            <div class="welcome-info">Welcome, {{ .UserInfo.Username }} ✌️</div>-->
-<!--            <a href="/logout" class="href"><button class="auth-button">Log Out</button></a>-->
-<!--            {{ else }}-->
-<!--            <a href="/login" class="href"><button class="auth-button">Log In</button></a>-->
-<!--            <a href="/register" class="href"><button class="auth-button">Sign Up</button></a>-->
-<!--            {{ end }}-->
-<!--        </div>-->
+       <div class="nav-links">
+           <a href="/login" class="href"><button class="auth-button">Log In</button></a>
+           <a href="/register" class="href"><button class="auth-button">Sign Up</button></a>
+       </div>
     </nav>
 </header>
 <div class="wrapper">
@@ -32,6 +26,9 @@
                 <h1>Login</h1>
                 <form action="/login" method="post">
                     <div class="form-group">
+                        {{if .Error}}
+                    <div class="error-mes">{{.Error}}</div>
+                    {{end}}
                         <label for="username">Username:</label>
                         <input type="text" id="username" name="username" required>
                     </div>
