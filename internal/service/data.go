@@ -52,7 +52,7 @@ func GetHomePageData(db *repository.Storage, ctx context.Context) (HomePageData,
 	if err != nil {
 		return HomePageData{}, err
 	}
-	LengthOfCategories := len(categories)
+	LengthOfCategories = len(categories)
 
 	userInfo, err := GetUserInfo(ctx, db)
 	if err != nil {
