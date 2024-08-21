@@ -24,6 +24,10 @@ func (a *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.Req
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
+	if id > service.LengthOfCategories {
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
 
 	posts, err := service.GetAllPostRelatedDataByCategory(r.Context(), a.storage, id)
 	if err != nil {

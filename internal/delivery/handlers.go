@@ -105,6 +105,11 @@ func (a *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if id > service.LengthOfPosts {
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+		return
+	}
+
 	postData, err := service.GetPostRelatedData(r.Context(), a.storage, id)
 	if err != nil {
 		a.log.Error(err.Error())
