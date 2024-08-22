@@ -11,7 +11,6 @@ import (
 	"forum/pkg/validator"
 )
 
-// DecodePost decodes and validates post data from an HTTP request form
 func DecodePost(r *http.Request) (*entity.Post, error) {
 	err := r.ParseForm()
 	if err != nil {
@@ -42,7 +41,6 @@ func DecodePost(r *http.Request) (*entity.Post, error) {
 	return post, nil
 }
 
-// DecodeComment decodes and validates comment data from an HTTP request form
 func DecodeComment(r *http.Request) (*entity.Comment, error) {
 	err := r.ParseForm()
 	if err != nil {

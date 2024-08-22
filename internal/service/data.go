@@ -46,6 +46,8 @@ func GetHomePageData(db *repository.Storage, ctx context.Context) (HomePageData,
 	if err != nil {
 		return HomePageData{}, err
 	}
+
+	// TODO: Remake with comparing db errors
 	LengthOfPosts = len(posts)
 
 	categories, err := GetCategories(db)

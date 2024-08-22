@@ -32,7 +32,6 @@ func MustLoad() *Config {
 		log.Fatalln("CONFIG_PATH is not set")
 	}
 
-	// Read the config file
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		log.Fatalf("failed to read config file: %v", err)

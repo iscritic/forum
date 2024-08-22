@@ -8,7 +8,6 @@ import (
 )
 
 func (s *Storage) GetAllPostsRelatedData() ([]*entity.PostRelatedData, error) {
-	// Получение всех постов
 	posts, err := s.GetAllPost()
 	if err != nil {
 		return nil, err
@@ -23,10 +22,9 @@ func (s *Storage) GetAllPostsRelatedData() ([]*entity.PostRelatedData, error) {
 }
 
 func (s *Storage) GetPostRelatedDataByPostID(postID int) (*entity.PostRelatedData, error) {
-	// 1. Fetch the post by ID
 	post, err := s.GetPostByID(postID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch post: %w", err) // Wrap the error
+		return nil, fmt.Errorf("failed to fetch post: %w", err)
 	}
 	if post == nil {
 		return nil, errors.New("post not found")
@@ -37,25 +35,21 @@ func (s *Storage) GetPostRelatedDataByPostID(postID int) (*entity.PostRelatedDat
 		return nil, err
 	}
 
-	// 2. Fetch related comments
 	comments, err := s.GetAllCommentsRelatedDataByPostID(postID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch comments: %w", err) // Wrap the error
+		return nil, fmt.Errorf("failed to fetch comments: %w", err)
 	}
 
-	// 3. Fetch author information
 	author, err := s.GetUserByID(post.AuthorID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch author: %w", err) // Wrap the error
+		return nil, fmt.Errorf("failed to fetch author: %w", err)
 	}
 
-	// 4. Fetch category information
 	category, err := s.GetCategoryById(post.CategoryID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch category: %w", err) // Wrap the error
+		return nil, fmt.Errorf("failed to fetch category: %w", err)
 	}
 
-	// 5. Construct and return the PostRelatedData struct
 	postRelatedData := &entity.PostRelatedData{
 		Post:     *post,
 		CommentR: comments,
@@ -103,13 +97,11 @@ func (s *Storage) GetAllCommentsRelatedDataByPostID(postID int) ([]entity.Commen
 		return nil, err
 	}
 
-	// Получаем уникальные ID авторов
 	authorIDs := make(map[int]struct{})
 	for _, comment := range comments {
 		authorIDs[comment.AuthorID] = struct{}{}
 	}
 
-	// Получаем информацию о пользователях
 	var authors []entity.User
 	for authorID := range authorIDs {
 		author, err := s.GetUserByID(authorID)
@@ -118,14 +110,11 @@ func (s *Storage) GetAllCommentsRelatedDataByPostID(postID int) ([]entity.Commen
 		}
 		authors = append(authors, *author)
 	}
-
-	// Создаем отображение ID авторов для быстрого доступа
 	authorMap := make(map[int]entity.User)
 	for _, author := range authors {
 		authorMap[author.ID] = author
 	}
 
-	// Создаем результат
 	var commentsRelatedData []entity.CommentRelatedData
 	for _, comment := range comments {
 		user := authorMap[comment.AuthorID]
@@ -139,7 +128,6 @@ func (s *Storage) GetAllCommentsRelatedDataByPostID(postID int) ([]entity.Commen
 }
 
 func (s *Storage) GetAllPostRelatedDataByCategory(categoryID int) ([]*entity.PostRelatedData, error) {
-	// Получение всех постов
 	posts, err := s.GetAllPostByCategory(categoryID)
 	if err != nil {
 		return nil, err
@@ -154,7 +142,6 @@ func (s *Storage) GetAllPostRelatedDataByCategory(categoryID int) ([]*entity.Pos
 }
 
 func (s *Storage) GetAllPostRelatedDataByUser(userID int) ([]*entity.PostRelatedData, error) {
-	// Получение всех постов
 	posts, err := s.GetAllPostByUser(userID)
 	if err != nil {
 		return nil, err
@@ -168,7 +155,6 @@ func (s *Storage) GetAllPostRelatedDataByUser(userID int) ([]*entity.PostRelated
 }
 
 func (s *Storage) GetMyLikedPosts(userID int) ([]*entity.PostRelatedData, error) {
-	// Получение всех постов
 	posts, err := s.GetAllLikedPosts(userID)
 	if err != nil {
 		return nil, err
@@ -183,43 +169,32 @@ func (s *Storage) GetMyLikedPosts(userID int) ([]*entity.PostRelatedData, error)
 }
 
 func (s *Storage) postAdoptionCenter(posts []*entity.Post) ([]*entity.PostRelatedData, error) {
-	// Слайс для хранения указателей на связанные данные
 	var postsRelatedData []*entity.PostRelatedData
 
-	// Итерация по каждому посту для получения связанных данных
 	for _, post := range posts {
-		// Получение связанных комментариев
 		comments, err := s.GetAllCommentsRelatedDataByPostID(post.ID)
 		if err != nil {
 			return nil, err
 		}
-
-		// Получение информации об авторе поста
 		author, err := s.GetUserByID(post.AuthorID)
 		if err != nil {
 			return nil, err
 		}
-
-		// Получение информации о категории
 		category, err := s.GetCategoryById(post.CategoryID)
 		if err != nil {
 			return nil, err
 		}
-
 		post.Likes, post.Dislikes, err = s.GetLikesAndDislikesForPost(post.ID)
 		if err != nil {
 			return nil, err
 		}
 
-		// Заполнение структуры PostRelatedData для текущего поста
-		postRelatedData := &entity.PostRelatedData{ // Создаем указатель на структуру
+		postRelatedData := &entity.PostRelatedData{
 			Post:     *post,
 			CommentR: comments,
 			User:     *author,
 			Category: *category,
 		}
-
-		// Добавление указателя в слайс
 		postsRelatedData = append(postsRelatedData, postRelatedData)
 	}
 

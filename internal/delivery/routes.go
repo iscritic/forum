@@ -1,8 +1,9 @@
 package delivery
 
 import (
-	"forum/pkg/tmpl"
 	"net/http"
+
+	"forum/pkg/tmpl"
 
 	"forum/internal/repository"
 	"forum/pkg/flog"

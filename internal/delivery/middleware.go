@@ -14,12 +14,11 @@ func (a *application) sessionManager(next http.Handler) http.Handler {
 		cookie, err := r.Cookie("session_token")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				// No session cookie, assign guest role
 				ctx = context.WithValue(ctx, "role", "guest")
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
-			// Unexpected error, log it and continue as guest
+
 			a.log.Error("Error getting session cookie: %v", err)
 			ctx = context.WithValue(ctx, "role", "guest")
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -64,16 +63,13 @@ func (a *application) requireRole(allowedRoles ...string) func(http.Handler) htt
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			role, ok := r.Context().Value("role").(string)
 			if !ok || role == "guest" {
-				// No role found in context, redirect to login
 				a.log.Warn("No role found in context, redirecting to login")
 				http.Redirect(w, r, "/login", http.StatusFound)
 				return
 			}
 
-			// Check if the role is in the list of allowed roles
 			for _, allowedRole := range allowedRoles {
 				if role == allowedRole {
-					// Role is allowed, proceed to the next handler
 					next.ServeHTTP(w, r)
 					return
 				}

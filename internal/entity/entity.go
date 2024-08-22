@@ -73,7 +73,3 @@ type PostData struct {
 	Post     PostRelatedData
 	Comments []*CommentRelatedData
 }
-
-//type Storage struct {
-//	Db *sql.DB
-//}

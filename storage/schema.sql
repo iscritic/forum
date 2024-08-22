@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS category (
     id INTEGER PRIMARY KEY,
     name TEXT UNIQUE
 );
+
 INSERT INTO category (name)
 VALUES ('Movies')
 ON CONFLICT(name) DO NOTHING;
@@ -34,8 +35,8 @@ ON CONFLICT(name) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY,
-    title TEXT,
-    content TEXT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
     author_id INTEGER,
     category_id INTEGER,
     likes INTEGER DEFAULT 0,
@@ -48,7 +49,7 @@ CREATE TABLE IF NOT EXISTS posts (
 CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY,
     post_id INTEGER,
-    content TEXT,
+    content TEXT NOT NULL,
     author_id INTEGER,
     likes INTEGER DEFAULT 0,
     dislikes INTEGER DEFAULT 0,
@@ -58,25 +59,13 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 
 CREATE TABLE IF NOT EXISTS sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     session_token TEXT UNIQUE NOT NULL,
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
-CREATE TABLE IF NOT EXISTS likes (
-    id INTEGER PRIMARY KEY,
-    post_id INTEGER,
-    comment_id INTEGER,
-    user_id INTEGER,
-    grade INTEGER,
-    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-
 
 CREATE TABLE IF NOT EXISTS likes (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -88,7 +77,6 @@ CREATE TABLE IF NOT EXISTS likes (
 	FOREIGN KEY (comment_id) REFERENCES comments(id),
 	UNIQUE(user_id, post_id, comment_id)
 );
-
 
 CREATE TABLE IF NOT EXISTS dislikes (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
