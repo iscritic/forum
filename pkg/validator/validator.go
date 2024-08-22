@@ -6,7 +6,7 @@ import (
 
 const (
 	usernamePattern = `^[a-zA-Z0-9]+$`
-	emailPattern    = `^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`
+	emailPattern    = `^[a-z0-9-\.]+@([a-z0-9-]+\.)+[a-z0-9-]{2,4}$`
 	passwordPattern = `^[a-zA-Z0-9]+$`
 	// passwordPattern = `^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@!#%^&*])[a-zA-Z\d@!#%^&*]$`
 )

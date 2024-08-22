@@ -1,4 +1,7 @@
 -- schema.sql
+
+PRAGMA FOREIGN_KEYS = ON;
+
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     username TEXT UNIQUE,
@@ -12,6 +15,10 @@ CREATE TABLE IF NOT EXISTS category (
     id INTEGER PRIMARY KEY,
     name TEXT UNIQUE
 );
+
+INSERT INTO category (name)
+VALUES ('Off-Topic')
+ON CONFLICT(name) DO NOTHING;
 
 INSERT INTO category (name)
 VALUES ('Movies')
@@ -29,9 +36,7 @@ INSERT INTO category (name)
 VALUES ('Games')
 ON CONFLICT(name) DO NOTHING;
 
-INSERT INTO category (name)
-VALUES ('Off-Topic')
-ON CONFLICT(name) DO NOTHING;
+
 
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY,
