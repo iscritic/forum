@@ -189,7 +189,7 @@ footer {
     background-color: #1c1c1c;
     clear: both;
     /* box-sizing: border-box; */
-    position: absolute; 
+    position: flex; 
     bottom: 0;
     left: 0;
 
