@@ -2,15 +2,16 @@ package delivery
 
 import (
 	"fmt"
+	"forum/internal/service"
+	"forum/internal/utils"
 	"net/http"
 	"strings"
 
-	"forum/internal/service"
-	"forum/internal/utils"
 	tmpl2 "forum/pkg/tmpl"
 )
 
 func (a *application) HomeHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("ALO")
 	if r.URL.Path != "/" {
 		a.log.Debug(fmt.Sprintf("%s %s", r.Method, r.URL.Path))
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
