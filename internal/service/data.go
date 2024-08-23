@@ -14,11 +14,6 @@ type HomePageData struct {
 	UserInfo   *entity.User
 }
 
-var (
-	LengthOfPosts      int
-	LengthOfCategories int
-)
-
 func GetUserInfo(ctx context.Context, storage *repository.Storage) (*entity.User, error) {
 	role, ok := ctx.Value("role").(string)
 	if !ok {
@@ -47,14 +42,10 @@ func GetHomePageData(db *repository.Storage, ctx context.Context) (HomePageData,
 		return HomePageData{}, err
 	}
 
-	// TODO: Remake with comparing db errors
-	LengthOfPosts = len(posts)
-
 	categories, err := GetCategories(db)
 	if err != nil {
 		return HomePageData{}, err
 	}
-	LengthOfCategories = len(categories)
 
 	userInfo, err := GetUserInfo(ctx, db)
 	if err != nil {

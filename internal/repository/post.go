@@ -56,7 +56,7 @@ func (Storage *Storage) GetPostByID(id int) (*entity.Post, error) {
 	err := row.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryID, &post.CreationDate)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+			return nil, err
 		}
 		return nil, err
 	}

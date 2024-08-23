@@ -15,7 +15,7 @@ func New(path string) (*Storage, error) {
 	if err != nil {
 		return nil, fmt.Errorf("can't open database: %w", err)
 	}
-
+	// todo
 	// defer db.Close()
 
 	if err := db.Ping(); err != nil {

@@ -1,6 +1,8 @@
 package delivery
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -106,13 +108,13 @@ func (a *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if id > service.LengthOfPosts {
-		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-		return
-	}
-
 	postData, err := service.GetPostRelatedData(r.Context(), a.storage, id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			a.log.Error("post not found")
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
 		a.log.Error(err.Error())
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return

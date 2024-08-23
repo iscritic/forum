@@ -1,6 +1,11 @@
 package repository
 
-import "forum/internal/entity"
+import (
+	"database/sql"
+	"errors"
+
+	"forum/internal/entity"
+)
 
 func (s Storage) GetAllPostByCategory(categoryID int) ([]*entity.Post, error) {
 	query := `
@@ -25,7 +30,6 @@ WHERE p.category_id = ?;
 		}
 		posts = append(posts, &post)
 	}
-
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -106,6 +110,9 @@ func (s *Storage) GetCategoryById(categoryID int) (*entity.Category, error) {
 	query := `SELECT id, name FROM category WHERE id = $1`
 	err := s.db.QueryRow(query, categoryID).Scan(&category.ID, &category.Name)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, err
+		}
 		return nil, err
 	}
 
