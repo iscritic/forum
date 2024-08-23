@@ -7,7 +7,6 @@ import (
 	"forum/pkg/tmpl"
 )
 
-// //// likes and dislikes
 func (a *application) LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))

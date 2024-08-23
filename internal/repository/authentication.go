@@ -18,9 +18,9 @@ func (storage *Storage) CreateUser(user *entity.User) error {
 func (storage *Storage) GetUserByUsername(username string) (*entity.User, error) {
 	row := storage.db.QueryRow(`SELECT id, username, email, password, role FROM users WHERE username = ?`, username)
 
-	var user entity.User // Создаем переменную user
+	var user entity.User
 
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Role) // Передаем адреса полей структуры для сканирования
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -35,9 +35,9 @@ func (storage *Storage) GetUserByUsername(username string) (*entity.User, error)
 func (storage *Storage) GetUserByID(id int) (*entity.User, error) {
 	row := storage.db.QueryRow(`SELECT id, username, email, password, role FROM users WHERE id = ?`, id)
 
-	var user entity.User // Создаем переменную user
+	var user entity.User
 
-	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Role) // Передаем адреса полей структуры для сканирования
+	err := row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (storage *Storage) GetSessionByToken(token string) (*entity.Session, error)
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil // No session found
+			return nil, nil
 		}
 		return nil, err
 	}
