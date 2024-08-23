@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 
 	"forum/internal/entity"
 	"forum/internal/repository"
@@ -14,6 +16,13 @@ type PageData struct {
 }
 
 func GetAllPostRelatedDataByCategory(ctx context.Context, db *repository.Storage, categoryID int) (PageData, error) {
+	_, err := db.GetCategoryById(categoryID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return PageData{}, err
+		}
+	}
+
 	posts, err := db.GetAllPostRelatedDataByCategory(categoryID)
 	if err != nil {
 		return PageData{}, err
