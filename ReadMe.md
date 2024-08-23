@@ -24,5 +24,6 @@ make docker_build
 make docker_run
 ```
 4. Access the Forum: <br>
-Open your web browser and navigate to http://localhost:4269 to start using the forum.
+Open your web browser and navigate to http://localhost:8080 to start using the forum.
+
 

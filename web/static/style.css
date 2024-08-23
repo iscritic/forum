@@ -129,7 +129,7 @@ a:hover {
     float: right;
 }
 
-.PostLikeForm {
+.LikeForm {
     display: flex;
     justify-content: start;
     gap: 10px;
@@ -189,7 +189,7 @@ footer {
     background-color: #1c1c1c;
     clear: both;
     /* box-sizing: border-box; */
-    position: flex; 
+    position: fixed; 
     bottom: 0;
     left: 0;
 

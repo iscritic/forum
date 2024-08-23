@@ -57,7 +57,7 @@ func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", nil)
 		return
 	case r.Method != http.MethodPost:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
@@ -102,14 +102,15 @@ func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 func (a *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	userId, ok := r.Context().Value("userID").(int)
 	if !ok {
-		http.Error(w, "User ID not found in context", http.StatusInternalServerError)
+		a.log.Error("User ID not found in context")
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
 	err := a.storage.DeleteAllSessionsForUser(userId)
 	if err != nil {
 		a.log.Error("Failed to delete existing sessions: %v", err)
-		http.Error(w, "Failed to log out", http.StatusInternalServerError)
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
