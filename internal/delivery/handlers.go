@@ -83,7 +83,7 @@ func (a *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 		}
 		fmt.Println(lastID)
 
-		http.Redirect(w, r, "/createdposts", http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/post/%d", lastID), http.StatusSeeOther)
 
 	default:
 		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
@@ -111,7 +111,7 @@ func (a *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 	postData, err := service.GetPostRelatedData(r.Context(), a.storage, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			a.log.Error("post not found")
+			a.log.Error(fmt.Sprintf("Post with ID %d not found", id))
 			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 			return
 		}

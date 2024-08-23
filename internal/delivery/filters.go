@@ -30,7 +30,7 @@ func (a *application) SortedByCategoryHandler(w http.ResponseWriter, r *http.Req
 	posts, err := service.GetAllPostRelatedDataByCategory(r.Context(), a.storage, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			a.log.Error(err.Error())
+			a.log.Error(fmt.Sprintf("Category with ID %d not found", id))
 			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
 			return
 		}
