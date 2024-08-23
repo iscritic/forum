@@ -6,6 +6,7 @@ import (
 
 	"forum/internal/service"
 	"forum/internal/service/session"
+
 	tmpl2 "forum/pkg/tmpl"
 )
 
@@ -56,18 +57,14 @@ func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", nil)
 		return
 	case r.Method != http.MethodPost:
-		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
 		return
 	}
 
 	err := r.ParseForm()
 	if err != nil {
-		data := struct {
-			Error string
-		}{
-			Error: "Internal Server Error",
-		}
-		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", data)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
@@ -79,7 +76,7 @@ func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		data := struct {
 			Error string
 		}{
-			Error: "Invalid credentials",
+			Error: "Password or username are not correct, try again",
 		}
 		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", data)
 		return
@@ -87,12 +84,8 @@ func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	sessionToken, err := session.CreateSession(a.storage, user)
 	if err != nil {
-		data := struct {
-			Error string
-		}{
-			Error: "Internal Server Error",
-		}
-		tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/login.html", data)
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -107,30 +100,27 @@ func (a *application) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *application) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	// Retrieve the userID from the context
 	userId, ok := r.Context().Value("userID").(int)
 	if !ok {
-		http.Error(w, "User ID not found in context", http.StatusInternalServerError)
+		a.log.Error("User ID not found in context")
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	// Delete all sessions for the user
 	err := a.storage.DeleteAllSessionsForUser(userId)
 	if err != nil {
 		a.log.Error("Failed to delete existing sessions: %v", err)
-		http.Error(w, "Failed to log out", http.StatusInternalServerError)
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
 	}
 
-	// Clear the session cookie
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    "",
 		Path:     "/",
-		Expires:  time.Unix(0, 0), // Expire the cookie
+		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
 	})
 
-	// Redirect to the home page after successful logout
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

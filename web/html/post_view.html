@@ -32,7 +32,7 @@
             <p>#{{ .Category.Name }}</p> 
             <p>Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
 
-            <div class="PostLikeForm">
+            <div class="LikeForm">
                 <span>
                     <form method="POST" action="/post/like">
                         <input type="hidden" name="post_id" value="{{ .Post.ID }}">
@@ -66,19 +66,22 @@
                 <p>{{ .Comment.Content }}</p>
                 <p>{{ .Comment.CreationDate.Format "Jan 2, 2006" }}</p>
     
-                <div class="CommentLikeForm">
+                <div class="LikeForm">
                     <form method="POST" action="/comment/like">
                         <input type="hidden" name="comment_id" value="{{ .Comment.ID }}">
-                        <button type="submit">❤️ {{ .Comment.Likes }}</button>
+                        <button type="submit"  class="like-button">❤️ {{ .Comment.Likes }}</button>
                     </form>
                     <form method="POST" action="/comment/dislike">
                         <input type="hidden" name="comment_id" value="{{ .Comment.ID }}">
-                        <button type="submit">💔 {{ .Comment.Dislikes }}</button>
+                        <button type="submit" class="dislike-button">💔 {{ .Comment.Dislikes }}</button>
                     </form>
                 </div>
             </div>
             {{ end }}
         </div>
     </div>
+    <footer>
+        Forum 2024
+    </footer>
 </body>
 </html>
