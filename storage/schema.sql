@@ -16,28 +16,6 @@ CREATE TABLE IF NOT EXISTS category (
     name TEXT UNIQUE
 );
 
-INSERT INTO category (name)
-VALUES ('Off-Topic')
-ON CONFLICT(name) DO NOTHING;
-
-INSERT INTO category (name)
-VALUES ('Movies')
-ON CONFLICT(name) DO NOTHING;
-
-INSERT INTO category (name)
-VALUES ('News')
-ON CONFLICT(name) DO NOTHING;
-
-INSERT INTO category (name)
-VALUES ('Pets')
-ON CONFLICT(name) DO NOTHING;
-
-INSERT INTO category (name)
-VALUES ('Games')
-ON CONFLICT(name) DO NOTHING;
-
-
-
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
