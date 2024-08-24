@@ -46,7 +46,7 @@ func (a *application) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		a.log.Info("New user detected: %v", user)
 	}
 }
