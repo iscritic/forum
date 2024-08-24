@@ -22,6 +22,17 @@ func GetPostRelatedData(ctx context.Context, db *repository.Storage, id int) (*e
 		return nil, err
 	}
 
+	// get user id from context for checking login
+	userID, ok := ctx.Value("userID").(int)
+	if !ok {
+		return post, err
+	}
+	ctxUser, err := db.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	post.CtxUser = *ctxUser
+
 	return post, nil
 }
 

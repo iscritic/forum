@@ -62,6 +62,8 @@ type PostRelatedData struct {
 	CommentR []CommentRelatedData
 	User     User
 	Category Category
+	CtxUser  User
+	IsLogin  bool
 }
 
 type CommentRelatedData struct {

@@ -15,6 +15,7 @@ func (a *application) sessionManager(next http.Handler) http.Handler {
 		if err != nil {
 			if err == http.ErrNoCookie {
 				ctx = context.WithValue(ctx, "role", "guest")
+				ctx = context.WithValue(ctx, "IsLogin", false)
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
@@ -54,6 +55,7 @@ func (a *application) sessionManager(next http.Handler) http.Handler {
 		// Attach userID and role to context
 		ctx = context.WithValue(ctx, "userID", user.ID)
 		ctx = context.WithValue(ctx, "role", user.Role)
+		ctx = context.WithValue(ctx, "IsLogin", true)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

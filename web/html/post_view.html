@@ -13,17 +13,18 @@
                 <a href="/" class="href" style="text-decoration: none; color: inherit;">Forum</a>
             </div>
             <div class="nav-links">
-                {{ if .User.Username }}
-                <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>
-                <div class="welcome-info">Welcome, {{ .User.Username }} ✌️</div>
-                <a href="/logout" class="href"><button class="auth-button">Log Out</button></a>
+                {{ if .IsLogin }} 
+                    <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>
+                        <div class="welcome-info">Welcome, {{ .CtxUser.Username }} ✌️</div>
+                    <a href="/logout" class="href"><button class="auth-button">Log Out</button></a>
                 {{ else }}
-                <a href="/login" class="href"><button class="auth-button">Log In</button></a>
-                <a href="/register" class="href"><button class="auth-button">Sign Up</button></a>
+                    <a href="/login" class="href"><button class="auth-button">Log In</button></a>
+                    <a href="/register" class="href"><button class="auth-button">Sign Up</button></a>
                 {{ end }}
             </div>
         </nav>
     </header>
+
     <div class="wrapper">
         <div class="post">
             <h1>{{ .Post.Title }}</h1>
@@ -33,30 +34,26 @@
             <p>Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
 
             <div class="LikeForm">
-                <span>
-                    <form method="POST" action="/post/like">
-                        <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-                        <button type="submit" class="like-button">❤️ {{ .Post.Likes }}</button>
-                    </form>
-                </span>
-                <span>
-                    <form method="POST" action="/post/dislike">
-                        <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-                        <button type="submit" class="dislike-button">💔 {{ .Post.Dislikes }}</button>
-                    </form>
-                </span>
+                <form method="POST" action="/post/like" class="like-form">
+                    <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+                    <button type="submit" class="like-button">❤️ {{ .Post.Likes }}</button>
+                </form>
+                <form method="POST" action="/post/dislike" class="dislike-form">
+                    <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+                    <button type="submit" class="dislike-button">💔 {{ .Post.Dislikes }}</button>
+                </form>
             </div>
         </div>
 
         <div class="comment-form"> 
             <div class="comment_card">
-            <h2>Write a comment</h2>
-            <form action="/post/comment" method="post">
-                <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-                <textarea name="content" rows="4" cols="30px" placeholder="Write your comment here" required minlength="4" maxlength="100"></textarea><br>
-                <button type="submit" class="com-but">Submit</button>
-            </form>
-        </div>
+                <h2>Write a comment</h2>
+                <form action="/post/comment" method="post">
+                    <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+                    <textarea name="content" rows="4" cols="30" placeholder="Write your comment here" required minlength="4" maxlength="100"></textarea><br>
+                    <button type="submit" class="com-but">Submit</button>
+                </form>
+            </div>
         </div>
 
         <div class="comments">
@@ -67,11 +64,11 @@
                 <p>{{ .Comment.CreationDate.Format "Jan 2, 2006" }}</p>
     
                 <div class="LikeForm">
-                    <form method="POST" action="/comment/like">
+                    <form method="POST" action="/comment/like" class="like-form">
                         <input type="hidden" name="comment_id" value="{{ .Comment.ID }}">
-                        <button type="submit"  class="like-button">❤️ {{ .Comment.Likes }}</button>
+                        <button type="submit" class="like-button">❤️ {{ .Comment.Likes }}</button>
                     </form>
-                    <form method="POST" action="/comment/dislike">
+                    <form method="POST" action="/comment/dislike" class="dislike-form">
                         <input type="hidden" name="comment_id" value="{{ .Comment.ID }}">
                         <button type="submit" class="dislike-button">💔 {{ .Comment.Dislikes }}</button>
                     </form>
@@ -80,6 +77,7 @@
             {{ end }}
         </div>
     </div>
+
     <footer>
         Forum 2024
     </footer>
