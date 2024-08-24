@@ -63,25 +63,19 @@ func (a *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 
 	case http.MethodPost:
 
-		post, err := service.DecodePost(r)
+		post, err := service.DecodePost(r, a.storage)
 		if err != nil {
 			a.log.Error(err.Error())
-			data := struct {
-				Error string
-			}{
-				Error: err.Error(),
-			}
-			tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/home.html", data)
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		lastID, err := a.storage.CreatePost(post)
 		if err != nil {
 			a.log.Error(err.Error())
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return
 		}
-		fmt.Println(lastID)
 
 		http.Redirect(w, r, fmt.Sprintf("/post/%d", lastID), http.StatusSeeOther)
 
@@ -121,21 +115,12 @@ func (a *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Check if postData is nil
-	if postData == nil {
-		a.log.Error("Post data is nil")
-		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, "Post data is missing")
-		return
-	}
-
-	// Set login status
 	isLogin, ok := r.Context().Value("IsLogin").(bool)
 	if !ok {
 		isLogin = false
 	}
 	postData.IsLogin = isLogin
 
-	// Render template
 	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/post_view.html", postData)
 	if err != nil {
 		a.log.Error(err.Error())

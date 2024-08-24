@@ -7,16 +7,16 @@ import (
 	"strings"
 
 	"forum/internal/entity"
+	"forum/internal/repository"
 	"forum/internal/utils"
 	"forum/pkg/validator"
 )
 
-func DecodePost(r *http.Request) (*entity.Post, error) {
+func DecodePost(r *http.Request, db *repository.Storage) (*entity.Post, error) {
 	err := r.ParseForm()
 	if err != nil {
 		return nil, fmt.Errorf("error parsing form: %w", err)
 	}
-
 	title := strings.TrimSpace(r.Form.Get("title"))
 	content := strings.TrimSpace(r.Form.Get("content"))
 	categoryIDStr := r.Form.Get("category")
@@ -29,6 +29,14 @@ func DecodePost(r *http.Request) (*entity.Post, error) {
 	if !validator.IsLengthValid(title, 3, 100) ||
 		!validator.IsLengthValid(content, 10, 1000) {
 		return nil, errors.New("title or content is too long or too short")
+	}
+
+	lenOfCategories, err := db.GetLenOfCategories()
+	if err != nil {
+		return nil, err
+	}
+	if categoryID > lenOfCategories || categoryID <= 0 {
+		return nil, errors.New("category not exist")
 	}
 
 	post := &entity.Post{

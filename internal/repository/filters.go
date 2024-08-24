@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"forum/internal/entity"
 )
@@ -139,4 +140,18 @@ func (storage *Storage) GetAllCategories() ([]entity.Category, error) {
 	}
 
 	return categories, nil
+}
+
+func (s *Storage) GetLenOfCategories() (int, error) {
+	var count int
+	
+	row := s.db.QueryRow("SELECT COUNT(*) FROM category")
+
+	err := row.Scan(&count)
+	if err != nil {
+		fmt.Println("GetLenOfCategories", err)
+		return 0, err
+	}
+
+	return count, nil
 }
