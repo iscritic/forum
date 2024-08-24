@@ -44,3 +44,4 @@ func GetCategories(db *repository.Storage) ([]entity.Category, error) {
 
 	return categories, nil
 }
+

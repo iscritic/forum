@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -49,7 +50,7 @@ func DecodePost(r *http.Request, db *repository.Storage) (*entity.Post, error) {
 	return post, nil
 }
 
-func DecodeComment(r *http.Request) (*entity.Comment, error) {
+func DecodeComment(r *http.Request, db *repository.Storage) (*entity.Comment, error) {
 	err := r.ParseForm()
 	if err != nil {
 		return nil, fmt.Errorf("error parsing form: %w", err)
@@ -59,6 +60,13 @@ func DecodeComment(r *http.Request) (*entity.Comment, error) {
 	postID, err := utils.Etoi(postIDStr)
 	if err != nil {
 		return nil, fmt.Errorf("invalid post ID: %w", err)
+	}
+	_, err = db.GetPostByID(postID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("post with ID %d does not exist", postID)
+		}
+		return nil, fmt.Errorf("error checking post existence: %w", err)
 	}
 
 	content := strings.TrimSpace(r.Form.Get("content"))

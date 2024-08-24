@@ -7,7 +7,6 @@ import (
 
 // Etoi - An enchanted Atoi, accepting only positive numbers and rejecting those starting with zero.
 func Etoi(s string) (int, error) {
-
 	num, err := strconv.Atoi(s)
 	if err != nil {
 		return 0, err

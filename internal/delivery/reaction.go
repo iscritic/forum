@@ -19,6 +19,7 @@ func (a *application) LikePostHandler(w http.ResponseWriter, r *http.Request) {
 		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
+
 	userID := r.Context().Value("userID").(int)
 
 	hasLiked, err := a.storage.HasLikedPost(userID, postID)

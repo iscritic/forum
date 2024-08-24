@@ -136,7 +136,7 @@ func (a *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comment, err := service.DecodeComment(r)
+	comment, err := service.DecodeComment(r, a.storage)
 	if err != nil {
 		a.log.Error(err.Error())
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
