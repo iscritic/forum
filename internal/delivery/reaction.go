@@ -1,9 +1,13 @@
 package delivery
 
 import (
+	"database/sql"
+	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
+	"forum/internal/utils"
 	"forum/pkg/tmpl"
 )
 
@@ -14,13 +18,28 @@ func (a *application) LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	postIDStr := r.FormValue("post_id")
-	postID, err := strconv.Atoi(postIDStr)
+	postIDStr = strings.TrimSpace(postIDStr)
+	postID, err := utils.Etoi(postIDStr)
 	if err != nil {
+		a.log.Error("Failed to convert post_id to int: %v", err)
 		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 
 	userID := r.Context().Value("userID").(int)
+
+	// can we use it like this ???
+	_, err = a.storage.GetPostByID(postID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			a.log.Error("post do not exist")
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, err.Error())
+			return
+		}
+		a.log.Error("Error fetching post: %v", err)
+		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	hasLiked, err := a.storage.HasLikedPost(userID, postID)
 	if err != nil {

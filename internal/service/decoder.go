@@ -72,7 +72,7 @@ func DecodeComment(r *http.Request, db *repository.Storage) (*entity.Comment, er
 	content := strings.TrimSpace(r.Form.Get("content"))
 
 	if !validator.IsLengthValid(content, 4, 500) {
-		return nil, errors.New("content is too long")
+		return nil, errors.New("content is too long or too short")
 	}
 
 	comment := &entity.Comment{
