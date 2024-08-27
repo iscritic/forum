@@ -94,12 +94,23 @@ func (a *application) DislikePostHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	postIDStr := r.FormValue("post_id")
-	postID, err := strconv.Atoi(postIDStr)
+	postID, err := utils.Etoi(postIDStr)
 	if err != nil {
 		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 		return
 	}
 	userID := r.Context().Value("userID").(int)
+	_, err = a.storage.GetPostByID(postID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			a.log.Error("post do not exist")
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, err.Error())
+			return
+		}
+		a.log.Error("Error fetching post: %v", err)
+		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
+		return
+	}
 
 	hasDisliked, err := a.storage.HasDislikedPost(userID, postID)
 	if err != nil {
@@ -161,6 +172,17 @@ func (a *application) LikeCommentHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	userID := r.Context().Value("userID").(int)
+	_, err = a.storage.GetCommentByID(commentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			a.log.Error("comment do not exist")
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+			return
+		}
+		a.log.Error("Error fetching post: %v", err)
+		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
 
 	hasLiked, err := a.storage.HasLikedComment(userID, commentID)
 	if err != nil {
@@ -215,6 +237,18 @@ func (a *application) DislikeCommentHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	userID := r.Context().Value("userID").(int)
+
+	_, err = a.storage.GetCommentByID(commentID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			a.log.Error("comment do not exist")
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+			return
+		}
+		a.log.Error("Error fetching post: %v", err)
+		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
 
 	hasDisliked, err := a.storage.HasDislikedComment(userID, commentID)
 	if err != nil {

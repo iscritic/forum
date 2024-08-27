@@ -1,5 +1,12 @@
 package repository
 
+import (
+	"database/sql"
+	"errors"
+
+	"forum/internal/entity"
+)
+
 func (storage *Storage) LikePost(userID, postID int) error {
 	_, err := storage.db.Exec(`
         INSERT INTO likes (user_id, post_id)
@@ -108,4 +115,20 @@ func (storage *Storage) GetLikesAndDislikesForComment(commentID int) (likes, dis
             (SELECT COUNT(*) FROM dislikes WHERE comment_id = ?) AS dislikes`,
 		commentID, commentID).Scan(&likes, &dislikes)
 	return
+}
+
+func (Storage *Storage) GetCommentByID(id int) (*entity.Comment, error) {
+	query := "SELECT id, post_id, content, author_id, creation_date FROM comments WHERE id = ?"
+	row := Storage.db.QueryRow(query, id)
+
+	comment := &entity.Comment{}
+	err := row.Scan(&comment.ID, &comment.PostID, &comment.Content, &comment.AuthorID, &comment.CreationDate)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, err
+		}
+		return nil, err
+	}
+
+	return comment, nil
 }

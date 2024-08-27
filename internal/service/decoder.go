@@ -59,6 +59,7 @@ func DecodeComment(r *http.Request, db *repository.Storage) (*entity.Comment, er
 	postIDStr := r.Form.Get("post_id")
 	postID, err := utils.Etoi(postIDStr)
 	if err != nil {
+		fmt.Println(err)
 		return nil, fmt.Errorf("invalid post ID: %w", err)
 	}
 	_, err = db.GetPostByID(postID)

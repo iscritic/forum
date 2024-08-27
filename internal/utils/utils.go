@@ -9,7 +9,7 @@ import (
 func Etoi(s string) (int, error) {
 	num, err := strconv.Atoi(s)
 	if err != nil {
-		return 0, err
+		return 0, errors.New("wrong id")
 	}
 
 	if num <= 0 {
