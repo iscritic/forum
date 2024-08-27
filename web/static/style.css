@@ -151,9 +151,11 @@ a:hover {
     background-color: #232324;
     border-radius: 15px;
     margin: 30px 30px 30px 0;
+    max-width: 100%;
     padding: 20px;
     width: 60%;
     box-sizing: border-box;
+    overflow: hidden;
 }
 
 .com-but{
