@@ -3,12 +3,11 @@ package delivery
 import (
 	"database/sql"
 	"errors"
+	"forum/internal/utils"
+	"forum/pkg/tmpl"
 	"net/http"
 	"strconv"
 	"strings"
-
-	"forum/internal/utils"
-	"forum/pkg/tmpl"
 )
 
 func (a *application) LikePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,11 +32,11 @@ func (a *application) LikePostHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			a.log.Error("post do not exist")
-			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return
 		}
 		a.log.Error("Error fetching post: %v", err)
-		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
+		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusBadRequest))
 		return
 	}
 
@@ -104,11 +103,11 @@ func (a *application) DislikePostHandler(w http.ResponseWriter, r *http.Request)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			a.log.Error("post do not exist")
-			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return
 		}
 		a.log.Error("Error fetching post: %v", err)
-		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
+		tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusBadRequest))
 		return
 	}
 
