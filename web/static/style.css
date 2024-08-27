@@ -27,6 +27,7 @@ nav {
     justify-content: space-between;
     width: 100%;
     position: fixed;
+    top: 0;
 }
 
 .site-title {
