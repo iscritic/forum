@@ -10,6 +10,19 @@ body {
 
 }
 
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    margin-bottom: 30px;
+    background-color: #1c1c1c;
+    width: 100%;
+    color: white;
+    text-align: center;
+    box-sizing: border-box;
+}
+
 .wrapper {
     margin: 0 auto;
     max-width: 1200px;
@@ -97,7 +110,18 @@ nav {
     border-radius: 5px;
 }
 
-.nav-button:hover, .auth-button:hover, .aside-button:hover, .like-button:hover, .dislike-button:hover {
+.nav-butheader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+    margin-bottom: 30px;
+    background-color: #1c1c1c;
+    width: 100%;
+    color: white;
+    text-align: center;
+    box-sizing: border-box;
+}ton:hover, .auth-button:hover, .aside-button:hover, .like-button:hover, .dislike-button:hover {
     background-color: #3d3d3d;
 }
 
@@ -112,6 +136,9 @@ a:hover {
     padding: 20px;
     width: 60%;
     box-sizing: border-box;
+    hyphens: auto; /* Browsers will automatically hyphenate the word */
+    word-wrap: break-word; /* Old, but widely supported */
+    overflow-wrap: break-word; /* Modern, preferred */
 }
 
 .post-header {
@@ -155,7 +182,10 @@ a:hover {
     padding: 20px;
     width: 60%;
     box-sizing: border-box;
-    overflow: hidden;
+    hyphens: auto; /* Browsers will automatically hyphenate the word */
+    word-wrap: break-word; /* Old, but widely supported */
+    overflow-wrap: break-word; /* Modern, preferred */
+
 }
 
 .com-but{
@@ -166,18 +196,12 @@ a:hover {
     margin: 20px 20px 0 0;
 }
 
-
-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0;
-    margin-bottom: 30px;
-    background-color: #1c1c1c;
-    width: 100%;
-    color: white;
+.error {
     text-align: center;
-    box-sizing: border-box;
+    margin: auto;
+    width: 50%;
+    height: 100vh;
+    padding: 10px;
 }
 
 footer {
@@ -190,12 +214,4 @@ footer {
     bottom: 0;
     left: 0;
 
-}
-
-.error {
-    text-align: center;
-    margin: auto;
-    width: 50%;
-    height: 100vh;
-    padding: 10px;
 }

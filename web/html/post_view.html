@@ -50,7 +50,7 @@
                 <h2>Write a comment</h2>
                 <form action="/post/comment" method="post">
                     <input type="hidden" name="post_id" value="{{ .Post.ID }}">
-                    <textarea name="content" rows="4" cols="30" placeholder="Write your comment here" required minlength="4" maxlength="100"></textarea><br>
+                    <textarea name="content" rows="4" cols="30" placeholder="Write your comment here" required minlength="4" maxlength="500"></textarea><br>
                     <button type="submit" class="com-but">Submit</button>
                 </form>
             </div>
