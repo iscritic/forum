@@ -11,7 +11,7 @@ type Post struct {
 	Title        string
 	Content      string
 	AuthorID     int
-	CategoryID   int
+	CategoryIDs  []int
 	Likes        int
 	Dislikes     int
 	CreationDate time.Time
@@ -58,12 +58,12 @@ type Like struct {
 }
 
 type PostRelatedData struct {
-	Post     Post
-	CommentR []CommentRelatedData
-	User     User
-	Category Category
-	CtxUser  User
-	IsLogin  bool
+	Post       Post
+	CommentR   []CommentRelatedData
+	User       User
+	Categories []Category
+	CtxUser    User
+	IsLogin    bool
 }
 
 type CommentRelatedData struct {

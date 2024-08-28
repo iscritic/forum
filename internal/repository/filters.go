@@ -8,11 +8,12 @@ import (
 	"forum/internal/entity"
 )
 
-func (s Storage) GetAllPostByCategory(categoryID int) ([]*entity.Post, error) {
+func (s *Storage) GetAllPostByCategory(categoryID int) ([]*entity.Post, error) {
 	query := `
-SELECT p.id, p.title, p.content, p.author_id, p.category_id, p.creation_date
+SELECT p.id, p.title, p.content, p.author_id, p.creation_date 
 FROM posts p
-WHERE p.category_id = ?;
+JOIN post_categories pc ON p.id = pc.post_id 
+WHERE pc.category_id = ?;
 `
 
 	rows, err := s.db.Query(query, categoryID)
@@ -22,15 +23,31 @@ WHERE p.category_id = ?;
 	defer rows.Close()
 
 	var posts []*entity.Post
-
 	for rows.Next() {
 		var post entity.Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryID, &post.CreationDate)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
+
+		// Fetch all category IDs for each post
+		catRows, err := s.db.Query("SELECT category_id FROM post_categories WHERE post_id = ?", post.ID)
+		if err != nil {
+			return nil, err
+		}
+		defer catRows.Close()
+
+		for catRows.Next() {
+			var catID int
+			if err := catRows.Scan(&catID); err != nil {
+				return nil, err
+			}
+			post.CategoryIDs = append(post.CategoryIDs, catID)
+		}
+
 		posts = append(posts, &post)
 	}
+
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -55,7 +72,7 @@ WHERE p.author_id = ?;
 
 	for rows.Next() {
 		var post entity.Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryID, &post.CreationDate)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryIDs, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +108,7 @@ WHERE
 
 	for rows.Next() {
 		var post entity.Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryID, &post.CreationDate)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryIDs, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
@@ -144,7 +161,7 @@ func (storage *Storage) GetAllCategories() ([]entity.Category, error) {
 
 func (s *Storage) GetLenOfCategories() (int, error) {
 	var count int
-	
+
 	row := s.db.QueryRow("SELECT COUNT(*) FROM category")
 
 	err := row.Scan(&count)

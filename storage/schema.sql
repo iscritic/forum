@@ -29,6 +29,15 @@ CREATE TABLE IF NOT EXISTS posts (
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
+CREATE TABLE IF NOT EXISTS post_categories (
+    post_id INTEGER,
+    category_id INTEGER,
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(id),
+    PRIMARY KEY (post_id, category_id)
+);
+
+
 CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY,
     post_id INTEGER,

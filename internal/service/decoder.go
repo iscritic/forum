@@ -20,11 +20,15 @@ func DecodePost(r *http.Request, db *repository.Storage) (*entity.Post, error) {
 	}
 	title := strings.TrimSpace(r.Form.Get("title"))
 	content := strings.TrimSpace(r.Form.Get("content"))
-	categoryIDStr := r.Form.Get("category")
+	categoryIDsStr := r.Form["categories[]"]
 
-	categoryID, err := utils.Etoi(categoryIDStr)
-	if err != nil {
-		return nil, fmt.Errorf("invalid category ID: %w", err)
+	var categoryIDs []int
+	for _, idStr := range categoryIDsStr {
+		categoryID, err := utils.Etoi(idStr)
+		if err != nil {
+			return nil, fmt.Errorf("invalid category ID: %w", err)
+		}
+		categoryIDs = append(categoryIDs, categoryID)
 	}
 
 	if !validator.IsLengthValid(title, 3, 100) ||
@@ -36,15 +40,18 @@ func DecodePost(r *http.Request, db *repository.Storage) (*entity.Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	if categoryID > lenOfCategories || categoryID <= 0 {
-		return nil, errors.New("category not exist")
+
+	for _, id := range categoryIDs {
+		if id > lenOfCategories || id <= 0 {
+			return nil, errors.New("one or more selected categories do not exist")
+		}
 	}
 
 	post := &entity.Post{
-		Title:      title,
-		Content:    content,
-		CategoryID: categoryID,
-		AuthorID:   r.Context().Value("userID").(int),
+		Title:       title,
+		Content:     content,
+		CategoryIDs: categoryIDs,
+		AuthorID:    r.Context().Value("userID").(int),
 	}
 
 	return post, nil
