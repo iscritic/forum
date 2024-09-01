@@ -30,11 +30,16 @@
                 <div class="activity">
                     <h3>Activity</h3>
                     <a href="/likedposts" class="aside-button">My Liked Posts</a>
+                    <a href="/dislikedposts" class="aside-button">  ↳ Disliked Posts</a>
                     <a href="/createdposts" class="aside-button">My Created Posts</a>
+                    <a href="/icommented" class="aside-button">  ↳ Commented Posts</a>
+
+
                 </div>
                 {{ end }}
                 <div class="categories">
                     <h3>Categories</h3>
+                    <a href="/" class="aside-button">All Posts</a>
                     {{ range .Categories }}
                     <a href="/category/{{ .ID }}" class="aside-button">{{ .Name }}</a>
                     {{ end }}

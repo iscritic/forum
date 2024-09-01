@@ -81,6 +81,43 @@ WHERE p.author_id = ?;
 	return posts, nil
 }
 
+func (s Storage) GetIcommentedPostByUser(userID int) ([]*entity.Post, error) {
+	query := `
+	SELECT DISTINCT p.id, p.title, p.content, p.author_id, p.creation_date
+	FROM posts p
+	JOIN comments c ON p.id = c.post_id
+	WHERE c.author_id = ?;
+`
+
+	rows, err := s.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []*entity.Post
+
+	for rows.Next() {
+		var post entity.Post
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
+		if err != nil {
+			return nil, err
+		}
+		post.CategoryIDs, err = s.GetCategoryIDsByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, &post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
 func (s Storage) GetAllLikedPosts(userID int) ([]*entity.Post, error) {
 	query := `
 	SELECT 
@@ -89,6 +126,47 @@ FROM
     posts p
 JOIN
     likes l ON p.id = l.post_id
+WHERE 
+    l.user_id = ?;
+`
+
+	rows, err := s.db.Query(query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var posts []*entity.Post
+
+	for rows.Next() {
+		var post entity.Post
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
+		if err != nil {
+			return nil, err
+		}
+		post.CategoryIDs, err = s.GetCategoryIDsByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, &post)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return posts, nil
+}
+
+func (s Storage) GetAllDislikedPosts(userID int) ([]*entity.Post, error) {
+	query := `
+	SELECT 
+    p.id, p.title, p.content, p.author_id, p.creation_date 
+FROM 
+    posts p
+JOIN
+    dislikes l ON p.id = l.post_id
 WHERE 
     l.user_id = ?;
 `

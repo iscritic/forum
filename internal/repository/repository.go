@@ -157,8 +157,35 @@ func (s *Storage) GetAllPostRelatedDataByUser(userID int) ([]*entity.PostRelated
 	return postsRelatedData, nil
 }
 
+func (s *Storage) GetIcommentedPostRelatedDataByUser(userID int) ([]*entity.PostRelatedData, error) {
+	posts, err := s.GetIcommentedPostByUser(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	postsRelatedData, err := s.postAdoptionCenter(posts)
+	if err != nil {
+		return nil, err
+	}
+	return postsRelatedData, nil
+}
+
 func (s *Storage) GetMyLikedPosts(userID int) ([]*entity.PostRelatedData, error) {
 	posts, err := s.GetAllLikedPosts(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	postsRelatedData, err := s.postAdoptionCenter(posts)
+	if err != nil {
+		return nil, err
+	}
+
+	return postsRelatedData, nil
+}
+
+func (s *Storage) GetMyDislikedPosts(userID int) ([]*entity.PostRelatedData, error) {
+	posts, err := s.GetAllDislikedPosts(userID)
 	if err != nil {
 		return nil, err
 	}
