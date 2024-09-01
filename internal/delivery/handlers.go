@@ -76,7 +76,6 @@ func (a *application) CreatePostHandler(w http.ResponseWriter, r *http.Request) 
 			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
 			return
 		}
-
 		http.Redirect(w, r, fmt.Sprintf("/post/%d", lastID), http.StatusSeeOther)
 
 	default:
@@ -102,7 +101,6 @@ func (a *application) ViewPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch post-related data
 	postData, err := service.GetPostRelatedData(r.Context(), a.storage, id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

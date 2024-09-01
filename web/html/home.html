@@ -56,11 +56,9 @@
                             <p class="post-container">{{ .Post.Content }}</p>
                         </div>
                         <div class="post-category">
-                            <ul>
-                                {{ range .Categories }}
-                                    <li>{{ .Name }}</li>
-                                {{ end }}
-                            </ul>
+                            {{ range .Category }}
+                            <p>#{{ .Name }}</p>
+                            {{ end }}
                         </div>
                         <div class="LikeForm">
                             <span>

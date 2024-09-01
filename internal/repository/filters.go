@@ -8,11 +8,11 @@ import (
 	"forum/internal/entity"
 )
 
-func (s *Storage) GetAllPostByCategory(categoryID int) ([]*entity.Post, error) {
+func (s Storage) GetAllPostByCategory(categoryID int) ([]*entity.Post, error) {
 	query := `
-SELECT p.id, p.title, p.content, p.author_id, p.creation_date 
+SELECT p.id, p.title, p.content, p.author_id, p.creation_date
 FROM posts p
-JOIN post_categories pc ON p.id = pc.post_id 
+JOIN post_category pc ON p.id = pc.post_id
 WHERE pc.category_id = ?;
 `
 
@@ -23,26 +23,16 @@ WHERE pc.category_id = ?;
 	defer rows.Close()
 
 	var posts []*entity.Post
+
 	for rows.Next() {
 		var post entity.Post
 		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
-
-		// Fetch all category IDs for each post
-		catRows, err := s.db.Query("SELECT category_id FROM post_categories WHERE post_id = ?", post.ID)
+		post.CategoryIDs, err = s.GetCategoryIDsByPostID(post.ID)
 		if err != nil {
 			return nil, err
-		}
-		defer catRows.Close()
-
-		for catRows.Next() {
-			var catID int
-			if err := catRows.Scan(&catID); err != nil {
-				return nil, err
-			}
-			post.CategoryIDs = append(post.CategoryIDs, catID)
 		}
 
 		posts = append(posts, &post)
@@ -57,7 +47,7 @@ WHERE pc.category_id = ?;
 
 func (s Storage) GetAllPostByUser(userID int) ([]*entity.Post, error) {
 	query := `
-SELECT p.id, p.title, p.content, p.author_id, p.category_id, p.creation_date
+SELECT p.id, p.title, p.content, p.author_id, p.creation_date
 FROM posts p
 WHERE p.author_id = ?;
 `
@@ -72,10 +62,15 @@ WHERE p.author_id = ?;
 
 	for rows.Next() {
 		var post entity.Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryIDs, &post.CreationDate)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
+		post.CategoryIDs, err = s.GetCategoryIDsByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
 		posts = append(posts, &post)
 	}
 
@@ -89,7 +84,7 @@ WHERE p.author_id = ?;
 func (s Storage) GetAllLikedPosts(userID int) ([]*entity.Post, error) {
 	query := `
 	SELECT 
-    p.id, p.title, p.content, p.author_id, p.category_id, p.creation_date 
+    p.id, p.title, p.content, p.author_id, p.creation_date 
 FROM 
     posts p
 JOIN
@@ -108,10 +103,15 @@ WHERE
 
 	for rows.Next() {
 		var post entity.Post
-		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CategoryIDs, &post.CreationDate)
+		err := rows.Scan(&post.ID, &post.Title, &post.Content, &post.AuthorID, &post.CreationDate)
 		if err != nil {
 			return nil, err
 		}
+		post.CategoryIDs, err = s.GetCategoryIDsByPostID(post.ID)
+		if err != nil {
+			return nil, err
+		}
+
 		posts = append(posts, &post)
 	}
 
@@ -135,6 +135,29 @@ func (s *Storage) GetCategoryById(categoryID int) (*entity.Category, error) {
 	}
 
 	return &category, nil
+}
+
+func (s Storage) GetCategoryIDsByPostID(postID int) ([]int, error) {
+	query := "SELECT category_id FROM post_category WHERE post_id = ?"
+	rows, err := s.db.Query(query, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var categoryIDs []int
+	for rows.Next() {
+		var categoryID int
+		if err := rows.Scan(&categoryID); err != nil {
+			return nil, err
+		}
+		categoryIDs = append(categoryIDs, categoryID)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return categoryIDs, nil
 }
 
 func (storage *Storage) GetAllCategories() ([]entity.Category, error) {

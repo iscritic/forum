@@ -27,3 +27,7 @@ make docker_run
 Open your web browser and navigate to http://localhost:8080 to start using the forum.
 
 
+## Disclaimer
+
+The information provided on this website/application is intended for general informational purposes only. All characters, names, and events depicted are fictional, and any resemblance to actual persons, living or dead, or to actual events is purely coincidental. Any content, views, or statements expressed herein are not intended to reflect real-life individuals or occurrences.
+

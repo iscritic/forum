@@ -22,7 +22,6 @@ func GetPostRelatedData(ctx context.Context, db *repository.Storage, id int) (*e
 		return nil, err
 	}
 
-	// get user id from context for checking login
 	userID, ok := ctx.Value("userID").(int)
 	if !ok {
 		return post, err
@@ -44,4 +43,3 @@ func GetCategories(db *repository.Storage) ([]entity.Category, error) {
 
 	return categories, nil
 }
-

@@ -21,23 +21,16 @@ CREATE TABLE IF NOT EXISTS posts (
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     author_id INTEGER,
-    category_id INTEGER,
-    likes INTEGER DEFAULT 0,
-    dislikes INTEGER DEFAULT 0,
     creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES category(id)
+    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
 );
-
-CREATE TABLE IF NOT EXISTS post_categories (
-    post_id INTEGER,
-    category_id INTEGER,
-    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES category(id),
+CREATE TABLE IF NOT EXISTS post_category (
+    post_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category (id) ON DELETE CASCADE,
     PRIMARY KEY (post_id, category_id)
 );
-
-
 CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY,
     post_id INTEGER,
@@ -64,9 +57,9 @@ CREATE TABLE IF NOT EXISTS likes (
 	user_id INTEGER NOT NULL,
 	post_id INTEGER,
 	comment_id INTEGER,
-	FOREIGN KEY (user_id) REFERENCES users(id),
-	FOREIGN KEY (post_id) REFERENCES posts(id),
-	FOREIGN KEY (comment_id) REFERENCES comments(id),
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+	FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+	FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
 	UNIQUE(user_id, post_id, comment_id)
 );
 
@@ -75,8 +68,8 @@ CREATE TABLE IF NOT EXISTS dislikes (
 	user_id INTEGER NOT NULL,
 	post_id INTEGER,
 	comment_id INTEGER,
-	FOREIGN KEY (user_id) REFERENCES users(id),
-	FOREIGN KEY (post_id) REFERENCES posts(id),
-	FOREIGN KEY (comment_id) REFERENCES comments(id),
+	FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+	FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+	FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
 	UNIQUE(user_id, post_id, comment_id)
 );

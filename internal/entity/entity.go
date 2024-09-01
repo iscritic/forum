@@ -58,20 +58,15 @@ type Like struct {
 }
 
 type PostRelatedData struct {
-	Post       Post
-	CommentR   []CommentRelatedData
-	User       User
-	Categories []Category
-	CtxUser    User
-	IsLogin    bool
+	Post     Post
+	CommentR []CommentRelatedData
+	User     User
+	Category []*Category
+	CtxUser  User
+	IsLogin  bool
 }
 
 type CommentRelatedData struct {
 	Comment Comment
 	User    User
-}
-
-type PostData struct {
-	Post     PostRelatedData
-	Comments []*CommentRelatedData
 }

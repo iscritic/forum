@@ -13,25 +13,9 @@ func (s *Storage) GetAllPostsRelatedData() ([]*entity.PostRelatedData, error) {
 		return nil, err
 	}
 
-	var postsRelatedData []*entity.PostRelatedData
-
-	for _, post := range posts {
-		postRelated := &entity.PostRelatedData{
-			Post:       *post,
-			Categories: []entity.Category{},
-		}
-
-		// Fetch and attach categories
-		for _, categoryID := range post.CategoryIDs {
-			category, err := s.GetCategoryById(categoryID)
-			if err != nil {
-				return nil, err
-			}
-			postRelated.Categories = append(postRelated.Categories, *category)
-		}
-
-		// Add post-related data to the list
-		postsRelatedData = append(postsRelatedData, postRelated)
+	postsRelatedData, err := s.postAdoptionCenter(posts)
+	if err != nil {
+		return nil, err
 	}
 
 	return postsRelatedData, nil
@@ -60,21 +44,20 @@ func (s *Storage) GetPostRelatedDataByPostID(postID int) (*entity.PostRelatedDat
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch author: %w", err)
 	}
-
-	var categories []entity.Category
+	var categories []*entity.Category
 	for _, categoryID := range post.CategoryIDs {
 		category, err := s.GetCategoryById(categoryID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch category: %w", err)
 		}
-		categories = append(categories, *category)
+		categories = append(categories, category)
 	}
 
 	postRelatedData := &entity.PostRelatedData{
-		Post:       *post,
-		CommentR:   comments,
-		User:       *author,
-		Categories: categories,
+		Post:     *post,
+		CommentR: comments,
+		User:     *author,
+		Category: categories,
 	}
 
 	return postRelatedData, nil
@@ -196,32 +179,28 @@ func (s *Storage) postAdoptionCenter(posts []*entity.Post) ([]*entity.PostRelate
 		if err != nil {
 			return nil, err
 		}
-
 		author, err := s.GetUserByID(post.AuthorID)
 		if err != nil {
 			return nil, err
 		}
-
-		// Retrieve full category details
-		var categories []entity.Category
+		var categories []*entity.Category
 		for _, categoryID := range post.CategoryIDs {
 			category, err := s.GetCategoryById(categoryID)
 			if err != nil {
 				return nil, err
 			}
-			categories = append(categories, *category)
+			categories = append(categories, category)
 		}
-
 		post.Likes, post.Dislikes, err = s.GetLikesAndDislikesForPost(post.ID)
 		if err != nil {
 			return nil, err
 		}
 
 		postRelatedData := &entity.PostRelatedData{
-			Post:       *post,
-			CommentR:   comments,
-			User:       *author,
-			Categories: categories,
+			Post:     *post,
+			CommentR: comments,
+			User:     *author,
+			Category: categories,
 		}
 		postsRelatedData = append(postsRelatedData, postRelatedData)
 	}

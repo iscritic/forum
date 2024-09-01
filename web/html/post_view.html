@@ -30,7 +30,11 @@
             <h1>{{ .Post.Title }}</h1>
             <p>{{ .Post.Content }}</p>
             <p>Author: {{ .User.Username }}</p> 
-            <p>#{{ .Category.Name }}</p> 
+            <p>Categories:
+                {{ range .Category }}
+                <span>#{{ .Name }}</span>
+                {{ end }}
+            </p>
             <p>Creation Date: {{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
 
             <div class="LikeForm">
