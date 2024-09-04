@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorted</title>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+<header>
+    <nav>
+        <div class="site-title">
+            <a href="/" class="href" style="text-decoration: none; color: inherit;">Forum</a>
+        </div>
+        <div class="nav-links">
+            {{ if .UserInfo.Username }}
+            <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>
+            <div class="welcome-info">Welcome, {{ .UserInfo.Username }} ✌️</div>
+            <a href="/logout" class="href"><button class="auth-button">Log Out</button></a>
+            {{ else }}
+            <a href="/login" class="href"><button class="auth-button">Log In</button></a>
+            <a href="/register" class="href"><button class="auth-button">Sign Up</button></a>
+            {{ end }}
+        </div>
+    </nav>
+</header>
+<div class="wrapper">
+    <aside class="aside">
+        {{ if .UserInfo.Username }}
+        <div class="activity">
+            <h3>Activity</h3>
+            <a href="/likedposts" class="aside-button">My Liked Posts</a>
+            <a href="/dislikedposts" class="aside-button">  ↳ Disliked Posts</a>
+            <a href="/createdposts" class="aside-button">My Created Posts</a>
+            <a href="/icommented" class="aside-button">  ↳ Commented Posts</a>
+
+
+        </div>
+        {{ end }}
+        <div class="categories">
+            <h3>Categories</h3>
+            <a href="/" class="aside-button">All Posts</a>
+            {{ range .Categories }}
+            <a href="/category/{{ .ID }}" class="aside-button">{{ .Name }}</a>
+            {{ end }}
+        </div>
+    </aside>
+    <main class="main">
+        <div class="posts">
+            {{ range .Posts }}
+            <a href="/post/{{ .Post.ID }}" class="Post">
+                <div class="post">
+                    <div class="post-header">
+                        <h4 class="author">{{ .User.Username }}</h4>
+                        <p class="date">{{ .Post.CreationDate.Format "Jan 2, 2006" }}</p>
+                    </div>
+                    <div class="post-content">
+                        <h2>{{ .Post.Title }}</h2>
+                        <p>{{ .Post.Content }}</p>
+                    </div>
+                    <div class="post-category">
+                        {{ range .Category }}
+                        <span>#{{ .Name }}</span>
+                        {{ end }}
+                    </div>
+                    <!-- Only My Comments Section -->
+                    <div class="comments">
+                        <hr>
+                        {{ range .CommentR }}
+                        <div class="comment">
+                            <p><strong>{{ .User.Username }}</strong></p>
+                            <p>{{ .Comment.Content }}</p>
+                            <p class="date">{{ .Comment.CreationDate.Format "Jan 2, 2006" }}</p>
+                        </div>
+                        <br>
+                        {{ end }}
+                    </div>
+                    <a href="/post/{{ .Post.ID }}" class="aside-button"><strong>Continue this Discussion</strong></a>
+                </div>
+            </a>
+            {{ end }}
+        </div>
+    </main>
+</div>
+<footer>
+    Forum 2024
+</footer>
+</body>
+</html>

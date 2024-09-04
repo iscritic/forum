@@ -90,7 +90,7 @@ func (a *application) IcommentedPostsHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/sorted.html", posts)
+	err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/icommented.html", posts)
 	if err != nil {
 		a.log.Error(err.Error())
 		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/style.css">
+    <title>Edit Post: {{ .Post.Title }}</title> </head>
+<body>
+<header>
+    <nav>
+        <div class="site-title">
+            <a href="/" class="href" style="text-decoration: none; color: inherit;">Forum</a>
+        </div>
+        <div class="nav-links">
+            {{ if .IsLogin }}
+            <a href="/post/create" class="href"><button class="nav-button">Create Post</button></a>
+            <div class="welcome-info">Welcome, {{ .CtxUser.Username }} ✌️</div>
+            <a href="/logout" class="href"><button class="auth-button">Log Out</button></a>
+            {{ else }}
+            <a href="/login" class="href"><button class="auth-button">Log In</button></a>
+            <a href="/register" class="href"><button class="auth-button">Sign Up</button></a>
+            {{ end }}
+        </div>
+    </nav>
+</header>
+
+<div class="wrapper">
+    <div class="post">
+        <form action="/edit/{{ .Post.ID }}" method="post">
+            <input type="hidden" name="post_id" value="{{ .Post.ID }}">
+
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title" value="{{ .Post.Title }}" required><br><br>
+
+            <label for="content">Content:</label><br>
+            <textarea id="content" name="content" rows="10" cols="50" required>{{ .Post.Content }}</textarea><br><br>
+
+            <div>
+                <label>Categories:</label><br>
+                {{range .}}
+                <input type="checkbox" id="category{{.ID}}" name="category" value="{{.ID}}">
+                <label for="category{{.ID}}">{{.Name}}</label><br>
+                {{end}}
+            </div>
+
+
+            <input type="submit" value="Save Changes">
+        </form>
+    </div>
+
+</div>
+
+<footer>
+    Forum 2024
+</footer>
+</body>
+</html>
