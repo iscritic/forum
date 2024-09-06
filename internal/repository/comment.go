@@ -1,6 +1,10 @@
 package repository
 
-import "forum/internal/entity"
+import (
+	"database/sql"
+	"errors"
+	"forum/internal/entity"
+)
 
 func (Storage *Storage) CreateComment(comment entity.Comment) error {
 	_, err := Storage.db.Exec(`INSERT INTO comments (post_id, content, author_id) VALUES (?, ?, ? )`,
@@ -10,6 +14,22 @@ func (Storage *Storage) CreateComment(comment entity.Comment) error {
 	}
 
 	return nil
+}
+
+func (Storage *Storage) GetCommentByID(id int) (*entity.Comment, error) {
+	query := "SELECT id, post_id, content, author_id, creation_date FROM comments WHERE id = ?"
+	row := Storage.db.QueryRow(query, id)
+
+	comment := &entity.Comment{}
+	err := row.Scan(&comment.ID, &comment.PostID, &comment.Content, &comment.AuthorID, &comment.CreationDate)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, err
+		}
+		return nil, err
+	}
+
+	return comment, nil
 }
 
 func (s *Storage) GetAllComments(postID int) ([]*entity.Comment, error) {
@@ -70,7 +90,6 @@ func (s *Storage) GetCommentsByPostID(postID int) ([]entity.Comment, error) {
 		return nil, err
 	}
 
-	// Преобразование [] *Comment в []Comment
 	result := make([]entity.Comment, len(comments))
 	for i, c := range comments {
 		result[i] = *c
@@ -79,6 +98,13 @@ func (s *Storage) GetCommentsByPostID(postID int) ([]entity.Comment, error) {
 	return result, nil
 }
 
-//TODO: Edit Comment
+func (s *Storage) UpdateComment(comment *entity.Comment) error {
+	_, err := s.db.Exec(`UPDATE comments SET content = ?, creation_date = CURRENT_TIMESTAMP WHERE id = ? AND author_id = ?`,
+		comment.Content, comment.ID, comment.AuthorID)
+	return err
+}
 
-//TODO: Delete Comment
+func (s *Storage) DeleteComment(commentID int) error {
+	_, err := s.db.Exec("DELETE FROM comments WHERE id = ?", commentID)
+	return err
+}

@@ -90,6 +90,18 @@
                     <button type="submit" class="dislike-button">💔 {{ .Comment.Dislikes }}</button>
                 </form>
             </div>
+
+            <!-- Вместо обращения к .CtxUser в контексте комментария -->
+            {{ if eq $.CtxUser.ID .Comment.AuthorID }}
+            <div class="comment-actions">
+                <a href="/comment/edit/{{ .Comment.ID }}" class="href"><button class="edit-button">Edit Comment</button></a>
+                <form action="/comment/delete/{{ .Comment.ID }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this comment?');" style="display:inline;">
+                    <button type="submit" class="delete-button">Delete Comment</button>
+                </form>
+            </div>
+            {{ end }}
+
+
         </div>
         {{ end }}
     </div>

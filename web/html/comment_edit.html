@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../../static/style.css">
+    <title>Edit Comment</title>
+</head>
+<body>
+<div class="wrapper">
+    <h1>Edit Comment</h1>
+    <form action="/comment/edit/{{.ID}}" method="POST">
+        <input type="hidden" name="post_id" value="{{.PostID}}">
+
+        <div>
+            <textarea name="content" rows="4" cols="50" required>{{.Content}}</textarea>
+        </div>
+        <div>
+            <button type="submit">Save Changes</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
