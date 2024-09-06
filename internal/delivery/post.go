@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"forum/internal/entity"
 	"forum/internal/service"
 	"forum/internal/utils"
 	tmpl2 "forum/pkg/tmpl"
@@ -13,8 +14,10 @@ import (
 
 func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
+
 	case http.MethodGet:
-		idStr := strings.TrimPrefix(r.URL.Path, "/edit/")
+		// Получаем ID поста из URL
+		idStr := strings.TrimPrefix(r.URL.Path, "/post/edit/")
 		id, err := utils.Etoi(idStr)
 		if err != nil {
 			a.log.Warn(err.Error())
@@ -22,6 +25,7 @@ func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Получаем данные поста для редактирования
 		postData, err := service.GetPostRelatedData(r.Context(), a.storage, id)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
@@ -30,30 +34,29 @@ func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			a.log.Error(err.Error())
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
-		isLogin, ok := r.Context().Value("IsLogin").(bool)
-		if !ok {
-			isLogin = false
-		}
-		postData.IsLogin = isLogin
-
-		currentUserID, ok := r.Context().Value("userID").(int)
-		if !ok {
-			a.log.Warn("User ID not found in context")
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusUnauthorized, "User not authorized")
+		// Получаем все категории
+		categories, err := service.GetCategories(a.storage)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
-		if postData.Post.AuthorID != currentUserID {
-			a.log.Warn("User is not the author of the post")
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusForbidden, "You are not the author of this post")
-			return
+		// Создаем структуру для передачи в шаблон
+		pageData := struct {
+			Post       *entity.PostRelatedData
+			Categories []entity.Category
+		}{
+			Post:       postData,
+			Categories: categories,
 		}
 
-		err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/post_edit.html", postData)
+		// Отображаем форму редактирования поста
+		err = tmpl2.RenderTemplate(w, a.tmplcache, "./web/html/post_edit.html", pageData)
 		if err != nil {
 			a.log.Error(err.Error())
 			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
@@ -61,7 +64,8 @@ func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case http.MethodPost:
-		idStr := strings.TrimPrefix(r.URL.Path, "/edit/")
+		// Получаем ID поста из URL
+		idStr := strings.TrimPrefix(r.URL.Path, "/post/edit/")
 		id, err := utils.Etoi(idStr)
 		if err != nil {
 			a.log.Warn(err.Error())
@@ -69,51 +73,31 @@ func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Декодируем данные поста из запроса
 		post, err := service.DecodePost(r, a.storage)
 		if err != nil {
 			a.log.Error(err.Error())
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		postData, err := service.GetPostRelatedData(r.Context(), a.storage, id)
-		if err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				a.log.Error(fmt.Sprintf("Post with ID %d not found", id))
-				tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
-				return
-			}
-			a.log.Error(err.Error())
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, http.StatusText(http.StatusBadRequest))
-			return
-		}
+		// Устанавливаем ID поста для обновления
+		post.ID = id
 
-		currentUserID, ok := r.Context().Value("userID").(int)
-		if !ok {
-			a.log.Warn("User ID not found in context")
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusUnauthorized, "User not authorized")
-			return
-		}
-
-		if postData.Post.AuthorID != currentUserID {
-			a.log.Warn("User is not the author of the post")
-			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusForbidden, "You are not the author of this post")
-			return
-		}
-
-		err = a.storage.UpdatePost(id, post)
+		// Обновляем пост в базе данных
+		err = a.storage.UpdatePost(post)
 		if err != nil {
 			a.log.Error(err.Error())
 			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("/post/%d", id), http.StatusSeeOther)
+		// Перенаправляем пользователя на страницу просмотра поста
+		http.Redirect(w, r, fmt.Sprintf("/post/%d", post.ID), http.StatusSeeOther)
 
 	default:
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
 	}
-}
-
-func (a *application) DeletePostHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Deleting post...")
 }

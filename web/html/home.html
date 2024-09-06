@@ -57,8 +57,10 @@
                         </div>
                         <div class="post-category">
                             {{ range .Category }}
-                            <p>#{{ .Name }}</p>
+                            <span>#{{ .Name }}</span>
                             {{ end }}
+                            <br>
+                            <br>
                         </div>
                         <div class="LikeForm">
                             <span>

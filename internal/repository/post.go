@@ -104,25 +104,23 @@ func (Storage *Storage) GetPostByID(id int) (*entity.Post, error) {
 	return post, nil
 }
 
-func (Storage *Storage) UpdatePost(id int, post *entity.Post) error {
-	// Обновляем основную информацию о посте
-	query := "UPDATE posts SET title = ?, content = ?, author_id = ? WHERE id = ?"
-	_, err := Storage.db.Exec(query, post.Title, post.Content, post.AuthorID, id)
+func (Storage *Storage) UpdatePost(post *entity.Post) error {
+	// Обновляем основной пост
+	_, err := Storage.db.Exec(`UPDATE posts SET title = ?, content = ? WHERE id = ? AND author_id = ?`,
+		post.Title, post.Content, post.ID, post.AuthorID)
 	if err != nil {
 		return err
 	}
 
 	// Удаляем старые связи с категориями
-	deleteCategoriesQuery := "DELETE FROM post_category WHERE post_id = ?"
-	_, err = Storage.db.Exec(deleteCategoriesQuery, id)
+	_, err = Storage.db.Exec(`DELETE FROM post_category WHERE post_id = ?`, post.ID)
 	if err != nil {
 		return err
 	}
 
 	// Добавляем новые связи с категориями
-	insertCategoryQuery := "INSERT INTO post_category (post_id, category_id) VALUES (?, ?)"
 	for _, categoryID := range post.CategoryIDs {
-		_, err := Storage.db.Exec(insertCategoryQuery, id, categoryID)
+		_, err := Storage.db.Exec(`INSERT INTO post_category (post_id, category_id) VALUES (?, ?)`, post.ID, categoryID)
 		if err != nil {
 			return err
 		}
