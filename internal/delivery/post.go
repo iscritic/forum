@@ -13,6 +13,7 @@ import (
 )
 
 func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
+
 	switch r.Method {
 
 	case http.MethodGet:
@@ -35,6 +36,20 @@ func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			a.log.Error(err.Error())
 			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		// Проверка авторизации пользователя
+		authorID, ok := r.Context().Value("userID").(int)
+		if !ok {
+			a.log.Warn("AuthorID not found in context or wrong type")
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusUnauthorized, "User not authorized")
+			return
+		}
+
+		if authorID != postData.Post.AuthorID {
+			a.log.Warn("Not authorized to edit this post")
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusForbidden, "Not authorized to edit this post")
 			return
 		}
 
@@ -78,6 +93,20 @@ func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			a.log.Error(err.Error())
 			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		// Проверка авторизации пользователя
+		authorID, ok := r.Context().Value("userID").(int)
+		if !ok {
+			a.log.Warn("AuthorID not found in context or wrong type")
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusUnauthorized, "User not authorized")
+			return
+		}
+
+		if authorID != post.AuthorID {
+			a.log.Warn("Not authorized to edit this post")
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusForbidden, "Not authorized to edit this post")
 			return
 		}
 

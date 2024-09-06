@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="http://localhost:8080/static/style.css">
     <title>Edit Post</title>
 </head>
 <body>
@@ -19,15 +19,11 @@
             <textarea id="content" name="content" rows="4" cols="50" required minlength="10" maxlength="1000">{{.Post.Post.Content}}</textarea>
         </div>
         <div>
-            {{ range .Post.Category }}
-                {{ . }}
-            {{end}}
             <label>Categories:</label><br>
             {{range .Categories}}
             <input type="checkbox" id="category{{.ID}}" name="category" value="{{.ID}}">
             <label for="category{{.ID}}">{{.Name}}</label><br>
             {{end}}
-
         </div>
         <div>
             <button type="submit">Save Changes</button>
