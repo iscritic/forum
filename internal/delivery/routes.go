@@ -42,7 +42,7 @@ func Routes(l *flog.Logger, db *repository.Storage, tc *tmpl.TemplateCache) http
 	mux.Handle("/post/comment", protected.ThenFunc(app.CreateComment))
 
 	mux.Handle("/post/edit/", protected.ThenFunc(app.EditPostHandler))
-	//mux.Handle("/post/delete", protected.ThenFunc(app.DeletePostHandler))
+	mux.Handle("/post/delete/", protected.ThenFunc(app.DeletePostHandler))
 
 	mux.Handle("/createdposts", protected.ThenFunc(app.MyPostsHandler))
 	mux.Handle("/icommented", protected.ThenFunc(app.IcommentedPostsHandler))

@@ -130,3 +130,47 @@ func (a *application) EditPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (a *application) DeletePostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		a.log.Debug(fmt.Sprintf("Method Not Allowed %s %s", r.Method, r.URL.Path))
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+
+	idStr := strings.TrimPrefix(r.URL.Path, "/post/delete/")
+	id, err := utils.Etoi(idStr)
+	if err != nil {
+		a.log.Warn("Invalid post ID: " + err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusBadRequest, "Invalid post ID")
+		return
+	}
+
+	postData, err := service.GetPostRelatedData(r.Context(), a.storage, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			a.log.Error(fmt.Sprintf("Post with ID %d not found", id))
+			tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusNotFound, http.StatusText(http.StatusNotFound))
+			return
+		}
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+		return
+	}
+
+	authorID, ok := r.Context().Value("userID").(int)
+	if !ok || authorID != postData.Post.AuthorID {
+		a.log.Warn("User not authorized to delete this post")
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusForbidden, "You are not authorized to delete this post")
+		return
+	}
+
+	err = a.storage.DeletePost(id)
+	if err != nil {
+		a.log.Error("Failed to delete post: " + err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, "Failed to delete post")
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}

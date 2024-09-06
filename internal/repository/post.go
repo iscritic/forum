@@ -105,20 +105,17 @@ func (Storage *Storage) GetPostByID(id int) (*entity.Post, error) {
 }
 
 func (Storage *Storage) UpdatePost(post *entity.Post) error {
-	// Обновляем основной пост
 	_, err := Storage.db.Exec(`UPDATE posts SET title = ?, content = ? WHERE id = ? AND author_id = ?`,
 		post.Title, post.Content, post.ID, post.AuthorID)
 	if err != nil {
 		return err
 	}
 
-	// Удаляем старые связи с категориями
 	_, err = Storage.db.Exec(`DELETE FROM post_category WHERE post_id = ?`, post.ID)
 	if err != nil {
 		return err
 	}
 
-	// Добавляем новые связи с категориями
 	for _, categoryID := range post.CategoryIDs {
 		_, err := Storage.db.Exec(`INSERT INTO post_category (post_id, category_id) VALUES (?, ?)`, post.ID, categoryID)
 		if err != nil {
@@ -127,4 +124,9 @@ func (Storage *Storage) UpdatePost(post *entity.Post) error {
 	}
 
 	return nil
+}
+
+func (s *Storage) DeletePost(postID int) error {
+	_, err := s.db.Exec("DELETE FROM posts WHERE id = ?", postID)
+	return err
 }

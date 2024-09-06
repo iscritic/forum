@@ -33,12 +33,12 @@
             <div class="post-actions">
                 {{ if eq .CtxUser.ID .Post.AuthorID }}
                 <a href="/post/edit/{{ .Post.ID }}" class="href"><button class="edit-button">Edit Post</button></a>
-                <a href="/post/delete/{{ .Post.ID }}" class="href"><button class="delete-button">Delete Post</button></a>
+                <form action="/post/delete/{{ .Post.ID }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');" style="display:inline;">
+                    <button type="submit" class="delete-button">Delete Post</button>
+                </form>
                 {{ end }}
             </div>
         </div>
-
-
 
         <h1>{{ .Post.Title }}</h1>
         <p>{{ .Post.Content }}</p>
