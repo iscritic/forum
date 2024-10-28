@@ -81,3 +81,14 @@ CREATE TABLE IF NOT EXISTS dislikes (
 	FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
 	UNIQUE(user_id, post_id, comment_id)
 );
+
+CREATE TABLE IF NOT EXISTS notifications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    message TEXT NOT NULL,
+    post_id INT NULL,
+    comment_id INT NULL,
+    read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

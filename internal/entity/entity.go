@@ -49,13 +49,13 @@ type Session struct {
 	ExpiredAt    time.Time
 }
 
-type Like struct {
-	ID        int
-	PostID    int
-	CommentID int
-	UserID    int
-	Grade     int
-}
+//type Like struct {
+//	ID        int
+//	PostID    int
+//	CommentID int
+//	UserID    int
+//	Grade     int
+//}
 
 type PostRelatedData struct {
 	Post     Post
@@ -69,4 +69,14 @@ type PostRelatedData struct {
 type CommentRelatedData struct {
 	Comment Comment
 	User    User
+}
+
+type Notification struct {
+	ID        int
+	UserID    int
+	PostID    *int // Use pointers to allow nil values
+	CommentID *int
+	Message   string
+	Read      bool
+	CreatedAt time.Time
 }

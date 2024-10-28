@@ -148,5 +148,21 @@ func (a *application) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	author, err := a.storage.GetPostAuthor(comment.PostID)
+	if err != nil {
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	user, err := a.storage.GetUserByID(comment.AuthorID)
+	if err != nil {
+		a.log.Error(err.Error())
+		tmpl2.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = a.storage.CreateNotification(author, fmt.Sprintf("%s commented on your post.", user.Username), &comment.PostID, nil)
+
 	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 }

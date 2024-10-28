@@ -57,6 +57,8 @@ func Routes(l *flog.Logger, db *repository.Storage, tc *tmpl.TemplateCache) http
 	mux.Handle("/comment/like", protected.ThenFunc(app.LikeCommentHandler))
 	mux.Handle("/comment/dislike", protected.ThenFunc(app.DislikeCommentHandler))
 
+	mux.Handle("/notifications", protected.ThenFunc(app.ViewNotificationsHandler))
+
 	mux.Handle("/logout", protected.ThenFunc(app.LogoutHandler))
 
 	// standard midllewares for all routes

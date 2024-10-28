@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="notifications">
+    <h3>Ваши уведомления</h3>
+    {{range .}}
+    <div class="notification">
+        <p>{{.Message}}</p>
+        {{if .CommentID}}
+        <a href="/post/{{.PostID}}">View Comment</a>
+        {{else if .PostID}}
+        <a href="/post/{{.PostID}}">View Post</a>
+        {{end}}
+    </div>
+    {{end}}
+</div>
+</body>
+</html>

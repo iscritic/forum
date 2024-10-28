@@ -3,6 +3,7 @@ package delivery
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"forum/internal/utils"
 	"forum/pkg/tmpl"
 	"net/http"
@@ -75,15 +76,39 @@ func (a *application) LikePostHandler(w http.ResponseWriter, r *http.Request) {
 			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
+
+		//Notification business
+		authorId, err := a.storage.GetPostAuthor(postID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		author, err := a.storage.GetUserByID(authorId)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		user, err := a.storage.GetUserByID(userID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		err = a.storage.CreateNotification(author.ID, fmt.Sprintf("%s liked your post.", user.Username), &postID, nil)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
 	}
 
-	referer := r.Referer()
+	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 
-	if referer == "/" {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	} else {
-		http.Redirect(w, r, referer, http.StatusSeeOther)
-	}
 }
 
 func (a *application) DislikePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -146,15 +171,40 @@ func (a *application) DislikePostHandler(w http.ResponseWriter, r *http.Request)
 			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
+
+		//Notification business
+		authorId, err := a.storage.GetPostAuthor(postID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		author, err := a.storage.GetUserByID(authorId)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		user, err := a.storage.GetUserByID(userID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		err = a.storage.CreateNotification(author.ID, fmt.Sprintf("%s disliked your post.", user.Username), &postID, nil)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
 	}
 
-	referer := r.Referer()
+	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
 
-	if referer == "/" {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-	} else {
-		http.Redirect(w, r, referer, http.StatusSeeOther)
-	}
 }
 
 func (a *application) LikeCommentHandler(w http.ResponseWriter, r *http.Request) {
@@ -218,6 +268,28 @@ func (a *application) LikeCommentHandler(w http.ResponseWriter, r *http.Request)
 			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
+
+		// Get the comment author
+		comment, err := a.storage.GetCommentByID(commentID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		user, err := a.storage.GetUserByID(userID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		err = a.storage.CreateNotification(comment.AuthorID, fmt.Sprintf("%s liked your comment.", user.Username), &comment.PostID, &commentID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
 	}
 
 	http.Redirect(w, r, r.Referer(), http.StatusSeeOther)
@@ -279,6 +351,27 @@ func (a *application) DislikeCommentHandler(w http.ResponseWriter, r *http.Reque
 			}
 		}
 		err = a.storage.DislikeComment(userID, commentID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		// Get the comment author
+		comment, err := a.storage.GetCommentByID(commentID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+
+		user, err := a.storage.GetUserByID(userID)
+		if err != nil {
+			a.log.Error(err.Error())
+			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
+			return
+		}
+		err = a.storage.CreateNotification(comment.AuthorID, fmt.Sprintf("%s dilskied your comment.", user.Username), &comment.PostID, &commentID)
 		if err != nil {
 			a.log.Error(err.Error())
 			tmpl.RenderErrorPage(w, a.tmplcache, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
